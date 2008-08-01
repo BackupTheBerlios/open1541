@@ -271,7 +271,7 @@ mos6502_continue:
 
 @ Do an ADC, the argument is in r0[0-7]
 .macro do_adc
-        mov r1, m_pc, lsl #3        @ set ARM C from 6502 C
+        movs r1, m_pc, lsl #3       @ set ARM C from 6502 C
                                     @ prepare summand if CS:
         mvncs r1, #0xff000000       @   set bits 0-23 so ARM C gets helpful
         orrcs r1, r1, r0, lsl #24   @   put summand into 24-31

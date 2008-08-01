@@ -33,20 +33,32 @@ void c1541_init(void)
 
     //memset(c1541_ram, 0xea, sizeof(c1541_ram));
     p = c1541_ram;
-    *p++ = 0xea; // NOP
+    *p++ = 0xea;    // NOP
 
-    *p++ = 0xa5; // LDA $01 (= $a5)
+    *p++ = 0xa5;    // LDA $01 (= $a5)
     *p++ = 0x01;
-// there:
-    *p++ = 0xe8; // INX
 
-    *p++ = 0xd0; // BNE there
+    *p++ = 0xa2;    // LDX #$fe
+    *p++ = 0xfe;
+
+// there:
+    *p++ = 0xe8;    // INX
+
+    *p++ = 0xd0;    // BNE there
     *p++ = (uint8_t)(-3);
 
-    *p++ = 0xa0; // LDY #02
-    *p++ = 0x02;
+    *p++ = 0x18;    // CLC
+    *p++ = 0x69;    // ADC #1
+    *p++ = 0x01;
 
-    *p++ = 0x4c; // JMP $0000
+    *p++ = 0x38;    // SEC
+    *p++ = 0x69;    // ADC #$80
+    *p++ = 0x80;
+
+    *p++ = 0x69;    // ADC #$80
+    *p++ = 0x80;
+
+    *p++ = 0x4c;    // JMP $0000
     *p++ = 0x00;
     *p++ = 0x00;
 

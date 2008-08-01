@@ -49,16 +49,21 @@ mos6502_reg_init:
         msr     cpsr_c, #MODE_FIQ | PSR_I | PSR_F
 
         @ set time to start exec in 1 ms
-        ldr r1, =T0TC
-        ldr m_t, [r1]
-        add m_t, m_t, #1024
-        ldr r1, =T0MR0
-        str m_t, [r1]
+        ldr     r1, =T0TC
+        ldr     m_t, [r1]
+        add     m_t, m_t, #1024
+        ldr     r1, =T0MR0
+        str     m_t, [r1]
+
+        @ set all regs to 0
+        mov     m_a, #0
+        mov     m_x, #0
+        mov     m_y, #0
 
         @ todo: Read start address from reset vector
-        mov m_pc, #0
+        mov     m_pc, #0
 
-        b exit_fiq_mode
+        b       exit_fiq_mode
 
 /*******************************************************************************
  * Copy the processor regs into mos6502_regs_t pointed to by r0.
@@ -68,7 +73,7 @@ mos6502_reg_init:
         .global mos6502_store_regs
 mos6502_store_regs:
         @ remember old processor and interrupt state
-        mrs r3, cpsr
+        mrs     r3, cpsr
 
         @ disable IRQs so we won't be disturbed, goto FIQ mode
         msr cpsr_c, #MODE_FIQ | PSR_I | PSR_F
@@ -82,7 +87,7 @@ mos6502_store_regs:
         stmia   r0!, {r1}
         stmia   r0!, {r12}  @ pc, flags
 
-        b exit_fiq_mode
+        b       exit_fiq_mode
 
 /*******************************************************************************
  * Return the emulated PC in R0. To be called from system mode.
@@ -92,16 +97,16 @@ mos6502_store_regs:
         .global mos6502_get_pc
 mos6502_get_pc:
         @ remember old processor and interrupt state
-        mrs r3, cpsr
+        mrs     r3, cpsr
 
         @ disable IRQs so we won't be disturbed, goto FIQ mode
-        msr cpsr_c, #MODE_FIQ | PSR_I | PSR_F
+        msr     cpsr_c, #MODE_FIQ | PSR_I | PSR_F
 
         @ copy PC to R0, shift away unused bits
-        mov r0, m_pc, lsl #16
-        mov r0, r0, lsr #16
+        mov     r0, m_pc, lsl #16
+        mov     r0, r0, lsr #16
 
-        b exit_fiq_mode
+        b       exit_fiq_mode
 
 /*******************************************************************************
  * Read from emulated memory pointed to by r0, return the result in r0.
@@ -111,14 +116,14 @@ mos6502_get_pc:
         .global mos6502_read_mem
 mos6502_read_mem:
         @ remember old processor and interrupt state
-        mrs r3, cpsr
+        mrs     r3, cpsr
 
         @ disable IRQs so we won't be disturbed, goto FIQ mode
-        msr cpsr_c, #MODE_FIQ | PSR_I | PSR_F
+        msr     cpsr_c, #MODE_FIQ | PSR_I | PSR_F
 
         @ read memory and return
         mr_r0
-        b exit_fiq_mode
+        b       exit_fiq_mode
 
 /*******************************************************************************
  * Put the 6502 into single step mode.

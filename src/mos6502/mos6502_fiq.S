@@ -28,21 +28,23 @@
  ******************************************************************************/
         stmfd sp!, {r0 - r2, lr}
 
-        ldr r2, =mrop_table
+        adr r2, direct_read_addresses
 
         @ each table entry points to 0x0800 bytes, use the higher bits
         and r1, m_pc, #0xf800
 
-        @ prepare link register, will return 2 instructions behind this
-        mov lr, pc
+        @ read pointer to native memory at m_pc to r2
+        ldr r2, [r2, r1, lsr #(11 - 2)]
 
-        @ jump to the right opcode reader
-        @ read emulated memory at m_pc to r0
-        @ r2 will point to the native memory at the opcode on return
-        ldr pc, [r2, r1, lsr #(11 - 2)]
+        @ put lower 11 bits of m_pc into higher part of r1
+        mov r1, m_pc, lsl #(32 - 11)
 
-        @ todo: Check if it is faster to jump to the opcode handlers
-        @       directly from the opcode readers
+        @ remember converted pc in r2 for reading args later
+        add     r2, r1, lsr#(32 - 11)
+
+        @ read opcode
+        ldrb    r0, [r2]
+
         @ jump to the opcode address
         ldr pc, [pc, r0, lsl #2]
 
@@ -82,3 +84,27 @@
         .word op_e8, op_xx, op_ea, op_xx, op_xx, op_xx, op_xx, op_xx
         .word op_f0, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx @ f
         .word op_f8, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx
+
+/*******************************************************************************
+ * This table points to memory areas for reading from emulated memory
+ * directly. It is located in this module to keep its address close to 0, so we
+ * can use ADR to get its address relatively to PC.
+ *
+ * Each 0x0800 = (1 << 11) = 2048 bytes block has one pointer,
+ *
+ * Currently the emulated RAM can be read every 2 kBytes. This must be corrected
+ * later to meet the real 1541 memory map.
+ *
+ ******************************************************************************/
+        nop @ use more or less NOPs to fixe the distance to ADR
+        nop
+        .global direct_read_addresses
+direct_read_addresses:
+        .word c1541_ram, c1541_ram, c1541_ram, c1541_ram   @ 0x0000
+        .word c1541_ram, c1541_ram, c1541_ram, c1541_ram   @ 0x2000
+        .word c1541_ram, c1541_ram, c1541_ram, c1541_ram   @ 0x4000
+        .word c1541_ram, c1541_ram, c1541_ram, c1541_ram   @ 0x6000
+        .word c1541_ram, c1541_ram, c1541_ram, c1541_ram   @ 0x8000
+        .word c1541_ram, c1541_ram, c1541_ram, c1541_ram   @ 0xa000
+        .word c1541_ram, c1541_ram, c1541_ram, c1541_ram   @ 0xc000
+        .word c1541_ram, c1541_ram, c1541_ram, c1541_ram   @ 0xe000

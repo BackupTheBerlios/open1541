@@ -19,22 +19,7 @@
 
 #include "mos6502_macros.S"
 
-/*******************************************************************************
- * mrop_table points to functions for reading an opcode.
- * Each 0x0800 = (1 << 11) = 2048 bytes block has one pointer,
- * so specialized functions and memory mirroring will be possible.
- *
- ******************************************************************************/
-        .global mrop_table
-mrop_table:
-        .word mrop_ram, mr_none,  mr_none,  mr_none   @ 0x0000
-        .word mr_none,  mr_none,  mr_none,  mr_none   @ 0x2000
-        .word mr_none,  mr_none,  mr_none,  mr_none   @ 0x4000
-        .word mr_none,  mr_none,  mr_none,  mr_none   @ 0x6000
-        .word mr_none,  mr_none,  mr_none,  mr_none   @ 0x8000
-        .word mr_none,  mr_none,  mr_none,  mr_none   @ 0xa000
-        .word mrop_rom, mrop_rom, mrop_rom, mrop_rom  @ 0xc000
-        .word mrop_rom, mrop_rom, mrop_rom, mrop_rom  @ 0xe000
+
 
 /*******************************************************************************
  * The mr8_table points to functions responsible for reading a certain
@@ -71,29 +56,7 @@ memwrite_table:
     .word memwrite_rom,  memwrite_rom,  memwrite_rom,  memwrite_rom  @ 0xe000
 
 /*******************************************************************************
- * Read an opcode from emulated RAM. Only the amount of bits needed to address 
- * mos6502_ramsize bytes are evaluated here.
- *
- * Return the result in r0. r2 will point to the native memory corresponding PC,
- * this can be used to read arguments later.
- *
- * Return address is taken from lr.
- *
- ******************************************************************************/
-mrop_ram:
-        ldr r2, =c1541_ram
-
-        @ shift away all forbidden bits
-        mov r0, m_pc, lsl #(32 - mos6502_ramsize_shift)
-
-        @ add it to the RAM base, shift r0 to have it in the right position
-        add r2, r2, r0, lsr #(32 - mos6502_ramsize_shift)
-
-        ldrb r0, [r2]
-        mov pc, lr
-
-/*******************************************************************************
- * Read a byte of emulated RAM pointed to by r0. Only the amount if bits
+ * Read a byte of emulated RAM pointed to by r0. Only the number of bits
  * needed to address mos6502_ramsize bytes are evaluated here.
  * This also changes r1.
  * Return the byte in r0.

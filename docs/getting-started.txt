@@ -1,0 +1,82 @@
+
+Requirements
+============
+
+If you want to compile open1541, your system has to meet following requirements:
+
+- A Linux environment, cygwin is not tested yet
+- GNU Make version 3.81 or higher
+- A native GCC to compile tools
+- An arm-elf toolchain
+
+
+Get an ARM Toolchain 
+====================
+
+If you don't have an arm-elf toolchain yet, you can easily build one with
+scripts/toolchain/Makefile. Read the header of that Makefile first for some
+instructions.
+
+Note that the toolchain does not require to contain a C library. But if it has
+one, this shouldn't matter since we do not use the default libraries when
+linking.
+
+Not using a C library has the advantage of eliminating external dependencies.
+On ARM there are several libraries in several versions which could be used, so
+this projects simply comes bundled with a few standard C functions to get
+constant compile results and additionally to avoid bloat.
+
+
+Compile
+=======
+
+Now you should be able to compile the project. There are a few environment
+variables which influence the make process, one of them is "add_path" which may
+contain an additional directory to be added to PATH when invoking the ARM
+compiler. If not set from the command line, it contains
+/opt/arm-elf-binutils-2.18.50-gcc-4.3.0/bin, which is the path were our Makefile
+installs the toolchain.
+
+So you can change to directory "make" and call:
+
+> make -s
+
+or
+
+> add_path=somewhere/else/bin make -s
+
+
+Simulate using skyeye
+=====================
+
+TODO: Explain how to patch and install skyeye. Contact me to get the patch.
+
+Change to directory "make" and call:
+
+> make simulate -s
+
+This builds the skyeye configuration of the software, starts skyeye in the
+current terminal window and starts the Insight debugger.
+
+In Insight you must first invoke Run=>Connect to target. Choose GDBServer/TCP,
+127.0.0.1 port 12345. Then you can click continue to get the stuff running.
+
+In the terminal window you should be able to access the UART interface of the
+emulated device.
+
+
+Bring in on hardware
+====================
+
+open1541 comes with a tool called lpcflash which is used to send the software
+over UART to the open1541 hardware. It is compiled automatically by our Makefile
+when it is needed.
+
+Connect the open1541 board to your computer. You can check the documention in
+tools/lpcflash on details about how to do this. Connecting the reset line is not
+necessarily needed, I never tested it.
+
+To put your board into the boot loader mode, close the boot loader jumper and
+reset it.
+
+...

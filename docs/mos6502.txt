@@ -1,0 +1,12 @@
+
+Single Step Mode
+================
+
+In this mode the emulation still takes place in the FIQ. But unless in the
+normal mode the timer IRQ is not set anymore, so the CPU emulation stops
+after each instruction.
+
+The single step mode is active if MOS6502_S_BIT is set in m_pc.
+
+To enable the single step mode call mos6502_stop. To exit from single step 
+mode call mos6502_cont. Call mos6502_step to execute one instruction.

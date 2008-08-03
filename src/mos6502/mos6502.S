@@ -388,6 +388,12 @@ op_78:  @ SEI
         orr m_pc, m_pc, #MOS6502_I
         op_end 1 2
 
+        .global op_79
+op_79: @ ADC $FFFF,Y
+        mr_addr_mode_absy       @ this increments m_t on page wraps
+        do_adc
+        op_end 3 4
+
         .global op_7d
 op_7d: @ ADC $FFFF,X
         mr_addr_mode_absx       @ this increments m_t on page wraps
@@ -472,16 +478,44 @@ op_aa: @ TAX
         update_nz               @ update 6502 flags N and Z
         op_end 1 2
 
+        .global op_ad
+op_ad: @ LDA $FFFF
+        mr_addr_mode_abs
+        movs m_a, r0, lsl #24   @ move to reg, update ARM flags
+        update_nz               @ update 6502 flags N and Z
+        op_end 3 4
+
         .global op_b0
 op_b0:  @ BCS
         tst m_pc, #MOS6502_C    @ check if emulated C bit is set
         beq no_branch           @ clear => no branch
         do_branch
 
+        .global op_b5
+op_b5: @ LDA $FF,X
+        mr_addr_mode_zpx
+        movs m_a, r0, lsl #24   @ move to reg, update ARM flags
+        update_nz               @ update 6502 flags N and Z
+        op_end 2 4
+
         .global op_b8
 op_b8:  @ CLV
         bic m_pc, #MOS6502_V
         op_end 1 2
+
+        .global op_b9
+op_b9: @ LDA $FFFF,Y
+        mr_addr_mode_absy       @ this increments m_t on page wraps
+        movs m_a, r0, lsl #24   @ move to reg, update ARM flags
+        update_nz               @ update 6502 flags N and Z
+        op_end 3 4
+
+        .global op_bd
+op_bd: @ LDA $FFFF,X
+        mr_addr_mode_absx       @ this increments m_t on page wraps
+        movs m_a, r0, lsl #24   @ move to reg, update ARM flags
+        update_nz               @ update 6502 flags N and Z
+        op_end 3 4
 
         .global op_c8
 op_c8:  @ INY
@@ -533,7 +567,6 @@ op_f8:  @ SED
         .global op_xx
 
 
-op_79: @ ADC $FFFF,Y
 op_61: @ ADC ($FF,X)
 op_71: @ ADC ($FF),Y
 op_29: @ AND #$FF
@@ -584,10 +617,6 @@ op_ee: @ INC $FFFF
 op_fe: @ INC $FFFF,X
 op_6c: @ JMP ($FFFF)
 op_20: @ JSR $FFFF
-op_b5: @ LDA $FF,X
-op_ad: @ LDA $FFFF
-op_bd: @ LDA $FFFF,X
-op_b9: @ LDA $FFFF,Y
 op_a1: @ LDA ($FF,X)
 op_b1: @ LDA ($FF),Y
 op_b6: @ LDX $FF,Y

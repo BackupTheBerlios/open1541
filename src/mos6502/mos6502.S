@@ -388,11 +388,23 @@ op_88: @ DEY
         update_nz               @ update 6502 flags N and Z
         op_end 1 2
 
+        .global op_8a
+op_8a: @ TXA
+        movs m_a, m_x
+        update_nz               @ update 6502 flags N and Z
+        op_end 1 2
+
         .global op_90
 op_90:  @ BCC
         tst m_pc, #MOS6502_C    @ check if emulated C bit is set
         bne no_branch           @ set => no branch
         do_branch
+
+        .global op_98
+op_98: @ TYA
+        movs m_a, m_y
+        update_nz               @ update 6502 flags N and Z
+        op_end 1 2
 
         .global op_a0
 op_a0:  @ LDY #xx
@@ -429,12 +441,24 @@ op_a6:  @ LDX $xx
         update_nz               @ update 6502 flags N and Z
         op_end 2 3
 
+        .global op_a8
+op_a8: @ TAY
+        movs m_y, m_a
+        update_nz               @ update 6502 flags N and Z
+        op_end 1 2
+
         .global op_a9
 op_a9:  @ LDA #xx
         mr_pc_arg8
         movs m_a, r0, lsl #24   @ load immediate, update ARM flags
         update_nz               @ update 6502 flags N and Z
         op_end 2 2
+
+        .global op_aa
+op_aa: @ TAX
+        movs m_x, m_a
+        update_nz               @ update 6502 flags N and Z
+        op_end 1 2
 
         .global op_b0
 op_b0:  @ BCS
@@ -612,12 +636,8 @@ op_8e: @ STX $FFFF
 op_84: @ STY $FF
 op_94: @ STY $FF,X
 op_8c: @ STY $FFFF
-op_aa: @ TAX
-op_a8: @ TAY
 op_ba: @ TSX
-op_8a: @ TXA
 op_9a: @ TXS
-op_98: @ TYA
 
 op_xx:
         op_end 1 2

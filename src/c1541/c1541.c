@@ -58,6 +58,8 @@ void c1541_init(void)
     *p++ = 0xca;    // DEX
     *p++ = 0x88;    // DEY
 
+    *p++ = 0x98;    // TYA
+
     *p++ = 0xa2;    // LDX #$ff
     *p++ = 0xff;
 

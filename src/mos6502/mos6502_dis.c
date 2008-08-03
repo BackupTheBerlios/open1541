@@ -282,7 +282,7 @@ uint16_t mos6502_dis(uint16_t start, uint16_t stop)
             case 0x6e:    absolute ( "ROR" ); break;
             case 0x70:      branch ( "BVS" ); break;
             case 0x71:  indirect_y ( "ADC" ); break;
-            case 0x75:  indirect_x ( "ADC" ); break;
+            case 0x75: zero_page_x ( "ADC" ); break;
             case 0x76: zero_page_x ( "ROR" ); break;
             case 0x78:      single ( "SEI" ); break;
             case 0x79:  absolute_y ( "ADC" ); break;

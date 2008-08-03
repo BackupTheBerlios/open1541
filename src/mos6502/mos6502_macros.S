@@ -92,7 +92,7 @@ mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
 .endm
 
 /*******************************************************************************
- * Read a two byte argument behind m_pc. Return the result in r0.
+ * Read a two byte argument behind m_pc. Return the result in r0[0..15].
  * This macros uses r2 which must point to the opcode in the native memory.
  * It reads *(pc + 1) | (*(pc + 2) << 8).
  *
@@ -126,7 +126,7 @@ mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
 /*******************************************************************************
  * 1. Read one byte argument behind m_pc.
  * 2. Add X to this value, use only lower 8 bits of the result
- * 2. Then read the byte at this calculated address
+ * 3. Then read the byte at this calculated address
  * This macros uses r2 which must point to the opcode in the native memory.
  * Return the result in r0.
  * This also changes r1, r2 and lr.
@@ -141,4 +141,48 @@ mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
         @ read a byte from there, shift back the address bits to 0..7
         ldr r1, =c1541_ram
         ldrb r0, [r1, r0, lsr #24]
+.endm
+
+/*******************************************************************************
+ * 1. Read two bytes argument behind m_pc.
+ * 2. Then read the byte pointed to by the byte read at step 1
+ * This macros uses r2 which must point to the opcode in the native memory.
+ * Return the result in r0.
+ * This also changes r1, r2 and lr.
+ *
+ ******************************************************************************/
+.macro  mr_addr_mode_abs
+        mr_pc_arg16
+
+        @ now r0 contains the address, read a byte from there
+        mr_r0
+.endm
+
+/*******************************************************************************
+ * 1. Read two bytes argument behind m_pc.
+ * 2. Add X to this value, use only lower 16 bits of the result
+ * 3. Then read the byte at this calculated address
+ * This macros uses r2 which must point to the opcode in the native memory.
+ * Return the result in r0.
+ * This also changes r1, r2 and lr.
+ *
+ ******************************************************************************/
+.macro  mr_addr_mode_absx
+        mr_pc_arg16
+
+        @ now r0[0..15] contains the address, remember the high-byte in r2[0..7]
+        mov r2, r0, lsr #8
+
+        @ add X to address and remove overflow bit
+        add r0, r0, m_x, lsr #24
+        bic r0, r0, #(1 << 16)
+
+        @ check if high-byte remained same
+        teq r2, r0, lsr #8
+
+        @ if not, add one cycle
+        addne m_t, m_t, #1
+
+        @ now r0 contains the address, read a byte from there
+        mr_r0
 .endm

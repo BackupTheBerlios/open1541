@@ -365,6 +365,12 @@ op_69:  @ ADC #$xx
         do_adc
         op_end 2 2
 
+        .global op_6d
+op_6d: @ ADC $FFFF
+        mr_addr_mode_abs
+        do_adc
+        op_end 3 4
+
         .global op_70
 op_70:  @ BVS
         tst m_pc, #MOS6502_V    @ check if emulated V bit is set
@@ -381,6 +387,12 @@ op_75: @ ADC $FF,X
 op_78:  @ SEI
         orr m_pc, m_pc, #MOS6502_I
         op_end 1 2
+
+        .global op_7d
+op_7d: @ ADC $FFFF,X
+        mr_addr_mode_absx       @ this increments m_t on page wraps
+        do_adc
+        op_end 3 4
 
         .global op_88
 op_88: @ DEY
@@ -521,8 +533,6 @@ op_f8:  @ SED
         .global op_xx
 
 
-op_6d: @ ADC $FFFF
-op_7d: @ ADC $FFFF,X
 op_79: @ ADC $FFFF,Y
 op_61: @ ADC ($FF,X)
 op_71: @ ADC ($FF),Y

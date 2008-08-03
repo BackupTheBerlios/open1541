@@ -36,7 +36,7 @@
         .text
 
 /*******************************************************************************
- * 
+ *
  * Must be called from system mode (not from FIQ mode).
  *
  ******************************************************************************/
@@ -353,6 +353,12 @@ op_58:  @ CLI
         bic m_pc, #MOS6502_I
         op_end 1 2
 
+        .global op_65
+op_65: @ ADC $FF
+        mr_addr_mode_zp
+        do_adc
+        op_end 2 3
+
         .global op_69
 op_69:  @ ADC #$xx
         mr_pc_arg8
@@ -365,9 +371,21 @@ op_70:  @ BVS
         beq no_branch           @ clear => no branch
         do_branch
 
+        .global op_75
+op_75: @ ADC $FF,X
+        mr_addr_mode_zpx
+        do_adc
+        op_end 2 4
+
         .global op_78
 op_78:  @ SEI
         orr m_pc, m_pc, #MOS6502_I
+        op_end 1 2
+
+        .global op_88
+op_88: @ DEY
+        subs m_y, m_y, #(1<<24) @ dec Y, update ARM flags
+        update_nz               @ update 6502 flags N and Z
         op_end 1 2
 
         .global op_90
@@ -435,6 +453,12 @@ op_c8:  @ INY
         update_nz               @ update 6502 flags N and Z
         op_end 1 2
 
+        .global op_ca
+op_ca: @ DEX
+        subs m_x, m_x, #(1<<24) @ dec X, update ARM flags
+        update_nz               @ update 6502 flags N and Z
+        op_end 1 2
+
         .global op_d0
 op_d0:  @ BNE
         tst m_pc, #MOS6502_Z    @ check if emulated Z bit is set
@@ -471,5 +495,129 @@ op_f8:  @ SED
         op_end 1 2
 
         .global op_xx
+
+
+op_6d: @ ADC $FFFF
+op_7d: @ ADC $FFFF,X
+op_79: @ ADC $FFFF,Y
+op_61: @ ADC ($FF,X)
+op_71: @ ADC ($FF),Y
+op_29: @ AND #$FF
+op_25: @ AND $FF
+op_35: @ AND $FF,X
+op_2d: @ AND $FFFF
+op_3d: @ AND $FFFF,X
+op_39: @ AND $FFFF,Y
+op_21: @ AND ($FF,X)
+op_31: @ AND ($FF),Y
+op_0a: @ ASL A
+op_06: @ ASL $FF
+op_16: @ ASL $FF,X
+op_0e: @ ASL $FFFF
+op_1e: @ ASL $FFFF,X
+op_24: @ BIT $FF
+op_2c: @ BIT $FFFF
+op_00: @ BRK
+op_c9: @ CMP #$FF
+op_c5: @ CMP $FF
+op_d5: @ CMP $FF,X
+op_cd: @ CMP $FFFF
+op_dd: @ CMP $FFFF,X
+op_d9: @ CMP $FFFF,Y
+op_c1: @ CMP ($FF,X)
+op_d1: @ CMP ($FF),Y
+op_e0: @ CPX #$FF
+op_e4: @ CPX $FF
+op_ec: @ CPX $FFFF
+op_c0: @ CPY #$FF
+op_c4: @ CPY $FF
+op_cc: @ CPY $FFFF
+op_c6: @ DEC $FF
+op_d6: @ DEC $FF,X
+op_ce: @ DEC $FFFF
+op_de: @ DEC $FFFF,X
+op_49: @ EOR #$FF
+op_45: @ EOR $FF
+op_55: @ EOR $FF,X
+op_4d: @ EOR $FFFF
+op_5d: @ EOR $FFFF,X
+op_59: @ EOR $FFFF,Y
+op_41: @ EOR ($FF,X)
+op_51: @ EOR ($FF),Y
+op_e6: @ INC $FF
+op_f6: @ INC $FF,X
+op_ee: @ INC $FFFF
+op_fe: @ INC $FFFF,X
+op_6c: @ JMP ($FFFF)
+op_20: @ JSR $FFFF
+op_b5: @ LDA $FF,X
+op_ad: @ LDA $FFFF
+op_bd: @ LDA $FFFF,X
+op_b9: @ LDA $FFFF,Y
+op_a1: @ LDA ($FF,X)
+op_b1: @ LDA ($FF),Y
+op_b6: @ LDX $FF,Y
+op_ae: @ LDX $FFFF
+op_be: @ LDX $FFFF,Y
+op_b4: @ LDY $FF,X
+op_ac: @ LDY $FFFF
+op_bc: @ LDY $FFFF,X
+op_4a: @ LSR A
+op_46: @ LSR $FF
+op_56: @ LSR $FF,X
+op_4e: @ LSR $FFFF
+op_5e: @ LSR $FFFF,X
+op_09: @ ORA #$FF
+op_05: @ ORA $FF
+op_15: @ ORA $FF,X
+op_0d: @ ORA $FFFF
+op_1d: @ ORA $FFFF,X
+op_19: @ ORA $FFFF,Y
+op_01: @ ORA ($FF,X)
+op_11: @ ORA ($FF),Y
+op_48: @ PHA
+op_08: @ PHP
+op_68: @ PLA
+op_28: @ PLP
+op_2a: @ ROL A
+op_26: @ ROL $FF
+op_36: @ ROL $FF,X
+op_2e: @ ROL $FFFF
+op_3e: @ ROL $FFFF,X
+op_6a: @ ROR A
+op_66: @ ROR $FF
+op_76: @ ROR $FF,X
+op_6e: @ ROR $FFFF
+op_7e: @ ROR $FFFF,X
+op_40: @ RTI
+op_60: @ RTS
+op_e9: @ SBC #$FF
+op_e5: @ SBC $FF
+op_f5: @ SBC $FF,X
+op_ed: @ SBC $FFFF
+op_fd: @ SBC $FFFF,X
+op_f9: @ SBC $FFFF,Y
+op_e1: @ SBC ($FF,X)
+op_f1: @ SBC ($FF),Y
+op_85: @ STA $FF
+op_95: @ STA $FF,X
+op_8d: @ STA $FFFF
+op_9d: @ STA $FFFF,X
+op_99: @ STA $FFFF,Y
+op_81: @ STA ($FF,X)
+op_91: @ STA ($FF),Y
+op_86: @ STX $FF
+op_96: @ STX $FF,Y
+op_8e: @ STX $FFFF
+op_84: @ STY $FF
+op_94: @ STY $FF,X
+op_8c: @ STY $FFFF
+op_aa: @ TAX
+op_a8: @ TAY
+op_ba: @ TSX
+op_8a: @ TXA
+op_9a: @ TXS
+op_98: @ TYA
+
 op_xx:
         op_end 1 2

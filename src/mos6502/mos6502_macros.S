@@ -83,8 +83,8 @@ mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
 
 /*******************************************************************************
  * Read one byte argument behind m_pc. Return the result in r0.
- * This macros uses r2 which must point to the opcode in the native memory,
- * so it reads *(pc + 1)
+ * This macros uses r2 which must point to the opcode in the native memory.
+ * It reads *(pc + 1)
  *
  ******************************************************************************/
 .macro  mr_pc_arg8
@@ -93,8 +93,8 @@ mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
 
 /*******************************************************************************
  * Read a two byte argument behind m_pc. Return the result in r0.
- * This macros uses r2 which must point to the opcode in the native memory,
- * so it reads *(pc + 1) | (*(pc + 2) << 8).
+ * This macros uses r2 which must point to the opcode in the native memory.
+ * It reads *(pc + 1) | (*(pc + 2) << 8).
  *
  * r1 will be changed here.
  *
@@ -108,8 +108,9 @@ mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
 /*******************************************************************************
  * 1. Read one byte argument behind m_pc.
  * 2. Then read the byte pointed to by the byte read at step 1
+ * This macros uses r2 which must point to the opcode in the native memory.
  * Return the result in r0.
- * This also changes r1, r2 and lr.
+ * This also changes r1.
  *
  ******************************************************************************/
 .macro  mr_addr_mode_zp
@@ -120,4 +121,24 @@ mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
 
         @ load the byte
         ldrb r0, [r1, r0]
+.endm
+
+/*******************************************************************************
+ * 1. Read one byte argument behind m_pc.
+ * 2. Add X to this value, use only lower 8 bits of the result
+ * 2. Then read the byte at this calculated address
+ * This macros uses r2 which must point to the opcode in the native memory.
+ * Return the result in r0.
+ * This also changes r1, r2 and lr.
+ *
+ ******************************************************************************/
+.macro  mr_addr_mode_zpx
+        mr_pc_arg8
+
+        @ now r0[0..7] contains the zp address, add it shifted to X into r0[24..31]
+        add r0, m_x, r0, lsl #24
+
+        @ read a byte from there, shift back the address bits to 0..7
+        ldr r1, =c1541_ram
+        ldrb r0, [r1, r0, lsr #24]
 .endm

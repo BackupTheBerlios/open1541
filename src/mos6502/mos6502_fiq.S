@@ -64,12 +64,12 @@
         .word op_xx, op_xx, op_xx, op_xx, op_4c, op_xx, op_xx, op_xx
         .word op_50, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx @ 5
         .word op_58, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx
-        .word op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx @ 6
+        .word op_xx, op_xx, op_xx, op_xx, op_xx, op_65, op_xx, op_xx @ 6
         .word op_xx, op_69, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx
-        .word op_70, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx @ 7
+        .word op_70, op_xx, op_xx, op_xx, op_xx, op_75, op_xx, op_xx @ 7
         .word op_78, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx
         .word op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx @ 8
-        .word op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx
+        .word op_88, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx
         .word op_90, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx @ 9
         .word op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx
         .word op_a0, op_xx, op_a2, op_xx, op_xx, op_a5, op_a6, op_xx @ a
@@ -77,7 +77,7 @@
         .word op_b0, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx @ b
         .word op_b8, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx
         .word op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx @ c
-        .word op_c8, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx
+        .word op_c8, op_xx, op_ca, op_xx, op_xx, op_xx, op_xx, op_xx
         .word op_d0, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx @ d
         .word op_d8, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx
         .word op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx @ e

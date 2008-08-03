@@ -52,11 +52,17 @@ void c1541_init(void)
     *p++ = 0x01;
 
     *p++ = 0x38;    // SEC
-    *p++ = 0x69;    // ADC #$80
-    *p++ = 0x80;
+    *p++ = 0x65;    // ADC $01 (= $a5)
+    *p++ = 0x01;
 
-    *p++ = 0x69;    // ADC #$80
-    *p++ = 0x80;
+    *p++ = 0xca;    // DEX
+    *p++ = 0x88;    // DEY
+
+    *p++ = 0xa2;    // LDX #$ff
+    *p++ = 0xff;
+
+    *p++ = 0x75;    // ADC $02,X => summand from 0x01 = $a5
+    *p++ = 0x02;
 
     *p++ = 0x4c;    // JMP $0000
     *p++ = 0x00;

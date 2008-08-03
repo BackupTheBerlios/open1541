@@ -1,7 +1,7 @@
 /*
  * (c) 2008 Thomas Giesel <skoe@directbox.com>
  *
- * Macros and functions for memory and I/O accesses
+ * Functions for memory and I/O access
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

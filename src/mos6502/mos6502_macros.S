@@ -163,6 +163,7 @@ mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
  * 2. Add X to this value, use only lower 16 bits of the result
  * 3. Then read the byte at this calculated address
  * This macros uses r2 which must point to the opcode in the native memory.
+ * One penalty cycle is added here if the page wraps.
  * Return the result in r0.
  * This also changes r1, r2 and lr.
  *
@@ -192,6 +193,7 @@ mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
  * 2. Add Y to this value, use only lower 16 bits of the result
  * 3. Then read the byte at this calculated address
  * This macros uses r2 which must point to the opcode in the native memory.
+ * One penalty cycle is added here if the page wraps.
  * Return the result in r0.
  * This also changes r1, r2 and lr.
  *
@@ -208,6 +210,77 @@ mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
 
         @ check if high-byte remained same
         teq r2, r0, lsr #8
+
+        @ if not, add one cycle
+        addne m_t, m_t, #1
+
+        @ now r0 contains the address, read a byte from there
+        mr_r0
+.endm
+
+/*******************************************************************************
+ * Adressing mode (Indirect,X)
+ * 1. Read one byte argument behind m_pc.
+ * 2. Add X to this value, use only lower 8 bits of the result
+ * 3. Then read two bytes at this calculated address, that's the address we need
+ * 4. Load the value from there
+ * Return the result in r0.
+ * This also changes r1, r2 and lr.
+ *
+ ******************************************************************************/
+.macro  mr_addr_mode_indx
+        mr_pc_arg8
+
+        @ now r0[0..7] contains the zp address, add it to X into r0[24..31]
+        add     r0, m_x, r0, lsl #24
+
+        @ load a byte from there, that's the low byte of the address
+        ldr     r2, =c1541_ram
+        ldrb    r1, [r2, r0, lsr #24]
+
+        @ the next one is the high byte, merge them into r0
+        add     r0, r0, #(1 << 24)
+        ldrb    r0, [r2, r0, lsr #24]
+        orr     r0, r1, r0, lsl #8
+
+        @ now r0 contains the address, read a byte from there
+        mr_r0
+.endm
+
+/*******************************************************************************
+ * Adressing mode (Indirect),Y
+ * 1. Read one byte argument behind m_pc.
+ * 2. Then read two bytes at this, that's the base address
+ * 3. Add Y to this base address, use only lower 16 bits of the result
+ * 4. Load the value from there
+ * One penalty cycle is added here if the page wraps.
+ * Return the result in r0.
+ * This also changes r1, r2 and lr.
+ *
+ ******************************************************************************/
+.macro  mr_addr_mode_indy
+        mr_pc_arg8
+
+        @ now r0[0..7] contains the zp address
+        @ load a byte from there, that's the low byte of the address
+        ldr     r2, =c1541_ram
+        ldrb    r1, [r2, r0]
+
+        @ the next one is the high byte, merge them into r0
+        add     r0, r0, #1
+        bic     r0, r0, #(1 << 8)
+        ldrb    r0, [r2, r0]
+        orr     r0, r1, r0, lsl #8
+
+        @ remember high-byte of address
+        mov     r2, r0, lsr #24
+
+        @ add Y to it, use 16 bits only
+        add     r0, r0, m_y, lsr #24
+        bic     r0, r0, #(1 << 16)
+
+        @ check if high-byte remained same
+        teq     r2, r0, lsr #8
 
         @ if not, add one cycle
         addne m_t, m_t, #1

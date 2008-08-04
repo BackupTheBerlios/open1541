@@ -353,6 +353,12 @@ op_58:  @ CLI
         bic m_pc, #MOS6502_I
         op_end 1 2
 
+        .global op_61
+op_61: @ ADC ($FF,X)
+        mr_addr_mode_indx
+        do_adc
+        op_end 2 6
+
         .global op_65
 op_65: @ ADC $FF
         mr_addr_mode_zp
@@ -376,6 +382,12 @@ op_70:  @ BVS
         tst m_pc, #MOS6502_V    @ check if emulated V bit is set
         beq no_branch           @ clear => no branch
         do_branch
+
+        .global op_71
+op_71: @ ADC ($FF),Y
+        mr_addr_mode_indy
+        do_adc
+        op_end 2 5
 
         .global op_75
 op_75: @ ADC $FF,X
@@ -430,6 +442,13 @@ op_a0:  @ LDY #xx
         movs m_y, r0, lsl #24   @ load immediate, update ARM flags
         update_nz               @ update 6502 flags N and Z
         op_end 2 2
+
+        .global op_a1
+op_a1: @ LDA ($FF,X)
+        mr_addr_mode_indx
+        movs m_a, r0, lsl #24   @ move to reg, update ARM flags
+        update_nz               @ update 6502 flags N and Z
+        op_end 2 6
 
         .global op_a2
 op_a2:  @ LDX #xx
@@ -490,6 +509,13 @@ op_b0:  @ BCS
         tst m_pc, #MOS6502_C    @ check if emulated C bit is set
         beq no_branch           @ clear => no branch
         do_branch
+
+        .global op_b1
+op_b1: @ LDA ($FF),Y
+        mr_addr_mode_indy
+        movs m_a, r0, lsl #24   @ move to reg, update ARM flags
+        update_nz               @ update 6502 flags N and Z
+        op_end 2 5
 
         .global op_b5
 op_b5: @ LDA $FF,X
@@ -567,8 +593,6 @@ op_f8:  @ SED
         .global op_xx
 
 
-op_61: @ ADC ($FF,X)
-op_71: @ ADC ($FF),Y
 op_29: @ AND #$FF
 op_25: @ AND $FF
 op_35: @ AND $FF,X
@@ -617,8 +641,6 @@ op_ee: @ INC $FFFF
 op_fe: @ INC $FFFF,X
 op_6c: @ JMP ($FFFF)
 op_20: @ JSR $FFFF
-op_a1: @ LDA ($FF,X)
-op_b1: @ LDA ($FF),Y
 op_b6: @ LDX $FF,Y
 op_ae: @ LDX $FFFF
 op_be: @ LDX $FFFF,Y

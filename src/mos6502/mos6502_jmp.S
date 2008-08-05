@@ -98,3 +98,10 @@ op_f0:  @ BEQ
         beq no_branch           @ clear => no branch
         do_branch
 
+        .global op_4c
+op_4c:  @ JMP abs
+        mr_pc_arg16
+        mov m_pc, m_pc, lsr #16     @ remove old PC
+        add m_pc, r0, m_pc, lsl #16 @ set new PC
+        op_end 0 3
+

@@ -308,13 +308,6 @@ op_3d: @ AND $FFFF,X
         update_nz               @ update 6502 flags N and Z
         op_end 3 4
 
-        .global op_4c
-op_4c:  @ JMP abs
-        mr_pc_arg16
-        mov m_pc, m_pc, lsr #16     @ remove old PC
-        add m_pc, r0, m_pc, lsl #16 @ set new PC
-        op_end 0 3
-
         .global op_58
 op_58:  @ CLI
         bic m_pc, #MOS6502_I

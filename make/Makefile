@@ -87,6 +87,7 @@ obj += $(objdir)/c1541/c1541.o
 obj += $(objdir)/mos6502/mos6502.o
 obj += $(objdir)/mos6502/mos6502_jmp.o
 obj += $(objdir)/mos6502/mos6502_transfer.o
+obj += $(objdir)/mos6502/mos6502_alu.o
 obj += $(objdir)/mos6502/mos6502_mem.o
 obj += $(objdir)/mos6502/mos6502_if.o
 obj += $(objdir)/mos6502/mos6502_dis.o

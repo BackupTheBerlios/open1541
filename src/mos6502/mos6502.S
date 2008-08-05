@@ -254,122 +254,19 @@ op_18:  @ CLC
         bic m_pc, #MOS6502_C
         op_end 1 2
 
-        .global op_21
-op_21: @ AND ($FF,X)
-        mr_addr_mode_indx
-        ands m_a, m_a, r0, lsl #24
-        update_nz               @ update 6502 flags N and Z
-        op_end 2 6
-
-        .global op_29
-op_29: @ AND #$FF
-        mr_pc_arg8
-        ands m_a, m_a, r0, lsl #24
-        update_nz               @ update 6502 flags N and Z
-        op_end 2 2
-
-        .global op_2d
-op_2d: @ AND $FFFF
-        mr_addr_mode_abs
-        ands m_a, m_a, r0, lsl #24
-        update_nz               @ update 6502 flags N and Z
-        op_end 3 4
-
-        .global op_31
-op_31: @ AND ($FF),Y
-        mr_addr_mode_indy       @ this increments m_t on page wraps
-        ands m_a, m_a, r0, lsl #24
-        update_nz               @ update 6502 flags N and Z
-        op_end 2 5
-
-        .global op_35
-op_35: @ AND $FF,X
-        mr_addr_mode_zpx
-        ands m_a, m_a, r0, lsl #24
-        update_nz               @ update 6502 flags N and Z
-        op_end 2 4
-
         .global op_38
 op_38:  @ SEC
         orr m_pc, m_pc, #MOS6502_C
         op_end 1 2
-
-        .global op_39
-op_39: @ AND $FFFF,Y
-        mr_addr_mode_absy       @ this increments m_t on page wraps
-        ands m_a, m_a, r0, lsl #24
-        update_nz               @ update 6502 flags N and Z
-        op_end 3 4
-
-        .global op_3d
-op_3d: @ AND $FFFF,X
-        mr_addr_mode_absx       @ this increments m_t on page wraps
-        ands m_a, m_a, r0, lsl #24
-        update_nz               @ update 6502 flags N and Z
-        op_end 3 4
 
         .global op_58
 op_58:  @ CLI
         bic m_pc, #MOS6502_I
         op_end 1 2
 
-        .global op_61
-op_61: @ ADC ($FF,X)
-        mr_addr_mode_indx
-        do_adc
-        op_end 2 6
-
-        .global op_65
-op_65: @ ADC $FF
-        mr_addr_mode_zp
-        do_adc
-        op_end 2 3
-
-        .global op_69
-op_69:  @ ADC #$xx
-        mr_pc_arg8
-        do_adc
-        op_end 2 2
-
-        .global op_6d
-op_6d: @ ADC $FFFF
-        mr_addr_mode_abs
-        do_adc
-        op_end 3 4
-
-        .global op_71
-op_71: @ ADC ($FF),Y
-        mr_addr_mode_indy       @ this increments m_t on page wraps
-        do_adc
-        op_end 2 5
-
-        .global op_75
-op_75: @ ADC $FF,X
-        mr_addr_mode_zpx
-        do_adc
-        op_end 2 4
-
         .global op_78
 op_78:  @ SEI
         orr m_pc, m_pc, #MOS6502_I
-        op_end 1 2
-
-        .global op_79
-op_79: @ ADC $FFFF,Y
-        mr_addr_mode_absy       @ this increments m_t on page wraps
-        do_adc
-        op_end 3 4
-
-        .global op_7d
-op_7d: @ ADC $FFFF,X
-        mr_addr_mode_absx       @ this increments m_t on page wraps
-        do_adc
-        op_end 3 4
-
-        .global op_88
-op_88: @ DEY
-        subs m_y, m_y, #(1<<24) @ dec Y, update ARM flags
-        update_nz               @ update 6502 flags N and Z
         op_end 1 2
 
         .global op_b8
@@ -377,27 +274,9 @@ op_b8:  @ CLV
         bic m_pc, #MOS6502_V
         op_end 1 2
 
-        .global op_c8
-op_c8:  @ INY
-        adds m_y, m_y, #(1<<24) @ inc Y, update ARM flags
-        update_nz               @ update 6502 flags N and Z
-        op_end 1 2
-
-        .global op_ca
-op_ca: @ DEX
-        subs m_x, m_x, #(1<<24) @ dec X, update ARM flags
-        update_nz               @ update 6502 flags N and Z
-        op_end 1 2
-
         .global op_d8
 op_d8:  @ CLD
         bic m_pc, #MOS6502_D
-        op_end 1 2
-
-        .global op_e8
-op_e8:  @ INX
-        adds m_x, m_x, #(1<<24) @ inc X, update ARM flags
-        update_nz               @ update 6502 flags N and Z
         op_end 1 2
 
         .global op_ea
@@ -410,7 +289,6 @@ op_f8:  @ SED
         op_end 1 2
 
         .global op_xx
-
 
 op_0a: @ ASL A
 op_06: @ ASL $FF

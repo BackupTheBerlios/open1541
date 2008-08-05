@@ -219,55 +219,6 @@ mos6502_continue:
  *
  ******************************************************************************/
 
-@ Increment PC by the given value.
-.macro inc_pc num
-.ifne \num
-        add m_pc, m_pc, #\num
-        @ todo: Delete bit 16 at a convinient place. This may be set if the PC
-        @ wraps from 0xffff to 0, Don't wanna spend a cycle here for this
-        @ unlikely case
-.endif
-.endm
-
-@ Set the CPU emulation timer to expire in 'time' microseconds.
-.macro inc_time time
-        @ Ack timer 0 interrupt
-        mov r0, #TIR_MR0
-        mov r1,     #(T0IR & 0xffff0000)
-        orr r1, r1, #(T0IR & 0x0000ffff)
-        str r0, [r1]
-
-        @ Set next timer
-        add m_t, m_t, #\time
-        add r1, r1, #(T0MR0 - T0IR)
-        @ do not program the timer match register in single step mode
-        tst m_pc, #MOS6502_S
-        streq m_t, [r1]
-.endm
-
-@ Increment the PC by the given number,
-@ Set the CPU emulation timer to expire in 'time' microseconds,
-@ Return from FIQ
-.macro op_end pc time
-        inc_pc \pc
-        inc_time \time
-        ret_fiq
-.endm
-
-@ Update 6502 flags N and Z with flags from ARM
-.macro update_nz
-        bic       m_pc, m_pc, #(MOS6502_N | MOS6502_Z)
-        orrmi     m_pc, m_pc, #MOS6502_N
-        orreq     m_pc, m_pc, #MOS6502_Z
-.endm
-
-@ Update 6502 flags NZCV with flags from ARM
-.macro update_nzcv
-        mrs r0, cpsr                @ get PSR into r0
-        and r0, r0, #0xff000000     @ isolate flags
-        bic m_pc, m_pc, #0xff000000 @ clear 6502 flags
-        orr m_pc, m_pc, r0          @ copy flags to 6502
-.endm
 
 @ Do an ADC, the argument is in r0[0-7]
 .macro do_adc
@@ -279,21 +230,6 @@ mos6502_continue:
         movcc r1, r0, lsl #24       @   put summand into 24-31
         adcs  m_a, m_a, r1          @ perform ADC and set ARM flags
         update_nzcv
-.endm
-
-@ Do a branch instruction the argument is fetched here,
-@ the timer is also updated here.
-.macro do_branch
-        mr_pc_arg8              @ get argument
-        inc_pc 2                @ advance the pc as usual
-        and r1, m_pc, #0xff00   @ remember page before branch
-        mov r0, r0, lsl #24     @ we use asr below to get a real signed value
-        add m_pc, m_pc, r0, asr #24 @ branch
-
-        and r0, m_pc, #0xff00   @ get page after branch
-        cmp r0, r1
-        addne m_t, m_t, #1      @ use an extra cycle for page crossing
-        op_end 0 3
 .endm
 
 /*******************************************************************************
@@ -313,27 +249,64 @@ mos6502_continue:
  *
  ******************************************************************************/
 
-        .global op_10
-op_10:  @ BPL
-        tst m_pc, #MOS6502_N    @ check if emulated N bit is set
-        bne no_branch           @ set => no branch
-        do_branch
-
         .global op_18
 op_18:  @ CLC
         bic m_pc, #MOS6502_C
         op_end 1 2
 
-        .global op_30
-op_30:  @ BMI
-        tst m_pc, #MOS6502_N    @ check if emulated N bit is set
-        beq no_branch           @ clear => no branch
-        do_branch
+        .global op_21
+op_21: @ AND ($FF,X)
+        mr_addr_mode_indx
+        ands m_a, m_a, r0, lsl #24
+        update_nz               @ update 6502 flags N and Z
+        op_end 2 6
+
+        .global op_29
+op_29: @ AND #$FF
+        mr_pc_arg8
+        ands m_a, m_a, r0, lsl #24
+        update_nz               @ update 6502 flags N and Z
+        op_end 2 2
+
+        .global op_2d
+op_2d: @ AND $FFFF
+        mr_addr_mode_abs
+        ands m_a, m_a, r0, lsl #24
+        update_nz               @ update 6502 flags N and Z
+        op_end 3 4
+
+        .global op_31
+op_31: @ AND ($FF),Y
+        mr_addr_mode_indy       @ this increments m_t on page wraps
+        ands m_a, m_a, r0, lsl #24
+        update_nz               @ update 6502 flags N and Z
+        op_end 2 5
+
+        .global op_35
+op_35: @ AND $FF,X
+        mr_addr_mode_zpx
+        ands m_a, m_a, r0, lsl #24
+        update_nz               @ update 6502 flags N and Z
+        op_end 2 4
 
         .global op_38
 op_38:  @ SEC
         orr m_pc, m_pc, #MOS6502_C
         op_end 1 2
+
+        .global op_39
+op_39: @ AND $FFFF,Y
+        mr_addr_mode_absy       @ this increments m_t on page wraps
+        ands m_a, m_a, r0, lsl #24
+        update_nz               @ update 6502 flags N and Z
+        op_end 3 4
+
+        .global op_3d
+op_3d: @ AND $FFFF,X
+        mr_addr_mode_absx       @ this increments m_t on page wraps
+        ands m_a, m_a, r0, lsl #24
+        update_nz               @ update 6502 flags N and Z
+        op_end 3 4
 
         .global op_4c
 op_4c:  @ JMP abs
@@ -341,12 +314,6 @@ op_4c:  @ JMP abs
         mov m_pc, m_pc, lsr #16     @ remove old PC
         add m_pc, r0, m_pc, lsl #16 @ set new PC
         op_end 0 3
-
-        .global op_50
-op_50:  @ BVC
-        tst m_pc, #MOS6502_V    @ check if emulated V bit is set
-        bne no_branch           @ set => no branch
-        do_branch
 
         .global op_58
 op_58:  @ CLI
@@ -377,15 +344,9 @@ op_6d: @ ADC $FFFF
         do_adc
         op_end 3 4
 
-        .global op_70
-op_70:  @ BVS
-        tst m_pc, #MOS6502_V    @ check if emulated V bit is set
-        beq no_branch           @ clear => no branch
-        do_branch
-
         .global op_71
 op_71: @ ADC ($FF),Y
-        mr_addr_mode_indy
+        mr_addr_mode_indy       @ this increments m_t on page wraps
         do_adc
         op_end 2 5
 
@@ -423,12 +384,6 @@ op_8a: @ TXA
         movs m_a, m_x
         update_nz               @ update 6502 flags N and Z
         op_end 1 2
-
-        .global op_90
-op_90:  @ BCC
-        tst m_pc, #MOS6502_C    @ check if emulated C bit is set
-        bne no_branch           @ set => no branch
-        do_branch
 
         .global op_98
 op_98: @ TYA
@@ -504,12 +459,6 @@ op_ad: @ LDA $FFFF
         update_nz               @ update 6502 flags N and Z
         op_end 3 4
 
-        .global op_b0
-op_b0:  @ BCS
-        tst m_pc, #MOS6502_C    @ check if emulated C bit is set
-        beq no_branch           @ clear => no branch
-        do_branch
-
         .global op_b1
 op_b1: @ LDA ($FF),Y
         mr_addr_mode_indy
@@ -555,15 +504,6 @@ op_ca: @ DEX
         update_nz               @ update 6502 flags N and Z
         op_end 1 2
 
-        .global op_d0
-op_d0:  @ BNE
-        tst m_pc, #MOS6502_Z    @ check if emulated Z bit is set
-        bne no_branch           @ set => no branch
-        do_branch
-
-no_branch:
-        op_end 2 2
-
         .global op_d8
 op_d8:  @ CLD
         bic m_pc, #MOS6502_D
@@ -579,12 +519,6 @@ op_e8:  @ INX
 op_ea:  @ NOP
         op_end 1 2
 
-        .global op_f0
-op_f0:  @ BEQ
-        tst m_pc, #MOS6502_Z    @ check if emulated Z bit is set
-        beq no_branch           @ clear => no branch
-        do_branch
-
         .global op_f8
 op_f8:  @ SED
         orr m_pc, m_pc, #MOS6502_D
@@ -593,14 +527,6 @@ op_f8:  @ SED
         .global op_xx
 
 
-op_29: @ AND #$FF
-op_25: @ AND $FF
-op_35: @ AND $FF,X
-op_2d: @ AND $FFFF
-op_3d: @ AND $FFFF,X
-op_39: @ AND $FFFF,Y
-op_21: @ AND ($FF,X)
-op_31: @ AND ($FF),Y
 op_0a: @ ASL A
 op_06: @ ASL $FF
 op_16: @ ASL $FF,X

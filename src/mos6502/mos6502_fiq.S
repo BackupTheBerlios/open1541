@@ -56,10 +56,10 @@
         .word op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx
         .word op_10, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx @ 1
         .word op_18, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx
-        .word op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx @ 2
-        .word op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx
+        .word op_xx, op_21, op_xx, op_xx, op_xx, op_25, op_xx, op_xx @ 2
+        .word op_xx, op_29, op_xx, op_xx, op_xx, op_2d, op_xx, op_xx
         .word op_30, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx @ 3
-        .word op_38, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx
+        .word op_38, op_xx, op_xx, op_xx, op_xx, op_3d, op_xx, op_xx
         .word op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx @ 4
         .word op_xx, op_xx, op_xx, op_xx, op_4c, op_xx, op_xx, op_xx
         .word op_50, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx @ 5

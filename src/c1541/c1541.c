@@ -53,6 +53,9 @@ void c1541_init(void)
     *p++ = 0xb1;    // LDA ($05),Y
     *p++ = 0x05;    // must be = $a0
 
+    *p++ = 0x29;    // AND #$20
+    *p++ = 0x20;
+
     *p++ = 0x4c;    // JMP $0000
     *p++ = 0x00;
     *p++ = 0x00;

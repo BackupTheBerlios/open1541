@@ -288,3 +288,63 @@ mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
         @ now r0 contains the address, read a byte from there
         mr_r0
 .endm
+
+/*******************************************************************************
+ * Increment PC by the given value.
+ ******************************************************************************/
+.macro inc_pc num
+.ifne \num
+        add m_pc, m_pc, #\num
+        @ todo: Delete bit 16 at a convinient place. This may be set if the PC
+        @ wraps from 0xffff to 0, Don't wanna spend a cycle here for this
+        @ unlikely case
+.endif
+.endm
+
+/*******************************************************************************
+ * Set the CPU emulation timer to expire in 'time' microseconds.
+ ******************************************************************************/
+.macro inc_time time
+        @ Ack timer 0 interrupt
+        mov r0, #TIR_MR0
+        mov r1,     #(T0IR & 0xffff0000)
+        orr r1, r1, #(T0IR & 0x0000ffff)
+        str r0, [r1]
+
+        @ Set next timer
+        add m_t, m_t, #\time
+        add r1, r1, #(T0MR0 - T0IR)
+        @ do not program the timer match register in single step mode
+        tst m_pc, #MOS6502_S
+        streq m_t, [r1]
+.endm
+
+/*******************************************************************************
+ * Increment the PC by the given number,
+ * Set the CPU emulation timer to expire in 'time' microseconds,
+ * Return from FIQ
+ ******************************************************************************/
+.macro op_end pc time
+        inc_pc \pc
+        inc_time \time
+        ret_fiq
+.endm
+
+/*******************************************************************************
+ * Update 6502 flags N and Z with flags from ARM
+ ******************************************************************************/
+.macro update_nz
+        bic       m_pc, m_pc, #(MOS6502_N | MOS6502_Z)
+        orrmi     m_pc, m_pc, #MOS6502_N
+        orreq     m_pc, m_pc, #MOS6502_Z
+.endm
+
+/*******************************************************************************
+ * Update 6502 flags NZCV with flags from ARM
+ ******************************************************************************/
+.macro update_nzcv
+        mrs r0, cpsr                @ get PSR into r0
+        and r0, r0, #0xff000000     @ isolate flags
+        bic m_pc, m_pc, #0xff000000 @ clear 6502 flags
+        orr m_pc, m_pc, r0          @ copy flags to 6502
+.endm

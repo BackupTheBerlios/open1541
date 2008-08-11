@@ -214,25 +214,6 @@ mos6502_continue:
         b exit_fiq_mode
 
 /*******************************************************************************
- * Here there are all basic operations (ALU etc.) implemented.
- * These macros are used in the real opcode implementations below.
- *
- ******************************************************************************/
-
-
-@ Do an ADC, the argument is in r0[0-7]
-.macro do_adc
-        movs r1, m_pc, lsl #3       @ set ARM C from 6502 C
-                                    @ prepare summand if CS:
-        mvncs r1, #0xff000000       @   set bits 0-23 so ARM C gets helpful
-        orrcs r1, r1, r0, lsl #24   @   put summand into 24-31
-                                    @ else prepare summand if CC:
-        movcc r1, r0, lsl #24       @   put summand into 24-31
-        adcs  m_a, m_a, r1          @ perform ADC and set ARM flags
-        update_nzcv
-.endm
-
-/*******************************************************************************
  * Here there are all opcodes implemented.
  *
  * On entry:
@@ -290,7 +271,6 @@ op_f8:  @ SED
 
         .global op_xx
 
-op_0a: @ ASL A
 op_06: @ ASL $FF
 op_16: @ ASL $FF,X
 op_0e: @ ASL $FFFF
@@ -316,14 +296,6 @@ op_c6: @ DEC $FF
 op_d6: @ DEC $FF,X
 op_ce: @ DEC $FFFF
 op_de: @ DEC $FFFF,X
-op_49: @ EOR #$FF
-op_45: @ EOR $FF
-op_55: @ EOR $FF,X
-op_4d: @ EOR $FFFF
-op_5d: @ EOR $FFFF,X
-op_59: @ EOR $FFFF,Y
-op_41: @ EOR ($FF,X)
-op_51: @ EOR ($FF),Y
 op_e6: @ INC $FF
 op_f6: @ INC $FF,X
 op_ee: @ INC $FFFF
@@ -341,14 +313,6 @@ op_46: @ LSR $FF
 op_56: @ LSR $FF,X
 op_4e: @ LSR $FFFF
 op_5e: @ LSR $FFFF,X
-op_09: @ ORA #$FF
-op_05: @ ORA $FF
-op_15: @ ORA $FF,X
-op_0d: @ ORA $FFFF
-op_1d: @ ORA $FFFF,X
-op_19: @ ORA $FFFF,Y
-op_01: @ ORA ($FF,X)
-op_11: @ ORA ($FF),Y
 op_48: @ PHA
 op_08: @ PHP
 op_68: @ PLA
@@ -365,14 +329,6 @@ op_6e: @ ROR $FFFF
 op_7e: @ ROR $FFFF,X
 op_40: @ RTI
 op_60: @ RTS
-op_e9: @ SBC #$FF
-op_e5: @ SBC $FF
-op_f5: @ SBC $FF,X
-op_ed: @ SBC $FFFF
-op_fd: @ SBC $FFFF,X
-op_f9: @ SBC $FFFF,Y
-op_e1: @ SBC ($FF,X)
-op_f1: @ SBC ($FF),Y
 op_85: @ STA $FF
 op_95: @ STA $FF,X
 op_8d: @ STA $FFFF

@@ -46,13 +46,6 @@ op_10:  @ BPL
         bne no_branch           @ set => no branch
         do_branch
 
-        .global op_25
-op_25: @ AND $FF
-        mr_addr_mode_zp
-        ands m_a, m_a, r0, lsl #24
-        update_nz               @ update 6502 flags N and Z
-        op_end 2 3
-
         .global op_30
 op_30:  @ BMI
         tst m_pc, #MOS6502_N    @ check if emulated N bit is set

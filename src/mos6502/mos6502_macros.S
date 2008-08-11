@@ -340,11 +340,26 @@ mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
 .endm
 
 /*******************************************************************************
+ * Update 6502 flags NZC with flags from ARM
+ ******************************************************************************/
+.macro update_nzc
+        mrs r0, cpsr                @ get PSR into r0
+
+        @ isolate flags from CPSR and put them into 6502 flags
+        and r0, r0, #(MOS6502_N | MOS6502_Z | MOS6502_C)
+        bic m_pc, m_pc, #(MOS6502_N | MOS6502_Z | MOS6502_C)
+        orr m_pc, m_pc, r0          @ copy flags to 6502
+.endm
+
+/*******************************************************************************
  * Update 6502 flags NZCV with flags from ARM
  ******************************************************************************/
 .macro update_nzcv
         mrs r0, cpsr                @ get PSR into r0
-        and r0, r0, #0xff000000     @ isolate flags
-        bic m_pc, m_pc, #0xff000000 @ clear 6502 flags
+
+        @ isolate flags from CPSR and put them into 6502 flags
+        and r0, r0, #(MOS6502_N | MOS6502_Z | MOS6502_C | MOS6502_V)
+        bic m_pc, m_pc, #(MOS6502_N | MOS6502_Z | MOS6502_C | MOS6502_V)
         orr m_pc, m_pc, r0          @ copy flags to 6502
 .endm
+

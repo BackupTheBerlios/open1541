@@ -52,18 +52,18 @@
 
         @ the opcode jump table is directly behind our current ARM-PC so we can
         @ use PC + opcode to find the right entry
-        .word op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx @ 0
-        .word op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx
-        .word op_10, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx @ 1
-        .word op_18, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx
+        .word op_xx, op_01, op_xx, op_xx, op_xx, op_05, op_xx, op_xx @ 0
+        .word op_xx, op_09, op_0a, op_xx, op_xx, op_0d, op_xx, op_xx
+        .word op_10, op_11, op_xx, op_xx, op_xx, op_15, op_xx, op_xx @ 1
+        .word op_18, op_19, op_xx, op_xx, op_xx, op_1d, op_xx, op_xx
         .word op_xx, op_21, op_xx, op_xx, op_xx, op_25, op_xx, op_xx @ 2
         .word op_xx, op_29, op_xx, op_xx, op_xx, op_2d, op_xx, op_xx
         .word op_30, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx @ 3
         .word op_38, op_xx, op_xx, op_xx, op_xx, op_3d, op_xx, op_xx
-        .word op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx @ 4
-        .word op_xx, op_xx, op_xx, op_xx, op_4c, op_xx, op_xx, op_xx
-        .word op_50, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx @ 5
-        .word op_58, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx
+        .word op_xx, op_41, op_xx, op_xx, op_xx, op_45, op_xx, op_xx @ 4
+        .word op_xx, op_49, op_xx, op_xx, op_4c, op_4d, op_xx, op_xx
+        .word op_50, op_51, op_xx, op_xx, op_xx, op_55, op_xx, op_xx @ 5
+        .word op_58, op_59, op_xx, op_xx, op_xx, op_5d, op_xx, op_xx
         .word op_xx, op_61, op_xx, op_xx, op_xx, op_65, op_xx, op_xx @ 6
         .word op_xx, op_69, op_xx, op_xx, op_xx, op_6d, op_xx, op_xx
         .word op_70, op_71, op_xx, op_xx, op_xx, op_75, op_xx, op_xx @ 7
@@ -80,10 +80,10 @@
         .word op_c8, op_xx, op_ca, op_xx, op_xx, op_xx, op_xx, op_xx
         .word op_d0, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx @ d
         .word op_d8, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx
-        .word op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx @ e
-        .word op_e8, op_xx, op_ea, op_xx, op_xx, op_xx, op_xx, op_xx
-        .word op_f0, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx @ f
-        .word op_f8, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx
+        .word op_xx, op_e1, op_xx, op_xx, op_xx, op_e5, op_xx, op_xx @ e
+        .word op_e8, op_e9, op_ea, op_xx, op_xx, op_ed, op_xx, op_xx
+        .word op_f0, op_f1, op_xx, op_xx, op_xx, op_f5, op_xx, op_xx @ f
+        .word op_f8, op_f9, op_xx, op_xx, op_xx, op_fd, op_xx, op_xx
 
 /*******************************************************************************
  * This table points to memory areas for reading from emulated memory
@@ -96,7 +96,7 @@
  * later to meet the real 1541 memory map.
  *
  ******************************************************************************/
-        nop @ use more or less NOPs to fixe the distance to ADR
+        nop @ use more or less NOPs to fix the distance to ADR
         nop
         .global direct_read_addresses
 direct_read_addresses:

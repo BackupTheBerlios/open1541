@@ -68,7 +68,7 @@ mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
  * This also changes r1, r2 and lr.
  *
  ******************************************************************************/
-.macro  mr_r0
+.macro  memr_r0
         ldr r2, =memr_table
 
         @ each table entry points to 0x0800 bytes, use the higher bits
@@ -88,8 +88,8 @@ mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
  * This macro does not check for addresses higher than 0xffff.
  *
  ******************************************************************************/
-.macro  mw_r1_to_r0
-        ldr r2, =memr_table
+.macro  memw_r1_to_r0
+        ldr r2, =memw_table
 
         @ each table entry points to 0x0800 bytes, use the higher bits
         add r2, r2, r0, lsr #(11 - 2)
@@ -108,7 +108,7 @@ mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
  * It reads *(pc + 1)
  *
  ******************************************************************************/
-.macro  mr_pc_arg8
+.macro  memr_pc_arg8
         ldrb r0, [r2, #1]
 .endm
 
@@ -120,7 +120,7 @@ mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
  * r1 will be changed here.
  *
  ******************************************************************************/
-.macro  mr_pc_arg16
+.macro  memr_pc_arg16
         ldrb r0, [r2, #1]
         ldrb r1, [r2, #2]
         orr r0, r0, r1, lsl #8
@@ -134,8 +134,8 @@ mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
  * This changes r2.
  *
  ******************************************************************************/
-.macro  mr_addr_mode_zp
-        mr_pc_arg8
+.macro  memr_addr_mode_zp
+        memr_pc_arg8
 
         @ now r0 contains the zp address, read a byte from there
         ldr r2, =c1541_ram
@@ -152,8 +152,8 @@ mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
  * This changes r2.
  *
  ******************************************************************************/
-.macro  mw_addr_mode_zp
-        mr_pc_arg8
+.macro  memw_addr_mode_zp
+        memr_pc_arg8
 
         @ now r0 contains the zp address, read a byte from there
         ldr r2, =c1541_ram
@@ -171,8 +171,8 @@ mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
  * This also changes r1, r2 and lr.
  *
  ******************************************************************************/
-.macro  mr_addr_mode_zpx
-        mr_pc_arg8
+.macro  memr_addr_mode_zpx
+        memr_pc_arg8
 
         @ now r0[0..7] contains the zp address, add it shifted to X into r0[24..31]
         add r0, m_x, r0, lsl #24
@@ -191,8 +191,8 @@ mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
  * This also changes r1, r2 and lr.
  *
  ******************************************************************************/
-.macro  mr_addr_mode_zpy
-        mr_pc_arg8
+.macro  memr_addr_mode_zpy
+        memr_pc_arg8
 
         @ now r0[0..7] contains the zp address, add it shifted to Y into r0[24..31]
         add r0, m_y, r0, lsl #24
@@ -210,11 +210,11 @@ mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
  * This also changes r1, r2 and lr.
  *
  ******************************************************************************/
-.macro  mr_addr_mode_abs
-        mr_pc_arg16
+.macro  memr_addr_mode_abs
+        memr_pc_arg16
 
         @ now r0 contains the address, read a byte from there
-        mr_r0
+        memr_r0
 .endm
 
 /*******************************************************************************
@@ -227,8 +227,8 @@ mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
  * This also changes r1, r2 and lr.
  *
  ******************************************************************************/
-.macro  mr_addr_mode_absx
-        mr_pc_arg16
+.macro  memr_addr_mode_absx
+        memr_pc_arg16
 
         @ now r0[0..15] contains the address, remember the high-byte in r2[0..7]
         mov r2, r0, lsr #8
@@ -244,7 +244,7 @@ mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
         addne m_t, m_t, #1
 
         @ now r0 contains the address, read a byte from there
-        mr_r0
+        memr_r0
 .endm
 
 /*******************************************************************************
@@ -257,8 +257,8 @@ mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
  * This also changes r1, r2 and lr.
  *
  ******************************************************************************/
-.macro  mr_addr_mode_absy
-        mr_pc_arg16
+.macro  memr_addr_mode_absy
+        memr_pc_arg16
 
         @ now r0[0..15] contains the address, remember the high-byte in r2[0..7]
         mov r2, r0, lsr #8
@@ -274,7 +274,7 @@ mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
         addne m_t, m_t, #1
 
         @ now r0 contains the address, read a byte from there
-        mr_r0
+        memr_r0
 .endm
 
 /*******************************************************************************
@@ -287,8 +287,8 @@ mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
  * This also changes r1, r2 and lr.
  *
  ******************************************************************************/
-.macro  mr_addr_mode_indx
-        mr_pc_arg8
+.macro  memr_addr_mode_indx
+        memr_pc_arg8
 
         @ now r0[0..7] contains the zp address, add it to X into r0[24..31]
         add     r0, m_x, r0, lsl #24
@@ -303,7 +303,7 @@ mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
         orr     r0, r1, r0, lsl #8
 
         @ now r0 contains the address, read a byte from there
-        mr_r0
+        memr_r0
 .endm
 
 /*******************************************************************************
@@ -317,8 +317,8 @@ mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
  * This also changes r1, r2 and lr.
  *
  ******************************************************************************/
-.macro  mr_addr_mode_indy
-        mr_pc_arg8
+.macro  memr_addr_mode_indy
+        memr_pc_arg8
 
         @ now r0[0..7] contains the zp address
         @ load a byte from there, that's the low byte of the address
@@ -345,7 +345,7 @@ mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
         addne m_t, m_t, #1
 
         @ now r0 contains the address, read a byte from there
-        mr_r0
+        memr_r0
 .endm
 
 /*******************************************************************************

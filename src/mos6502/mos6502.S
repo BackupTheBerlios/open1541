@@ -34,7 +34,7 @@
  *
  * r2  points to the native memory corresponding to the emulated PC. So it
  *     points to the byte behind the current opcode. This will be used by the
- *     macros mr_pc_arg8 or mr_pc_arg16
+ *     macros me memr_pc_arg8 or me memr_pc_arg16
  *
  * r0 to r2 can be used as scratch registers and don't need to be restored
  *
@@ -136,7 +136,7 @@ mos6502_read_mem:
         msr     cpsr_c, #MODE_FIQ | PSR_I | PSR_F
 
         @ read memory and return
-        mr_r0
+        memr_r0
         b       exit_fiq_mode
 
 /*******************************************************************************

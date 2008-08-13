@@ -49,49 +49,49 @@
 
         .global op_61
 op_61: @ ADC ($FF,X)
-        mr_addr_mode_indx
+        memr_addr_mode_indx
         do_adc
         op_end 2 6
 
         .global op_65
 op_65: @ ADC $FF
-        mr_addr_mode_zp
+        memr_addr_mode_zp
         do_adc
         op_end 2 3
 
         .global op_69
 op_69:  @ ADC #$FF
-        mr_pc_arg8
+        memr_pc_arg8
         do_adc
         op_end 2 2
 
         .global op_6d
 op_6d: @ ADC $FFFF
-        mr_addr_mode_abs
+        memr_addr_mode_abs
         do_adc
         op_end 3 4
 
         .global op_71
 op_71: @ ADC ($FF),Y
-        mr_addr_mode_indy       @ this increments m_t on page wraps
+        memr_addr_mode_indy     @ this increments m_t on page wraps
         do_adc
         op_end 2 5
 
         .global op_75
 op_75: @ ADC $FF,X
-        mr_addr_mode_zpx
+        memr_addr_mode_zpx
         do_adc
         op_end 2 4
 
         .global op_79
 op_79: @ ADC $FFFF,Y
-        mr_addr_mode_absy       @ this increments m_t on page wraps
+        memr_addr_mode_absy     @ this increments m_t on page wraps
         do_adc
         op_end 3 4
 
         .global op_7d
 op_7d: @ ADC $FFFF,X
-        mr_addr_mode_absx       @ this increments m_t on page wraps
+        memr_addr_mode_absx     @ this increments m_t on page wraps
         do_adc
         op_end 3 4
 
@@ -115,7 +115,7 @@ op_ca: @ DEX
 
         .global op_e1
 op_e1: @ SBC ($FF,X)
-        mr_addr_mode_indx
+        memr_addr_mode_indx
         do_sbc
         op_end 2 6
 
@@ -127,43 +127,43 @@ op_e8:  @ INX
 
         .global op_e5
 op_e5: @ SBC $FF
-        mr_addr_mode_zp
+        memr_addr_mode_zp
         do_sbc
         op_end 2 3
 
         .global op_e9
 op_e9: @ SBC #$FF
-        mr_pc_arg8
+        memr_pc_arg8
         do_sbc
         op_end 2 2
 
         .global op_ed
 op_ed: @ SBC $FFFF
-        mr_addr_mode_abs
+        memr_addr_mode_abs
         do_sbc
         op_end 3 4
 
         .global op_f1
 op_f1: @ SBC ($FF),Y
-        mr_addr_mode_indy       @ this increments m_t on page wraps
+        memr_addr_mode_indy     @ this increments m_t on page wraps
         do_sbc
         op_end 2 5
 
         .global op_f5
 op_f5: @ SBC $FF,X
-        mr_addr_mode_zpx
+        memr_addr_mode_zpx
         do_sbc
         op_end 2 4
 
         .global op_f9
 op_f9: @ SBC $FFFF,Y
-        mr_addr_mode_absy       @ this increments m_t on page wraps
+        memr_addr_mode_absy     @ this increments m_t on page wraps
         do_sbc
         op_end 3 4
 
         .global op_fd
 op_fd: @ SBC $FFFF,X
-        mr_addr_mode_absx       @ this increments m_t on page wraps
+        memr_addr_mode_absx     @ this increments m_t on page wraps
         do_sbc
         op_end 3 4
 

@@ -28,7 +28,7 @@
 @ Do a branch instruction the argument is fetched here,
 @ the timer is also updated here.
 .macro do_branch
-        mr_pc_arg8              @ get argument
+        memr_pc_arg8            @ get argument
         inc_pc 2                @ advance the pc as usual
         and r1, m_pc, #0xff00   @ remember page before branch
         mov r0, r0, lsl #24     @ we use asr below to get a real signed value
@@ -93,7 +93,7 @@ op_f0:  @ BEQ
 
         .global op_4c
 op_4c:  @ JMP abs
-        mr_pc_arg16
+        memr_pc_arg16
         mov m_pc, m_pc, lsr #16     @ remove old PC
         add m_pc, r0, m_pc, lsl #16 @ set new PC
         op_end 0 3

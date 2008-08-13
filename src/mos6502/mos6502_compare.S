@@ -24,98 +24,98 @@
 
         .global op_c0
 op_c0: @ CPY #$FF
-        mr_pc_arg8
+        memr_pc_arg8
         cmp m_y, r0, lsl #24
         update_nzcv             @ update 6502 flags
         op_end 2 2
 
         .global op_c1
 op_c1: @ CMP ($FF,X)
-        mr_addr_mode_indx
+        memr_addr_mode_indx
         cmp m_a, r0, lsl #24
         update_nzcv             @ update 6502 flags
         op_end 2 6
 
         .global op_c4
 op_c4: @ CPY $FF
-        mr_addr_mode_zp
+        memr_addr_mode_zp
         cmp m_y, r0, lsl #24
         update_nzcv             @ update 6502 flags
         op_end 2 3
 
         .global op_c5
 op_c5: @ CMP $FF
-        mr_addr_mode_zp
+        memr_addr_mode_zp
         cmp m_a, r0, lsl #24
         update_nzcv             @ update 6502 flags
         op_end 2 3
 
         .global op_c9
 op_c9: @ CMP #$FF
-        mr_pc_arg8
+        memr_pc_arg8
         cmp m_a, r0, lsl #24
         update_nzcv             @ update 6502 flags
         op_end 2 2
 
         .global op_cc
 op_cc: @ CPY $FFFF
-        mr_addr_mode_abs
+        memr_addr_mode_abs
         cmp m_y, r0, lsl #24
         update_nzcv             @ update 6502 flags
         op_end 3 4
 
         .global op_cd
 op_cd: @ CMP $FFFF
-        mr_addr_mode_abs
+        memr_addr_mode_abs
         cmp m_a, r0, lsl #24
         update_nzcv             @ update 6502 flags
         op_end 3 4
 
         .global op_d1
 op_d1: @ CMP ($FF),Y
-        mr_addr_mode_indy       @ this increments m_t on page wraps
+        memr_addr_mode_indy     @ this increments m_t on page wraps
         cmp m_a, r0, lsl #24
         update_nzcv             @ update 6502 flags
         op_end 2 5
 
         .global op_d5
 op_d5: @ CMP $FF,X
-        mr_addr_mode_zpx
+        memr_addr_mode_zpx
         cmp m_a, r0, lsl #24
         update_nzcv             @ update 6502 flags
         op_end 2 4
 
         .global op_d9
 op_d9: @ CMP $FFFF,Y
-        mr_addr_mode_absy       @ this increments m_t on page wraps
+        memr_addr_mode_absy     @ this increments m_t on page wraps
         cmp m_a, r0, lsl #24
         update_nzcv             @ update 6502 flags
         op_end 3 4
 
         .global op_dd
 op_dd: @ CMP $FFFF,X
-        mr_addr_mode_absx       @ this increments m_t on page wraps
+        memr_addr_mode_absx     @ this increments m_t on page wraps
         cmp m_a, r0, lsl #24
         update_nzcv             @ update 6502 flags
         op_end 3 4
 
         .global op_e0
 op_e0: @ CPX #$FF
-        mr_pc_arg8
+        memr_pc_arg8
         cmp m_x, r0, lsl #24
         update_nzcv             @ update 6502 flags
         op_end 2 2
 
         .global op_e4
 op_e4: @ CPX $FF
-        mr_addr_mode_zp
+        memr_addr_mode_zp
         cmp m_x, r0, lsl #24
         update_nzcv             @ update 6502 flags
         op_end 2 3
 
         .global op_ec
 op_ec: @ CPX $FFFF
-        mr_addr_mode_abs
+        memr_addr_mode_abs
         cmp m_x, r0, lsl #24
         update_nzcv             @ update 6502 flags
         op_end 3 4

@@ -101,13 +101,6 @@ op_6e: @ ROR $FFFF
 op_7e: @ ROR $FFFF,X
 op_40: @ RTI
 op_60: @ RTS
-op_85: @ STA $FF
-op_95: @ STA $FF,X
-op_8d: @ STA $FFFF
-op_9d: @ STA $FFFF,X
-op_99: @ STA $FFFF,Y
-op_81: @ STA ($FF,X)
-op_91: @ STA ($FF),Y
 op_86: @ STX $FF
 op_96: @ STX $FF,Y
 op_8e: @ STX $FFFF

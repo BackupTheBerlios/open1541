@@ -69,7 +69,7 @@ mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
  *
  ******************************************************************************/
 .macro  mr_r0
-        ldr r2, =mr8_table
+        ldr r2, =memr_table
 
         @ each table entry points to 0x0800 bytes, use the higher bits
         and r1, r0, #0xf800
@@ -79,6 +79,27 @@ mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
 
         @ jump to the right handler
         ldr pc, [r2, r1, lsr #(11 - 2)]
+.endm
+
+/*******************************************************************************
+ * Write the bits 0..7 from r1 to the location pointed to by r0.
+ * This also changes r1, r2 and lr.
+ *
+ * This macro does not check for addresses higher than 0xffff.
+ *
+ ******************************************************************************/
+.macro  mw_r1_to_r0
+        ldr r2, =memr_table
+
+        @ each table entry points to 0x0800 bytes, use the higher bits
+        add r2, r2, r0, lsr #(11 - 2)
+        bic r2, r2, #3
+
+        @ prepare link register, will return 2 instructions behind this
+        mov lr, pc
+
+        @ jump to the right handler
+        ldr pc, [r2]
 .endm
 
 /*******************************************************************************
@@ -110,17 +131,35 @@ mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
  * 2. Then read the byte pointed to by the byte read at step 1
  * This macros uses r2 which must point to the opcode in the native memory.
  * Return the result in r0.
- * This also changes r1.
+ * This changes r2.
  *
  ******************************************************************************/
 .macro  mr_addr_mode_zp
         mr_pc_arg8
 
         @ now r0 contains the zp address, read a byte from there
-        ldr r1, =c1541_ram
+        ldr r2, =c1541_ram
 
         @ load the byte
-        ldrb r0, [r1, r0]
+        ldrb r0, [r2, r0]
+.endm
+
+/*******************************************************************************
+ * 1. Read one byte argument behind m_pc.
+ * 2. Write the byte from r1[7:0] to the address read at step 1
+ * This macros uses r2 which must point to the opcode in the native memory.
+ * Return the result in r0.
+ * This changes r2.
+ *
+ ******************************************************************************/
+.macro  mw_addr_mode_zp
+        mr_pc_arg8
+
+        @ now r0 contains the zp address, read a byte from there
+        ldr r2, =c1541_ram
+
+        @ load the byte
+        strb r1, [r2, r0]
 .endm
 
 /*******************************************************************************

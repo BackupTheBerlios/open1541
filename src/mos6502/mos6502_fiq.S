@@ -68,7 +68,7 @@
         .word op_xx, op_69, op_xx, op_xx, op_xx, op_6d, op_xx, op_xx
         .word op_70, op_71, op_xx, op_xx, op_xx, op_75, op_xx, op_xx @ 7
         .word op_78, op_79, op_xx, op_xx, op_xx, op_7d, op_xx, op_xx
-        .word op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx @ 8
+        .word op_xx, op_xx, op_xx, op_xx, op_xx, op_85, op_xx, op_xx @ 8
         .word op_88, op_xx, op_8a, op_xx, op_xx, op_xx, op_xx, op_xx
         .word op_90, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx @ 9
         .word op_98, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx
@@ -86,9 +86,11 @@
         .word op_f8, op_f9, op_xx, op_xx, op_xx, op_fd, op_xx, op_xx
 
 /*******************************************************************************
- * This table points to memory areas for reading from emulated memory
- * directly. It is located in this module to keep its address close to 0, so we
- * can use ADR to get its address relatively to PC.
+ * This table points to memory areas for reading instructions from emulated 
+ * memory directly. It is located in this module to keep its address close to 0, 
+ * so we can use ADR to get its address relatively to PC.
+ *
+ * This table is not used to read data, see mos6502_mem.S instead.
  *
  * Each 0x0800 = (1 << 11) = 2048 bytes block has one pointer,
  *

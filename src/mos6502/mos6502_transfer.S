@@ -25,6 +25,12 @@
 #include <lpc213x.h>
 #include "mos6502_macros.S"
 
+        .global op_85
+op_85: @ STA $FF
+        mov r1, m_a, lsr #24
+        mw_addr_mode_zp
+        op_end 2 3
+
         .global op_8a
 op_8a: @ TXA
         movs m_a, m_x
@@ -174,3 +180,12 @@ op_be: @ LDX $FFFF,Y
         movs m_x, r0, lsl #24   @ move to reg, update ARM flags
         update_nz               @ update 6502 flags N and Z
         op_end 3 4
+
+
+op_95: @ STA $FF,X
+op_8d: @ STA $FFFF
+op_9d: @ STA $FFFF,X
+op_99: @ STA $FFFF,Y
+op_81: @ STA ($FF,X)
+op_91: @ STA ($FF),Y
+        op_end 1 2

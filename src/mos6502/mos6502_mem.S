@@ -22,38 +22,40 @@
 
 
 /*******************************************************************************
- * The mr8_table points to functions responsible for reading a certain
+ * memr_table points to functions responsible for reading data at a certain
  * memory location. Each 0x0800 = (1 << 11) = 2048 bytes block has one pointer,
  * so specialized functions and memory mirroring will be possible.
  *
+ * This table is not used to read opcodes, see mos6502_fiq.S instead.
+ *
  ******************************************************************************/
-        .global mr8_table
-mr8_table:
-        .word mr8_ram, mr_none, mr_via,  mr_none  @ 0x0000
-        .word mr_none, mr_none, mr_none, mr_none  @ 0x2000
-        .word mr_none, mr_none, mr_none, mr_none  @ 0x4000
-        .word mr_none, mr_none, mr_none, mr_none  @ 0x6000
-        .word mr_none, mr_none, mr_none, mr_none  @ 0x8000
-        .word mr_none, mr_none, mr_none, mr_none  @ 0xa000
-        .word mr8_rom, mr8_rom, mr8_rom, mr8_rom  @ 0xc000
-        .word mr8_rom, mr8_rom, mr8_rom, mr8_rom  @ 0xe000
+        .global memr_table
+memr_table:
+        .word memr_ram,  memr_none, memr_via,  memr_none  @ 0x0000
+        .word memr_none, memr_none, memr_none, memr_none  @ 0x2000
+        .word memr_none, memr_none, memr_none, memr_none  @ 0x4000
+        .word memr_none, memr_none, memr_none, memr_none  @ 0x6000
+        .word memr_none, memr_none, memr_none, memr_none  @ 0x8000
+        .word memr_none, memr_none, memr_none, memr_none  @ 0xa000
+        .word memr_rom,  memr_rom,  memr_rom,  memr_rom   @ 0xc000
+        .word memr_rom,  memr_rom,  memr_rom,  memr_rom   @ 0xe000
 
 /*******************************************************************************
- * The mr8_table points to functions responsible for writing a certain
+ * memw_table points to functions responsible for writing data to a certain
  * memory location. Each 0x0800 = (1 << 11) = 2048 bytes block has one pointer,
  * so specialized functions and memory mirroring will be possible.
  *
  ******************************************************************************/
-        .global memwrite_table
-memwrite_table:
-    .word memwrite_ram,  memwrite_none, memwrite_via,  memwrite_none @ 0x0000
-    .word memwrite_none, memwrite_none, memwrite_none, memwrite_none @ 0x2000
-    .word memwrite_none, memwrite_none, memwrite_none, memwrite_none @ 0x4000
-    .word memwrite_none, memwrite_none, memwrite_none, memwrite_none @ 0x6000
-    .word memwrite_none, memwrite_none, memwrite_none, memwrite_none @ 0x8000
-    .word memwrite_none, memwrite_none, memwrite_none, memwrite_none @ 0xa000
-    .word memwrite_rom,  memwrite_rom,  memwrite_rom,  memwrite_rom  @ 0xc000
-    .word memwrite_rom,  memwrite_rom,  memwrite_rom,  memwrite_rom  @ 0xe000
+        .global memw_table
+memw_table:
+        .word memw_ram,  memw_none, memw_via,  memw_none  @ 0x0000
+        .word memw_none, memw_none, memw_none, memw_none  @ 0x2000
+        .word memw_none, memw_none, memw_none, memw_none  @ 0x4000
+        .word memw_none, memw_none, memw_none, memw_none  @ 0x6000
+        .word memw_none, memw_none, memw_none, memw_none  @ 0x8000
+        .word memw_none, memw_none, memw_none, memw_none  @ 0xa000
+        .word memw_none, memw_none, memw_none, memw_none  @ 0xc000
+        .word memw_none, memw_none, memw_none, memw_none  @ 0xe000
 
 /*******************************************************************************
  * Read a byte of emulated RAM pointed to by r0. Only the number of bits
@@ -64,7 +66,7 @@ memwrite_table:
  * Return address is taken from r14.
  *
  ******************************************************************************/
-mr8_ram:
+memr_ram:
         ldr r1, =c1541_ram
 
         @ shift away all forbidden bits
@@ -74,12 +76,28 @@ mr8_ram:
         ldrb r0, [r1, r0, lsr #(32 - mos6502_ramsize_shift)]
         mov pc, r14         @ return
 
-mr_none:
-mr_via:
-mrop_rom:
-mr8_rom:
-memwrite_ram:
-memwrite_none:
-memwrite_via:
-memwrite_rom:
+/*******************************************************************************
+ * Write the bits 0..7 from r1 to emulated RAM pointed to by r0.
+ * Only the number of bits needed to address mos6502_ramsize bytes are evaluated 
+ * here.
+ * This changes r0, r1 and r2.
+ *
+ * Return address is taken from r14.
+ *
+ ******************************************************************************/
+memw_ram:
+        ldr r2, =c1541_ram
+
+        @ shift away all forbidden bits
+        mov r0, r0, lsl #(32 - mos6502_ramsize_shift)
+
+        @ load the byte, shift back r0 to have the bits in the right positions
+        strb r1, [r2, r0, lsr #(32 - mos6502_ramsize_shift)]
+        mov pc, r14         @ return
+
+memr_none:
+memr_via:
+memr_rom:
+memw_none:
+memw_via:
         mov pc, r14

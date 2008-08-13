@@ -55,6 +55,12 @@ op_98: @ TYA
         update_nz               @ update 6502 flags N and Z
         op_end 1 2
 
+        .global op_9d
+op_9d: @ STA $FFFF,X
+        mov r1, m_a, lsr #24
+        memw_addr_mode_absx
+        op_end 3 5
+
         .global op_a0
 op_a0:  @ LDY #xx
         memr_pc_arg8
@@ -193,7 +199,6 @@ op_be: @ LDX $FFFF,Y
         update_nz               @ update 6502 flags N and Z
         op_end 3 4
 
-op_9d: @ STA $FFFF,X
 op_99: @ STA $FFFF,Y
 op_81: @ STA ($FF,X)
 op_91: @ STA ($FF),Y

@@ -257,9 +257,29 @@ mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
 /*******************************************************************************
  * 1. Read two bytes argument behind m_pc.
  * 2. Add X to this value, use only lower 16 bits of the result
- * 3. Then read the byte at this calculated address
- * This macros uses r2 which must point to the opcode in the native memory.
+ * 3. Write the byte from r1[7:0] to the address calculated above
+ * This macro uses r2 which must point to the opcode in the native memory.
  * One penalty cycle is added here if the page wraps.
+ * Return the result in r0.
+ * This also changes r1, r2 and lr.
+ *
+ ******************************************************************************/
+.macro  memw_addr_mode_absx
+        memr_pc_arg16
+
+        @ add X to address and remove overflow bit
+        add r0, r0, m_x, lsr #24
+        bic r0, r0, #(1 << 16)
+
+        @ now r0 contains the address, read a byte from there
+        memw_r1_to_r0
+.endm
+
+/*******************************************************************************
+ * 1. Read two bytes argument behind m_pc.
+ * 2. Add X to this value, use only lower 16 bits of the result
+ * 3. Then write the byte from r1 to this calculated address
+ * This macro uses r2 which must point to the opcode in the native memory.
  * Return the result in r0.
  * This also changes r1, r2 and lr.
  *

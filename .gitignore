@@ -1,0 +1,9 @@
+*.o
+*.a
+*.s
+*.armobj
+*~
+*.?#?
+obj-*
+*.kdev*
+Doxyfile

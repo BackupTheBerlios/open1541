@@ -144,6 +144,26 @@ mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
 .endm
 
 /*******************************************************************************
+ * 1. Read one byte argument behind m_pc.
+ * 2. Add Y to this value, use only lower 8 bits of the result
+ * 3. Then read the byte at this calculated address
+ * This macros uses r2 which must point to the opcode in the native memory.
+ * Return the result in r0.
+ * This also changes r1, r2 and lr.
+ *
+ ******************************************************************************/
+.macro  mr_addr_mode_zpy
+        mr_pc_arg8
+
+        @ now r0[0..7] contains the zp address, add it shifted to Y into r0[24..31]
+        add r0, m_y, r0, lsl #24
+
+        @ read a byte from there, shift back the address bits to 0..7
+        ldr r1, =c1541_ram
+        ldrb r0, [r1, r0, lsr #24]
+.endm
+
+/*******************************************************************************
  * 1. Read two bytes argument behind m_pc.
  * 2. Then read the byte pointed to by the byte read at step 1
  * This macros uses r2 which must point to the opcode in the native memory.

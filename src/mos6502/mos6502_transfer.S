@@ -98,10 +98,24 @@ op_aa: @ TAX
         update_nz               @ update 6502 flags N and Z
         op_end 1 2
 
+        .global op_ac
+op_ac: @ LDY $FFFF
+        mr_addr_mode_abs
+        movs m_y, r0, lsl #24   @ move to reg, update ARM flags
+        update_nz               @ update 6502 flags N and Z
+        op_end 3 4
+
         .global op_ad
 op_ad: @ LDA $FFFF
         mr_addr_mode_abs
         movs m_a, r0, lsl #24   @ move to reg, update ARM flags
+        update_nz               @ update 6502 flags N and Z
+        op_end 3 4
+
+        .global op_ae
+op_ae: @ LDX $FFFF
+        mr_addr_mode_abs
+        movs m_x, r0, lsl #24   @ move to reg, update ARM flags
         update_nz               @ update 6502 flags N and Z
         op_end 3 4
 
@@ -112,10 +126,24 @@ op_b1: @ LDA ($FF),Y
         update_nz               @ update 6502 flags N and Z
         op_end 2 5
 
+        .global op_b4
+op_b4: @ LDY $FF,X
+        mr_addr_mode_zpx
+        movs m_y, r0, lsl #24   @ move to reg, update ARM flags
+        update_nz               @ update 6502 flags N and Z
+        op_end 2 4
+
         .global op_b5
 op_b5: @ LDA $FF,X
         mr_addr_mode_zpx
         movs m_a, r0, lsl #24   @ move to reg, update ARM flags
+        update_nz               @ update 6502 flags N and Z
+        op_end 2 4
+
+        .global op_b6
+op_b6: @ LDX $FF,Y
+        mr_addr_mode_zpy
+        movs m_x, r0, lsl #24   @ move to reg, update ARM flags
         update_nz               @ update 6502 flags N and Z
         op_end 2 4
 
@@ -126,9 +154,23 @@ op_b9: @ LDA $FFFF,Y
         update_nz               @ update 6502 flags N and Z
         op_end 3 4
 
+        .global op_bc
+op_bc: @ LDY $FFFF,X
+        mr_addr_mode_absx       @ this increments m_t on page wraps
+        movs m_y, r0, lsl #24   @ move to reg, update ARM flags
+        update_nz               @ update 6502 flags N and Z
+        op_end 3 4
+
         .global op_bd
 op_bd: @ LDA $FFFF,X
         mr_addr_mode_absx       @ this increments m_t on page wraps
         movs m_a, r0, lsl #24   @ move to reg, update ARM flags
+        update_nz               @ update 6502 flags N and Z
+        op_end 3 4
+
+        .global op_be
+op_be: @ LDX $FFFF,Y
+        mr_addr_mode_absy       @ this increments m_t on page wraps
+        movs m_x, r0, lsl #24   @ move to reg, update ARM flags
         update_nz               @ update 6502 flags N and Z
         op_end 3 4

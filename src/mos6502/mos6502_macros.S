@@ -117,13 +117,13 @@ mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
  * This macros uses r2 which must point to the opcode in the native memory.
  * It reads *(pc + 1) | (*(pc + 2) << 8).
  *
- * r1 will be changed here.
+ * r2 will be changed here.
  *
  ******************************************************************************/
 .macro  memr_pc_arg16
         ldrb r0, [r2, #1]
-        ldrb r1, [r2, #2]
-        orr r0, r0, r1, lsl #8
+        ldrb r2, [r2, #2]
+        orr r0, r0, r2, lsl #8
 .endm
 
 /*******************************************************************************
@@ -155,10 +155,10 @@ mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
 .macro  memw_addr_mode_zp
         memr_pc_arg8
 
-        @ now r0 contains the zp address, read a byte from there
+        @ now r0 contains the zp address
         ldr r2, =c1541_ram
 
-        @ load the byte
+        @ store the byte
         strb r1, [r2, r0]
 .endm
 
@@ -180,6 +180,28 @@ mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
         @ read a byte from there, shift back the address bits to 0..7
         ldr r1, =c1541_ram
         ldrb r0, [r1, r0, lsr #24]
+.endm
+
+/*******************************************************************************
+ * 1. Read one byte argument behind m_pc.
+ * 2. Add X to this value, use only lower 8 bits of the result
+ * 3. Write the byte from r1[7:0] to the address calculated above
+ * This macros uses r2 which must point to the opcode in the native memory.
+ * Return the result in r0.
+ * This changes r2.
+ *
+ ******************************************************************************/
+.macro  memw_addr_mode_zpx
+        memr_pc_arg8
+
+        @ now r0[0..7] contains the zp address, add it shifted to X into r0[24..31]
+        add r0, m_x, r0, lsl #24
+
+        @ now r0 contains the zp address, read a byte from there
+        ldr r2, =c1541_ram
+
+        @ store the byte, shift back the address bits to 0..7
+        strb r1, [r2, r0, lsr #24]
 .endm
 
 /*******************************************************************************
@@ -215,6 +237,21 @@ mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
 
         @ now r0 contains the address, read a byte from there
         memr_r0
+.endm
+
+/*******************************************************************************
+ * 1. Read two bytes argument behind m_pc.
+ * 2. Then write r1 to the address read at step 1
+ * This macros uses r2 which must point to the opcode in the native memory.
+ * Return the result in r0.
+ * This also changes r1, r2 and lr.
+ *
+ ******************************************************************************/
+.macro  memw_addr_mode_abs
+        memr_pc_arg16
+
+        @ now r0 contains the address, write the byte from r1 to there
+        memw_r1_to_r0
 .endm
 
 /*******************************************************************************

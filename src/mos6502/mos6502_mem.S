@@ -80,7 +80,7 @@ memr_ram:
  * Write the bits 0..7 from r1 to emulated RAM pointed to by r0.
  * Only the number of bits needed to address mos6502_ramsize bytes are evaluated 
  * here.
- * This changes r0, r1 and r2.
+ * This changes r0 and r2.
  *
  * Return address is taken from r14.
  *
@@ -91,7 +91,7 @@ memw_ram:
         @ shift away all forbidden bits
         mov r0, r0, lsl #(32 - mos6502_ramsize_shift)
 
-        @ load the byte, shift back r0 to have the bits in the right positions
+        @ store the byte, shift back r0 to have the bits in the right positions
         strb r1, [r2, r0, lsr #(32 - mos6502_ramsize_shift)]
         mov pc, r14         @ return
 

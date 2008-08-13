@@ -37,6 +37,18 @@ op_8a: @ TXA
         update_nz               @ update 6502 flags N and Z
         op_end 1 2
 
+        .global op_8d
+op_8d: @ STA $FFFF
+        mov r1, m_a, lsr #24
+        memw_addr_mode_abs
+        op_end 3 4
+
+        .global op_95
+op_95: @ STA $FF,X
+        mov r1, m_a, lsr #24
+        memw_addr_mode_zpx
+        op_end 2 4
+
         .global op_98
 op_98: @ TYA
         movs m_a, m_y
@@ -181,9 +193,6 @@ op_be: @ LDX $FFFF,Y
         update_nz               @ update 6502 flags N and Z
         op_end 3 4
 
-
-op_95: @ STA $FF,X
-op_8d: @ STA $FFFF
 op_9d: @ STA $FFFF,X
 op_99: @ STA $FFFF,Y
 op_81: @ STA ($FF,X)

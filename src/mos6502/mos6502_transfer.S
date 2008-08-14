@@ -25,6 +25,12 @@
 #include <lpc213x.h>
 #include "mos6502_macros.S"
 
+        .global op_81
+op_81: @ STA ($FF,X)
+        mov m_data, m_a, lsr #24
+        memw_addr_mode_indx
+        op_end 2 6
+
         .global op_85
 op_85: @ STA $FF
         mov m_data, m_a, lsr #24
@@ -43,6 +49,12 @@ op_8d: @ STA $FFFF
         memw_addr_mode_abs
         op_end 3 4
 
+        .global op_91
+op_91: @ STA ($FF),Y
+        mov m_data, m_a, lsr #24
+        memw_addr_mode_indy
+        op_end 2 6
+
         .global op_95
 op_95: @ STA $FF,X
         mov m_data, m_a, lsr #24
@@ -54,6 +66,12 @@ op_98: @ TYA
         movs m_a, m_y
         update_nz
         op_end 1 2
+
+        .global op_99
+op_99: @ STA $FFFF,Y
+        mov m_data, m_a, lsr #24
+        memw_addr_mode_absy
+        op_end 3 5
 
         .global op_9d
 op_9d: @ STA $FFFF,X
@@ -199,7 +217,3 @@ op_be: @ LDX $FFFF,Y
         update_nz
         op_end 3 4
 
-op_99: @ STA $FFFF,Y
-op_81: @ STA ($FF,X)
-op_91: @ STA ($FF),Y
-        op_end 1 2

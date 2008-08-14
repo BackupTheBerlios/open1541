@@ -419,7 +419,32 @@ mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
 .endm
 
 /*******************************************************************************
- * Adressing mode (Indirect,X)
+ * Absolute,Y addressing mode (write)
+ * 1. Read two bytes argument behind m_pc.
+ * 2. Add Y to this value, use only lower 16 bits of the result
+ * 3. Write the byte from r1[7:0] to the address calculated above
+ *
+ * In:  m_addr  Points to the opcode in the native memory
+ *      m_data  The byte to be written
+ *
+ * Out: m_addr  Changed (!!!)
+ *      m_tmp   Changed
+ *      lr      Changed
+ *
+ ******************************************************************************/
+.macro  memw_addr_mode_absy
+        memr_pc_arg16
+
+        @ add Y to address and remove overflow bit
+        add m_addr, m_addr, m_y, lsr #24
+        bic m_addr, m_addr, #(1 << 16)
+
+        @ now m_addr contains the address, write the byte m_data to there
+        memw_data_to_addr
+.endm
+
+/*******************************************************************************
+ * (Indirect,X) adressing mode (read)
  * 1. Read one byte argument behind m_pc.
  * 2. Add X to this value, use only lower 8 bits of the result
  * 3. Then read two bytes at this calculated address, that's the address we need
@@ -435,10 +460,10 @@ mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
  ******************************************************************************/
 .macro  memr_addr_mode_indx
         @ read argument behind PC (zeropage address)
-        ldrb    m_addr, [m_addr, #1]
+        ldrb    m_tmp, [m_addr, #1]
 
-        @ now m_addr contains the zp address, add it to X into m_tmp[24..31]
-        add     m_tmp, m_x, m_addr, lsl #24
+        @ add it to X into m_tmp[31:24]
+        add     m_tmp, m_x, m_tmp, lsl #24
 
         @ load a byte from there, that's the low byte of the address
         ldr     m_addr, =c1541_ram
@@ -454,8 +479,43 @@ mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
 .endm
 
 /*******************************************************************************
- * Adressing mode (Indirect),Y
+ * (Indirect,X) adressing mode (write)
  * 1. Read one byte argument behind m_pc.
+ * 2. Add X to this value, use only lower 8 bits of the result
+ * 3. Then read two bytes at this calculated address, that's the address we need
+ * 4. Store m_data to there
+ *
+ * In:  m_addr  Points to the opcode in the native memory
+ *      m_data  Byte to be written
+ *
+ * Out: m_addr  Changed (!!!)
+ *      m_tmp   Changed
+ *      lr      Changed
+ *
+ ******************************************************************************/
+.macro  memw_addr_mode_indx
+        @ read argument behind PC (zeropage address)
+        ldrb    m_tmp, [m_addr, #1]
+
+        @ add it to X into m_tmp[31:24]
+        add     m_tmp, m_x, m_tmp, lsl #24
+
+        @ load a byte from there, that's the low byte of the address
+        ldr     lr, =c1541_ram
+        ldrb    m_addr, [lr, m_tmp, lsr #24]
+
+        @ the next one is the high byte, merge them into m_addr
+        add     m_tmp, m_tmp, #(1 << 24)
+        ldrb    m_tmp, [lr, m_tmp, lsr #24]
+        orr     m_addr, m_addr, m_tmp, lsl #8
+
+        @ now m_addr contains the address, write the byte m_data to there
+        memw_data_to_addr
+.endm
+
+/*******************************************************************************
+ * (Indirect),Y adressing mode (read)
+ * 1. Read one byte argument behind m_pc
  * 2. Read two bytes at this, that's the base address
  * 3. Add Y to this base address, use only lower 16 bits of the result
  * 4. Load the value from there
@@ -479,8 +539,9 @@ mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
         ldrb    m_data, [m_tmp, m_addr]
 
         @ the next one is the high byte, merge them into m_addr
-        add     m_tmp, m_tmp, #(1 << 24)
-        ldrb    m_tmp, [m_addr, m_tmp, lsr #24]
+        add     m_addr, m_addr, #1
+        and     m_addr, m_addr, #0xff
+        ldrb    m_tmp, [m_tmp, m_addr]
         orr     m_addr, m_data, m_tmp, lsl #8
 
         @ remember high-byte of address
@@ -498,6 +559,43 @@ mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
 
         @ now m_addr contains the address, read a byte from there
         memr_addr
+.endm
+
+/*******************************************************************************
+ * (Indirect),Y adressing mode (write)
+ * 1. Read one byte argument behind m_pc
+ * 2. Read two bytes at this, that's the base address
+ * 3. Add Y to this base address, use only lower 16 bits of the result
+ * 4. Store m_data to there
+ *
+ * In:  m_addr  Points to the opcode in the native memory
+ *      m_data  Byte to be written
+ *
+ * Out: m_addr  Changed (!!!)
+ *      m_tmp   Changed
+ *      lr      Changed
+ *
+ ******************************************************************************/
+.macro  memw_addr_mode_indy
+        @ read argument behind PC (zeropage address)
+        ldrb    m_tmp, [m_addr, #1]
+
+        @ load a byte from there, that's the low byte of the address
+        ldr     lr, =c1541_ram
+        ldrb    m_addr, [lr, m_tmp]
+
+        @ the next one is the high byte, merge them into m_addr
+        add     m_tmp, m_tmp, #1
+        and     m_tmp, m_tmp, #0xff
+        ldrb    m_tmp, [lr, m_tmp]
+        orr     m_addr, m_addr, m_tmp, lsl #8
+
+        @ add Y to it, use 16 bits only
+        add     m_addr, m_addr, m_y, lsr #24
+        bic     m_addr, m_addr, #(1 << 16)
+
+        @ now m_addr contains the address, write the byte m_data to there
+        memw_data_to_addr
 .endm
 
 /*******************************************************************************

@@ -31,9 +31,21 @@ op_81: @ STA ($FF,X)
         memw_addr_mode_indx
         op_end 2 6
 
+        .global op_84
+op_84: @ STY $FF
+        mov m_data, m_y, lsr #24
+        memw_addr_mode_zp
+        op_end 2 3
+
         .global op_85
 op_85: @ STA $FF
         mov m_data, m_a, lsr #24
+        memw_addr_mode_zp
+        op_end 2 3
+
+        .global op_86
+op_86: @ STX $FF
+        mov m_data, m_x, lsr #24
         memw_addr_mode_zp
         op_end 2 3
 
@@ -43,9 +55,21 @@ op_8a: @ TXA
         update_nz
         op_end 1 2
 
+        .global op_8c
+op_8c: @ STY $FFFF
+        mov m_data, m_y, lsr #24
+        memw_addr_mode_abs
+        op_end 3 4
+
         .global op_8d
 op_8d: @ STA $FFFF
         mov m_data, m_a, lsr #24
+        memw_addr_mode_abs
+        op_end 3 4
+
+        .global op_8e
+op_8e: @ STX $FFFF
+        mov m_data, m_x, lsr #24
         memw_addr_mode_abs
         op_end 3 4
 
@@ -55,9 +79,21 @@ op_91: @ STA ($FF),Y
         memw_addr_mode_indy
         op_end 2 6
 
+        .global op_94
+op_94: @ STY $FF,X
+        mov m_data, m_y, lsr #24
+        memw_addr_mode_zpx
+        op_end 2 4
+
         .global op_95
 op_95: @ STA $FF,X
         mov m_data, m_a, lsr #24
+        memw_addr_mode_zpx
+        op_end 2 4
+
+        .global op_96
+op_96: @ STX $FF,Y
+        mov m_data, m_x, lsr #24
         memw_addr_mode_zpx
         op_end 2 4
 

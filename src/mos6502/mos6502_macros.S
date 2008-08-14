@@ -15,6 +15,18 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+@ may be used as scratch register
+m_tmp   .req    r0
+
+@ contains the value we are currently working on
+@ may be also used as scratch register
+m_data  .req    r1
+
+@ contains the address we are currently working on, depending from the
+@ context this may be an client (emulated) or a host address
+@ may be also used as scratch register
+m_addr  .req    r2
+
 
 @ time [us] when the next instruction will start to be executed
 m_t     .req    r8
@@ -64,274 +76,346 @@ mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
 .endm
 
 /*******************************************************************************
- * Read the memory pointed to by r0. Return the result in r0.
- * This also changes r1, r2 and lr.
+ * Read the memory pointed to by m_addr (client address). Return the result
+ * in m_data.
+ *
+ * In:  m_addr      Client address to be read
+ *
+ * Out: m_data      The byte
+ *      m_tmp       Changed
+ *      lr          Changed
  *
  ******************************************************************************/
-.macro  memr_r0
-        ldr r2, =memr_table
+.macro  memr_addr
+        ldr m_data, =memr_table     @ m_data used as scratch reg
 
         @ each table entry points to 0x0800 bytes, use the higher bits
-        and r1, r0, #0xf800
+        and m_tmp, m_addr, #0xf800
+
+        @ prepare link register, will return 2 instructions behind this
+        mov lr, pc
+
+        @ call the right handler
+        ldr pc, [m_data, m_tmp, lsr #(11 - 2)]
+.endm
+
+/*******************************************************************************
+ * Write byte m_data to the client memory m_addr.
+ *
+ * In:  m_addr      Client address
+ *      m_data      The byte to be written
+ *
+ * Out:
+ *      m_addr      Changed (!!!)
+ *      m_tmp       Changed
+ *      lr          Changed
+ *
+ ******************************************************************************/
+.macro  memw_data_to_addr
+        ldr m_tmp, =memw_table
+
+        @ each table entry points to 0x0800 bytes, use the higher bits
+        add m_tmp, m_tmp, m_addr, lsr #(11 - 2)
+        bic m_tmp, m_tmp, #3
 
         @ prepare link register, will return 2 instructions behind this
         mov lr, pc
 
         @ jump to the right handler
-        ldr pc, [r2, r1, lsr #(11 - 2)]
+        ldr pc, [m_tmp]
 .endm
 
 /*******************************************************************************
- * Write the bits 0..7 from r1 to the location pointed to by r0.
- * This also changes r1, r2 and lr.
- *
- * This macro does not check for addresses higher than 0xffff.
- *
- ******************************************************************************/
-.macro  memw_r1_to_r0
-        ldr r2, =memw_table
-
-        @ each table entry points to 0x0800 bytes, use the higher bits
-        add r2, r2, r0, lsr #(11 - 2)
-        bic r2, r2, #3
-
-        @ prepare link register, will return 2 instructions behind this
-        mov lr, pc
-
-        @ jump to the right handler
-        ldr pc, [r2]
-.endm
-
-/*******************************************************************************
- * Read one byte argument behind m_pc. Return the result in r0.
- * This macros uses r2 which must point to the opcode in the native memory.
+ * Read one byte argument behind m_pc.
+ * This macros uses m_addr which must point to the opcode in the native memory.
  * It reads *(pc + 1)
+ *
+ * In:  m_addr  Points to native memory related to m_pc
+ *
+ * Out: m_data  The byte
  *
  ******************************************************************************/
 .macro  memr_pc_arg8
-        ldrb r0, [r2, #1]
+        ldrb    m_data, [m_addr, #1]
 .endm
 
 /*******************************************************************************
- * Read a two byte argument behind m_pc. Return the result in r0[0..15].
- * This macros uses r2 which must point to the opcode in the native memory.
+ * Read a two byte argument behind m_pc.
+ * This macros uses m_addr which must point to the opcode in the native memory.
  * It reads *(pc + 1) | (*(pc + 2) << 8).
  *
- * r2 will be changed here.
+ * In:  m_addr  Points to native memory related to m_pc
+ *
+ * Out: m_addr  Two bytes behind opcode (little endian [15:0] )
+ *      m_tmp   Changed
+ *
  *
  ******************************************************************************/
 .macro  memr_pc_arg16
-        ldrb r0, [r2, #1]
-        ldrb r2, [r2, #2]
-        orr r0, r0, r2, lsl #8
+        ldrb    m_tmp, [m_addr, #1]
+        ldrb    m_addr, [m_addr, #2]
+        orr     m_addr, m_tmp, m_addr, lsl #8
 .endm
 
 /*******************************************************************************
+ * Zero page addressing mode (read)
  * 1. Read one byte argument behind m_pc.
  * 2. Then read the byte pointed to by the byte read at step 1
- * This macros uses r2 which must point to the opcode in the native memory.
- * Return the result in r0.
- * This changes r2.
+ *
+ * In:  m_addr  Points to the opcode in the native memory
+ *
+ * Out: m_addr  Client address of the byte
+ *      m_data  The byte
+ *      m_tmp   Changed
  *
  ******************************************************************************/
 .macro  memr_addr_mode_zp
-        memr_pc_arg8
+        @ read argument behind PC (zeropage address)
+        ldrb    m_addr, [m_addr, #1]
 
-        @ now r0 contains the zp address, read a byte from there
-        ldr r2, =c1541_ram
-
-        @ load the byte
-        ldrb r0, [r2, r0]
+        @ now m_addr contains the zp address, read a byte from there
+        ldr     m_tmp, =c1541_ram
+        ldrb    m_data, [m_tmp, m_addr]
 .endm
 
 /*******************************************************************************
+ * Zero page addressing mode (write)
  * 1. Read one byte argument behind m_pc.
- * 2. Write the byte from r1[7:0] to the address read at step 1
- * This macros uses r2 which must point to the opcode in the native memory.
- * Return the result in r0.
- * This changes r2.
+ * 2. Write the byte from m_dataq[7:0] to the address read at step 1
+ *
+ * In:  m_addr  Points to the opcode in the native memory
+ *      m_data  Byte to be written
+ *
+ * Out: m_addr  Client address of the byte
+ *      m_tmp   Changed
  *
  ******************************************************************************/
 .macro  memw_addr_mode_zp
-        memr_pc_arg8
+        @ read argument behind PC (zeropage address)
+        ldrb    m_addr, [m_addr, #1]
 
-        @ now r0 contains the zp address
-        ldr r2, =c1541_ram
-
-        @ store the byte
-        strb r1, [r2, r0]
+        @ store data byte to that address into RAM
+        ldr     m_tmp, =c1541_ram
+        strb    m_data, [m_tmp, m_addr]
 .endm
 
 /*******************************************************************************
- * 1. Read one byte argument behind m_pc.
+ * Zeropage,X addressing mode (read)
+ * 1. Read one byte argument behind m_pc
  * 2. Add X to this value, use only lower 8 bits of the result
  * 3. Then read the byte at this calculated address
- * This macros uses r2 which must point to the opcode in the native memory.
- * Return the result in r0.
- * This also changes r1, r2 and lr.
+ *
+ * In:  m_addr  Points to the opcode in the native memory
+ *
+ * Out: m_addr  Client address of the addressed byte
+ *      m_data  Byte read from there
+ *      m_tmp   Changed
+ *      lr      Changed
  *
  ******************************************************************************/
 .macro  memr_addr_mode_zpx
-        memr_pc_arg8
+        @ read argument behind PC (zeropage address)
+        ldrb    m_addr, [m_addr, #1]
 
-        @ now r0[0..7] contains the zp address, add it shifted to X into r0[24..31]
-        add r0, m_x, r0, lsl #24
+        @ now m_addr contains the zp address, add it shifted to X into r0[31:24]
+        add     m_addr, m_x, m_addr, lsl #24
 
-        @ read a byte from there, shift back the address bits to 0..7
-        ldr r1, =c1541_ram
-        ldrb r0, [r1, r0, lsr #24]
+        @ correct the bit positions
+        mov     m_addr, m_addr, lsr #24
+
+        @ read m_data from there
+        ldr     m_tmp, =c1541_ram
+        ldrb    m_data, [m_tmp, m_addr]
 .endm
 
 /*******************************************************************************
- * 1. Read one byte argument behind m_pc.
+ * Zeropage,X addressing mode (write)
+ * 1. Read one byte argument behind m_pc
  * 2. Add X to this value, use only lower 8 bits of the result
- * 3. Write the byte from r1[7:0] to the address calculated above
- * This macros uses r2 which must point to the opcode in the native memory.
- * Return the result in r0.
- * This changes r2.
+ * 3. Write the byte from m_data to the address calculated above
+ *
+ * In:  m_addr  Points to the opcode in the native memory
+ *      m_data  Byte to be written
+ *
+ * Out: m_addr  Changed (!!!)
+ *      m_tmp   Changed
  *
  ******************************************************************************/
 .macro  memw_addr_mode_zpx
-        memr_pc_arg8
+        @ read argument behind PC (zeropage address)
+        ldrb    m_addr, [m_addr, #1]
 
-        @ now r0[0..7] contains the zp address, add it shifted to X into r0[24..31]
-        add r0, m_x, r0, lsl #24
+        @ now m_addr contains the zp address, add it shifted to X into m_addr[31:24]
+        add     m_addr, m_x, m_addr, lsl #24
 
-        @ now r0 contains the zp address, read a byte from there
-        ldr r2, =c1541_ram
-
-        @ store the byte, shift back the address bits to 0..7
-        strb r1, [r2, r0, lsr #24]
+        @ write m_data to there. correct the bit positions
+        ldr     m_tmp, =c1541_ram
+        strb    m_data, [m_tmp, m_addr, lsr #24]
 .endm
 
+
 /*******************************************************************************
- * 1. Read one byte argument behind m_pc.
+ * Zeropage,Y addressing mode (read)
+ * 1. Read one byte argument behind m_pc
  * 2. Add Y to this value, use only lower 8 bits of the result
  * 3. Then read the byte at this calculated address
- * This macros uses r2 which must point to the opcode in the native memory.
- * Return the result in r0.
- * This also changes r1, r2 and lr.
+ *
+ * In:  m_addr  Points to the opcode in the native memory
+ *
+ * Out: m_addr  Client address of the addressed byte
+ *      m_data  Byte read from there
+ *      m_tmp   Changed
+ *      lr      Changed
  *
  ******************************************************************************/
 .macro  memr_addr_mode_zpy
-        memr_pc_arg8
+        @ read argument behind PC (zeropage address)
+        ldrb    m_addr, [m_addr, #1]
 
-        @ now r0[0..7] contains the zp address, add it shifted to Y into r0[24..31]
-        add r0, m_y, r0, lsl #24
+        @ now m_addr contains the zp address, add it shifted to Y into r0[31:24]
+        add     m_addr, m_y, m_addr, lsl #24
 
-        @ read a byte from there, shift back the address bits to 0..7
-        ldr r1, =c1541_ram
-        ldrb r0, [r1, r0, lsr #24]
+        @ correct the bit positions
+        mov     m_addr, m_addr, lsr #24
+
+        @ read m_data from there
+        ldr     m_tmp, =c1541_ram
+        ldrb    m_data, [m_tmp, m_addr]
 .endm
 
 /*******************************************************************************
- * 1. Read two bytes argument behind m_pc.
- * 2. Then read the byte pointed to by the byte read at step 1
- * This macros uses r2 which must point to the opcode in the native memory.
- * Return the result in r0.
- * This also changes r1, r2 and lr.
+ * Absolute addressing mode (read)
+ * 1. Read two bytes argument behind m_pc
+ * 2. Read the byte pointed to by the byte read in step 1
+ *
+ * In:  m_addr  Points to the opcode in the native memory
+ *
+ * Out: m_addr  Client address of the byte
+ *      m_data  The byte
+ *      m_tmp   Changed
+ *      lr      Changed
  *
  ******************************************************************************/
 .macro  memr_addr_mode_abs
         memr_pc_arg16
 
-        @ now r0 contains the address, read a byte from there
-        memr_r0
+        @ now m_addr contains the address, read a byte from there
+        memr_addr
 .endm
 
 /*******************************************************************************
+ * Absolute addressing mode (write)
  * 1. Read two bytes argument behind m_pc.
- * 2. Then write r1 to the address read at step 1
- * This macros uses r2 which must point to the opcode in the native memory.
- * Return the result in r0.
- * This also changes r1, r2 and lr.
+ * 2. Write m_data to the address read in step 1
+ *
+ * In:  m_addr  Points to the opcode in the native memory
+ *      m_data  The byte to be written
+ *
+ * Out: m_addr  Changed (!!!)
+ *      m_tmp   Changed
+ *      lr      Changed
  *
  ******************************************************************************/
 .macro  memw_addr_mode_abs
         memr_pc_arg16
 
-        @ now r0 contains the address, write the byte from r1 to there
-        memw_r1_to_r0
+        @ now m_addr contains the address, write the byte m_data to there
+        memw_data_to_addr
 .endm
 
 /*******************************************************************************
+ * Absolute,X addressing mode (read)
+ * 1. Read two bytes argument behind m_pc.
+ * 2. Add X to this value, use only lower 16 bits of the result
+ * 3. Then read the byte at this calculated address
+ * One penalty cycle is added here if the page wraps.
+ *
+ * In:  m_addr  Points to the opcode in the native memory
+ *
+ * Out: m_addr  Client address of the byte
+ *      m_data  The byte
+ *      m_tmp   Changed
+ *      lr      Changed
+ *
+ ******************************************************************************/
+.macro  memr_addr_mode_absx
+        memr_pc_arg16
+
+        @ now m_addr[15:0] contains the address, remember the high-byte in m_data[7:0]
+        mov m_tmp, m_addr, lsr #8
+
+        @ add X to address and remove overflow bit
+        add m_addr, m_addr, m_x, lsr #24
+        bic m_addr, m_addr, #(1 << 16)
+
+        @ check if high-byte remained same
+        teq m_tmp, m_addr, lsr #8
+
+        @ if not, add one cycle
+        addne m_t, m_t, #1
+
+        @ now m_addr contains the address, read a byte from there
+        memr_addr
+.endm
+
+/*******************************************************************************
+ * Absolute,X addressing mode (write)
  * 1. Read two bytes argument behind m_pc.
  * 2. Add X to this value, use only lower 16 bits of the result
  * 3. Write the byte from r1[7:0] to the address calculated above
- * This macro uses r2 which must point to the opcode in the native memory.
- * One penalty cycle is added here if the page wraps.
- * Return the result in r0.
- * This also changes r1, r2 and lr.
+ *
+ * In:  m_addr  Points to the opcode in the native memory
+ *      m_data  The byte to be written
+ *
+ * Out: m_addr  Changed (!!!)
+ *      m_tmp   Changed
+ *      lr      Changed
  *
  ******************************************************************************/
 .macro  memw_addr_mode_absx
         memr_pc_arg16
 
         @ add X to address and remove overflow bit
-        add r0, r0, m_x, lsr #24
-        bic r0, r0, #(1 << 16)
+        add m_addr, m_addr, m_x, lsr #24
+        bic m_addr, m_addr, #(1 << 16)
 
-        @ now r0 contains the address, read a byte from there
-        memw_r1_to_r0
+        @ now m_addr contains the address, write the byte m_data to there
+        memw_data_to_addr
 .endm
 
 /*******************************************************************************
- * 1. Read two bytes argument behind m_pc.
- * 2. Add X to this value, use only lower 16 bits of the result
- * 3. Then write the byte from r1 to this calculated address
- * This macro uses r2 which must point to the opcode in the native memory.
- * Return the result in r0.
- * This also changes r1, r2 and lr.
- *
- ******************************************************************************/
-.macro  memr_addr_mode_absx
-        memr_pc_arg16
-
-        @ now r0[0..15] contains the address, remember the high-byte in r2[0..7]
-        mov r2, r0, lsr #8
-
-        @ add X to address and remove overflow bit
-        add r0, r0, m_x, lsr #24
-        bic r0, r0, #(1 << 16)
-
-        @ check if high-byte remained same
-        teq r2, r0, lsr #8
-
-        @ if not, add one cycle
-        addne m_t, m_t, #1
-
-        @ now r0 contains the address, read a byte from there
-        memr_r0
-.endm
-
-/*******************************************************************************
+ * Absolute,Y addressing mode (read)
  * 1. Read two bytes argument behind m_pc.
  * 2. Add Y to this value, use only lower 16 bits of the result
  * 3. Then read the byte at this calculated address
- * This macros uses r2 which must point to the opcode in the native memory.
  * One penalty cycle is added here if the page wraps.
- * Return the result in r0.
- * This also changes r1, r2 and lr.
+ *
+ * In:  m_addr  Points to the opcode in the native memory
+ *
+ * Out: m_addr  Client address of the byte
+ *      m_data  The byte
+ *      m_tmp   Changed
+ *      lr      Changed
  *
  ******************************************************************************/
 .macro  memr_addr_mode_absy
         memr_pc_arg16
 
-        @ now r0[0..15] contains the address, remember the high-byte in r2[0..7]
-        mov r2, r0, lsr #8
+        @ now m_addr[15:0] contains the address, remember the high-byte in m_data[7:0]
+        mov m_tmp, m_addr, lsr #8
 
         @ add Y to address and remove overflow bit
-        add r0, r0, m_y, lsr #24
-        bic r0, r0, #(1 << 16)
+        add m_addr, m_addr, m_y, lsr #24
+        bic m_addr, m_addr, #(1 << 16)
 
         @ check if high-byte remained same
-        teq r2, r0, lsr #8
+        teq m_tmp, m_addr, lsr #8
 
         @ if not, add one cycle
         addne m_t, m_t, #1
 
-        @ now r0 contains the address, read a byte from there
-        memr_r0
+        @ now m_addr contains the address, read a byte from there
+        memr_addr
 .endm
 
 /*******************************************************************************
@@ -340,73 +424,89 @@ mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
  * 2. Add X to this value, use only lower 8 bits of the result
  * 3. Then read two bytes at this calculated address, that's the address we need
  * 4. Load the value from there
- * Return the result in r0.
- * This also changes r1, r2 and lr.
+ *
+ * In:  m_addr  Points to the opcode in the native memory
+ *
+ * Out: m_addr  Client address of the addressed byte
+ *      m_data  Byte read from there
+ *      m_tmp   Changed
+ *      lr      Changed
  *
  ******************************************************************************/
 .macro  memr_addr_mode_indx
-        memr_pc_arg8
+        @ read argument behind PC (zeropage address)
+        ldrb    m_addr, [m_addr, #1]
 
-        @ now r0[0..7] contains the zp address, add it to X into r0[24..31]
-        add     r0, m_x, r0, lsl #24
+        @ now m_addr contains the zp address, add it to X into m_tmp[24..31]
+        add     m_tmp, m_x, m_addr, lsl #24
 
         @ load a byte from there, that's the low byte of the address
-        ldr     r2, =c1541_ram
-        ldrb    r1, [r2, r0, lsr #24]
+        ldr     m_addr, =c1541_ram
+        ldrb    m_data, [m_addr, m_tmp, lsr #24]
 
-        @ the next one is the high byte, merge them into r0
-        add     r0, r0, #(1 << 24)
-        ldrb    r0, [r2, r0, lsr #24]
-        orr     r0, r1, r0, lsl #8
+        @ the next one is the high byte, merge them into m_addr
+        add     m_tmp, m_tmp, #(1 << 24)
+        ldrb    m_tmp, [m_addr, m_tmp, lsr #24]
+        orr     m_addr, m_data, m_tmp, lsl #8
 
-        @ now r0 contains the address, read a byte from there
-        memr_r0
+        @ now m_addr contains the address, read a byte from there
+        memr_addr
 .endm
 
 /*******************************************************************************
  * Adressing mode (Indirect),Y
  * 1. Read one byte argument behind m_pc.
- * 2. Then read two bytes at this, that's the base address
+ * 2. Read two bytes at this, that's the base address
  * 3. Add Y to this base address, use only lower 16 bits of the result
  * 4. Load the value from there
  * One penalty cycle is added here if the page wraps.
- * Return the result in r0.
- * This also changes r1, r2 and lr.
+ *
+ * In:  m_addr  Points to the opcode in the native memory
+ *
+ * Out: m_addr  Client address of the addressed byte
+ *      m_data  Byte read from there
+ *      m_tmp   Changed
+ *      lr      Changed
  *
  ******************************************************************************/
 .macro  memr_addr_mode_indy
-        memr_pc_arg8
+        @ read argument behind PC (zeropage address)
+        ldrb    m_addr, [m_addr, #1]
 
-        @ now r0[0..7] contains the zp address
+        @ now m_addr contains the zp address
         @ load a byte from there, that's the low byte of the address
-        ldr     r2, =c1541_ram
-        ldrb    r1, [r2, r0]
+        ldr     m_tmp, =c1541_ram
+        ldrb    m_data, [m_tmp, m_addr]
 
-        @ the next one is the high byte, merge them into r0
-        add     r0, r0, #1
-        bic     r0, r0, #(1 << 8)
-        ldrb    r0, [r2, r0]
-        orr     r0, r1, r0, lsl #8
+        @ the next one is the high byte, merge them into m_addr
+        add     m_tmp, m_tmp, #(1 << 24)
+        ldrb    m_tmp, [m_addr, m_tmp, lsr #24]
+        orr     m_addr, m_data, m_tmp, lsl #8
 
         @ remember high-byte of address
-        mov     r2, r0, lsr #24
+        mov     m_data, m_addr, lsr #24
 
         @ add Y to it, use 16 bits only
-        add     r0, r0, m_y, lsr #24
-        bic     r0, r0, #(1 << 16)
+        add     m_addr, m_addr, m_y, lsr #24
+        bic     m_addr, m_addr, #(1 << 16)
 
         @ check if high-byte remained same
-        teq     r2, r0, lsr #8
+        teq     m_data, m_addr, lsr #8
 
         @ if not, add one cycle
         addne m_t, m_t, #1
 
-        @ now r0 contains the address, read a byte from there
-        memr_r0
+        @ now m_addr contains the address, read a byte from there
+        memr_addr
 .endm
 
 /*******************************************************************************
  * Increment PC by the given value.
+ *
+ * In:  m_pc    Current client PC
+ *      num     Number of bytes to add
+ *
+ * Out: m_pc    Increased by num
  ******************************************************************************/
 .macro inc_pc num
 .ifne \num
@@ -419,26 +519,38 @@ mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
 
 /*******************************************************************************
  * Set the CPU emulation timer to expire in 'time' microseconds.
+ * If the emulated CPU is in single step mode, the new time is calculated but
+ * not programmed to the hardware timer. The timer IRQ is Ack'd in any case.
+ *
+ * In:  m_t     Current client CPU time
+ *      time    Number of microseconds for current operation
+ *
+ * Out: m_t     Increased by 'time'
+ *      m_addr  Changed
+ *      m_tmp   changed
+ *
  ******************************************************************************/
 .macro inc_time time
         @ Ack timer 0 interrupt
-        mov r0, #TIR_MR0
-        mov r1,     #(T0IR & 0xffff0000)
-        orr r1, r1, #(T0IR & 0x0000ffff)
-        str r0, [r1]
+        mov     m_tmp, #TIR_MR0
+        mov     m_addr, #(T0IR & 0xffff0000)
+        orr     m_addr, m_addr, #(T0IR & 0x0000ffff)
+        str     m_tmp, [m_addr]
 
         @ Set next timer
-        add m_t, m_t, #\time
-        add r1, r1, #(T0MR0 - T0IR)
-        @ do not program the timer match register in single step mode
-        tst m_pc, #MOS6502_S
-        streq m_t, [r1]
+        add     m_t, m_t, #\time
+
+        @ Change address from T0IR to T0MR
+        add     m_addr, m_addr, #(T0MR0 - T0IR)
+
+        @ program the timer match register if not in single step mode
+        tst     m_pc, #MOS6502_S
+        streq   m_t, [m_addr]
 .endm
 
 /*******************************************************************************
- * Increment the PC by the given number,
- * Set the CPU emulation timer to expire in 'time' microseconds,
- * Return from FIQ
+ * Increment the PC by the given number, set the CPU emulation timer to expire
+ * in 'time' microseconds and return from FIQ
  ******************************************************************************/
 .macro op_end pc time
         inc_pc \pc
@@ -448,6 +560,8 @@ mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
 
 /*******************************************************************************
  * Update 6502 flags N and Z with flags from ARM
+ *
+ * Out: m_pc    Flags updated
  ******************************************************************************/
 .macro update_nz
         bic       m_pc, m_pc, #(MOS6502_N | MOS6502_Z)
@@ -457,25 +571,31 @@ mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
 
 /*******************************************************************************
  * Update 6502 flags NZC with flags from ARM
+ *
+ * Out: m_pc    Flags updated
+ *      m_tmp   Changed
  ******************************************************************************/
 .macro update_nzc
-        mrs r0, cpsr                @ get PSR into r0
+        mrs     m_tmp, cpsr         @ get PSR into m_tmp
 
         @ isolate flags from CPSR and put them into 6502 flags
-        and r0, r0, #(MOS6502_N | MOS6502_Z | MOS6502_C)
-        bic m_pc, m_pc, #(MOS6502_N | MOS6502_Z | MOS6502_C)
-        orr m_pc, m_pc, r0          @ copy flags to 6502
+        and     m_tmp, m_tmp, #(MOS6502_N | MOS6502_Z | MOS6502_C)
+        bic     m_pc, m_pc, #(MOS6502_N | MOS6502_Z | MOS6502_C)
+        orr     m_pc, m_pc, m_tmp   @ copy flags to 6502
 .endm
 
 /*******************************************************************************
  * Update 6502 flags NZCV with flags from ARM
+ *
+ * Out: m_pc    Flags updated
+ *      m_tmp   Changed
  ******************************************************************************/
 .macro update_nzcv
-        mrs r0, cpsr                @ get PSR into r0
+        mrs m_tmp, cpsr             @ get PSR into r0
 
         @ isolate flags from CPSR and put them into 6502 flags
-        and r0, r0, #(MOS6502_N | MOS6502_Z | MOS6502_C | MOS6502_V)
-        bic m_pc, m_pc, #(MOS6502_N | MOS6502_Z | MOS6502_C | MOS6502_V)
-        orr m_pc, m_pc, r0          @ copy flags to 6502
+        and     m_tmp, m_tmp, #(MOS6502_N | MOS6502_Z | MOS6502_C | MOS6502_V)
+        bic     m_pc, m_pc, #(MOS6502_N | MOS6502_Z | MOS6502_C | MOS6502_V)
+        orr     m_pc, m_pc, m_tmp   @ copy flags to 6502
 .endm
 

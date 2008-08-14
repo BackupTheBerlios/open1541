@@ -58,46 +58,54 @@ memw_table:
         .word memw_none, memw_none, memw_none, memw_none  @ 0xe000
 
 /*******************************************************************************
- * Read a byte of emulated RAM pointed to by r0. Only the number of bits
- * needed to address mos6502_ramsize bytes are evaluated here.
- * This also changes r1.
- * Return the byte in r0.
+ * Read RAM pointed to by m_addr (client address). Return the result
+ * in m_data. Only the number of bits needed to address mos6502_ramsize bytes
+ * are evaluated here.
  *
- * Return address is taken from r14.
+ * In:  m_addr      Client address to be read
+ *
+ * Out: m_data      The byte
+ *      m_tmp       Changed
+ *      lr          Changed
+ *
  *
  ******************************************************************************/
 memr_ram:
-        ldr r1, =c1541_ram
+        ldr m_tmp, =c1541_ram
 
-        @ shift away all forbidden bits
-        mov r0, r0, lsl #(32 - mos6502_ramsize_shift)
+        @ shift away all forbidden bits (m_data = scratch)
+        mov m_data, m_addr, lsl #(32 - mos6502_ramsize_shift)
 
         @ load the byte, shift back r0 to have the bits in the right positions
-        ldrb r0, [r1, r0, lsr #(32 - mos6502_ramsize_shift)]
+        ldrb m_data, [m_tmp, m_data, lsr #(32 - mos6502_ramsize_shift)]
         mov pc, r14         @ return
 
 /*******************************************************************************
- * Write the bits 0..7 from r1 to emulated RAM pointed to by r0.
- * Only the number of bits needed to address mos6502_ramsize bytes are evaluated 
- * here.
- * This changes r0 and r2.
+ * Write byte m_data to the client RAM m_addr.
  *
- * Return address is taken from r14.
+ * In:  m_addr      Client address
+ *      m_data      The byte to be written
+ *
+ * Out: m_addr      Changed (!!!)
+ *      m_tmp       Changed
  *
  ******************************************************************************/
 memw_ram:
-        ldr r2, =c1541_ram
+        ldr     m_tmp, =c1541_ram
 
         @ shift away all forbidden bits
-        mov r0, r0, lsl #(32 - mos6502_ramsize_shift)
+        mov     m_addr, m_addr, lsl #(32 - mos6502_ramsize_shift)
 
-        @ store the byte, shift back r0 to have the bits in the right positions
-        strb r1, [r2, r0, lsr #(32 - mos6502_ramsize_shift)]
-        mov pc, r14         @ return
+        @ store the byte, shift back the bits to original real position
+        strb    m_data, [m_tmp, m_addr, lsr #(32 - mos6502_ramsize_shift)] 
+        mov     pc, lr                  @ return
 
 memr_none:
 memr_via:
 memr_rom:
+        mov m_data, #0xff
+        mov pc, lr
+
 memw_none:
 memw_via:
-        mov pc, r14
+        mov pc, lr

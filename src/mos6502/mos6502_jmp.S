@@ -28,15 +28,15 @@
 @ Do a branch instruction the argument is fetched here,
 @ the timer is also updated here.
 .macro do_branch
-        memr_pc_arg8            @ get argument
-        inc_pc 2                @ advance the pc as usual
-        and r1, m_pc, #0xff00   @ remember page before branch
-        mov r0, r0, lsl #24     @ we use asr below to get a real signed value
-        add m_pc, m_pc, r0, asr #24 @ branch
+        memr_pc_arg8                @ get argument
+        inc_pc 2                    @ advance the pc as usual
+        and m_tmp, m_pc, #0xff00    @ remember page before branch
+        mov m_data, m_data, lsl #24 @ use asr below to get a real signed value
+        add m_pc, m_pc, m_data, asr #24 @ branch
 
-        and r0, m_pc, #0xff00   @ get page after branch
-        cmp r0, r1
-        addne m_t, m_t, #1      @ use an extra cycle for page crossing
+        and m_data, m_pc, #0xff00   @ get page after branch
+        cmp m_data, m_tmp
+        addne m_t, m_t, #1          @ extra cycle for page crossing
         op_end 0 3
 .endm
 
@@ -94,7 +94,7 @@ op_f0:  @ BEQ
         .global op_4c
 op_4c:  @ JMP abs
         memr_pc_arg16
-        mov m_pc, m_pc, lsr #16     @ remove old PC
-        add m_pc, r0, m_pc, lsl #16 @ set new PC
+        mov m_pc, m_pc, lsr #16         @ remove old PC
+        add m_pc, m_addr, m_pc, lsl #16 @ set new PC
         op_end 0 3
 

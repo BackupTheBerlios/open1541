@@ -28,25 +28,26 @@
  ******************************************************************************/
         stmfd sp!, {r0 - r2, lr}
 
-        adr r2, direct_read_addresses
+        @ let m_addr point to the table with pointers to readable mem locations
+        adr     m_addr, direct_read_addresses
 
         @ each table entry points to 0x0800 bytes, use the higher bits
-        and r1, m_pc, #0xf800
+        and     m_tmp, m_pc, #0xf800
 
-        @ read pointer to native memory at m_pc to r2
-        ldr r2, [r2, r1, lsr #(11 - 2)]
+        @ read pointer to native memory at m_pc to m_addr
+        ldr     m_addr, [m_addr, m_tmp, lsr #(11 - 2)]
 
-        @ put lower 11 bits of m_pc into higher part of r1
-        mov r1, m_pc, lsl #(32 - 11)
+        @ put lower 11 bits of m_pc into higher part of m_tmp
+        mov     m_tmp, m_pc, lsl #(32 - 11)
 
-        @ remember converted pc in r2 for reading args later
-        add     r2, r1, lsr#(32 - 11)
+        @ remember converted pc in m_addr for reading args later
+        add     m_addr, m_addr, m_tmp, lsr #(32 - 11)
 
         @ read opcode
-        ldrb    r0, [r2]
+        ldrb    m_tmp, [m_addr]
 
         @ jump to the opcode address
-        ldr pc, [pc, r0, lsl #2]
+        ldr pc, [pc, m_tmp, lsl #2]
 
         nop
 

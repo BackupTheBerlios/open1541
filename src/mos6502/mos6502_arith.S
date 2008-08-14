@@ -25,22 +25,22 @@
 #include <lpc213x.h>
 #include "mos6502_macros.S"
 
-@ Do an ADC, the argument is in r0[0-7]
+@ Do an ADC, the argument is in m_data[7:0]
 .macro do_adc
-        movs    r1, m_pc, lsl #3    @ set ARM C from 6502 C
-                                    @ prepare summand if CS:
-        mvncs   r1, #0xff000000     @   set bits 0-23 so ARM C gets helpful
-        orrcs   r1, r1, r0, lsl #24 @   put summand into 24-31
-                                    @ else prepare summand if CC:
-        movcc   r1, r0, lsl #24     @   put summand into 24-31
-        adcs    m_a, m_a, r1        @ perform ADC and set ARM flags
+        movs    m_tmp, m_pc, lsl #3     @ set ARM C from 6502 C
+                                        @ if CS: prepare summand
+        mvncs   m_tmp, #0xff000000      @     set bits 0-23 so ARM C will work
+        orrcs   m_tmp, m_tmp, m_data, lsl #24 @ put summand into 24-31
+                                        @ else prepare summand if CC:
+        movcc   m_tmp, m_data, lsl #24  @     put summand into 24-31
+        adcs    m_a, m_a, m_tmp         @ perform ADC and set ARM flags
         update_nzcv
 .endm
 
-@ Do an SBC, the argument is in r0[0-7]
+@ Do an SBC, the argument is in m_data[7:0]
 .macro do_sbc
-        movs    r1, m_pc, lsl #3    @ set ARM C from 6502 C
-        sbcs    m_a, m_a, r0, lsl #24
+        movs    m_tmp, m_pc, lsl #3     @ set ARM C from 6502 C
+        sbcs    m_a, m_a, m_data, lsl #24
 
         @ clear unused bits (may be 1 because of C)
         ands    m_a, m_a, #(0xff << 24)

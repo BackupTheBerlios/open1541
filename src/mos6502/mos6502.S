@@ -30,13 +30,16 @@
  * Registers r8..r12 (m_t, m_a, m_x, m_y, m_pc) contain the current emulation
  * state as described in mos6502_macros.S.
  *
- * m_t contains the time when the instruction starts to be executed.
+ * m_t
+ *      contains the time when the instruction starts to be executed.
  *
- * r2  points to the native memory corresponding to the emulated PC. So it
- *     points to the byte behind the current opcode. This will be used by the
- *     macros me memr_pc_arg8 or me memr_pc_arg16
+ * m_addr
+ *      points to the host memory corresponding to the client PC. So it
+ *      points to the current opcode. This will be used by the
+ *      macros memr_pc_arg8 or me memr_pc_arg16
  *
- * r0 to r2 can be used as scratch registers and don't need to be restored
+ * m_data, m_addr and m_tmp can be used as scratch registers and don't need to
+ * be restored
  *
  */
 
@@ -136,7 +139,10 @@ mos6502_read_mem:
         msr     cpsr_c, #MODE_FIQ | PSR_I | PSR_F
 
         @ read memory and return
-        memr_r0
+        mov     m_addr, r0
+        memr_addr
+        mov     r0, m_data
+
         b       exit_fiq_mode
 
 /*******************************************************************************

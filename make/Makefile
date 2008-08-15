@@ -17,7 +17,9 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-ifeq ($(MAKECMDGOALS),simulate)
+skyeye_goals := $(filter $(MAKECMDGOALS), simulate debug)
+
+ifneq (x$(skyeye_goals), x)
 platform     ?= skyeye
 else
 platform     ?= lpc2134
@@ -115,15 +117,14 @@ world: $(objdir)/open1541.hex
 $(objdir)/open1541: $(obj)
 	$(LD) $(LDFLAGS) -o $@ $(obj) $(extra_obj)
 
-.PHONY: simulate
-simulate: $(objdir)/open1541
+.PHONY: debug
+debug: $(objdir)/open1541
 	$(SHELL) -c "$(INSIGHT) $(objdir)/open1541 & \
 		skyeye -c $(scriptdir)/skyeye.conf -e $(objdir)/open1541 -d"
 
-# UART doesn't work in this mode?
-#.PHONY: run
-#run: $(objdir)/open1541
-#	skyeye -c $(scriptdir)/skyeye.conf -e $(objdir)/open1541
+.PHONY: simulate
+simulate: $(objdir)/open1541
+	skyeye -c $(scriptdir)/skyeye.conf -e $(objdir)/open1541
 
 .PHONY: flash
 flash: $(lpcflash) $(objdir)/open1541.hex

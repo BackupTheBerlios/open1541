@@ -55,15 +55,18 @@ Change to directory "make" and call:
 
 > make simulate -s
 
-This builds the skyeye configuration of the software, starts skyeye in the
-current terminal window and starts the Insight debugger.
-
-In Insight you must first invoke Run=>Connect to target. Choose GDBServer/TCP,
-127.0.0.1 port 12345. Then you can click continue to get the stuff running.
+This builds the skyeye configuration of the software and starts skyeye in the
+current terminal window.
 
 In the terminal window you should be able to access the UART interface of the
 emulated device.
 
+> make debug -s
+
+This does the same and starts the Insight debugger additionally.
+
+In Insight you must first invoke Run=>Connect to target. Choose GDBServer/TCP,
+127.0.0.1 port 12345. Then you can click continue to get the stuff running.
 
 Bring in on hardware
 ====================

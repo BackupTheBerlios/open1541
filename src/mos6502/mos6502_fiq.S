@@ -77,18 +77,18 @@
         .word op_a8, op_a9, op_aa, op_xx, op_ac, op_ad, op_ae, op_xx
         .word op_b0, op_b1, op_xx, op_xx, op_b4, op_b5, op_b6, op_xx @ b
         .word op_b8, op_b9, op_xx, op_xx, op_bc, op_bd, op_be, op_xx
-        .word op_c0, op_c1, op_xx, op_xx, op_c4, op_c5, op_xx, op_xx @ c
-        .word op_c8, op_c9, op_ca, op_xx, op_cc, op_cd, op_xx, op_xx
-        .word op_d0, op_d1, op_xx, op_xx, op_xx, op_d5, op_xx, op_xx @ d
-        .word op_d8, op_d9, op_xx, op_xx, op_xx, op_dd, op_xx, op_xx
-        .word op_e0, op_e1, op_xx, op_xx, op_e4, op_e5, op_xx, op_xx @ e
-        .word op_e8, op_e9, op_ea, op_xx, op_ec, op_ed, op_xx, op_xx
-        .word op_f0, op_f1, op_xx, op_xx, op_xx, op_f5, op_xx, op_xx @ f
-        .word op_f8, op_f9, op_xx, op_xx, op_xx, op_fd, op_xx, op_xx
+        .word op_c0, op_c1, op_xx, op_xx, op_c4, op_c5, op_c6, op_xx @ c
+        .word op_c8, op_c9, op_ca, op_xx, op_cc, op_cd, op_ce, op_xx
+        .word op_d0, op_d1, op_xx, op_xx, op_xx, op_d5, op_d6, op_xx @ d
+        .word op_d8, op_d9, op_xx, op_xx, op_xx, op_dd, op_de, op_xx
+        .word op_e0, op_e1, op_xx, op_xx, op_e4, op_e5, op_e6, op_xx @ e
+        .word op_e8, op_e9, op_ea, op_xx, op_ec, op_ed, op_ee, op_xx
+        .word op_f0, op_f1, op_xx, op_xx, op_xx, op_f5, op_f6, op_xx @ f
+        .word op_f8, op_f9, op_xx, op_xx, op_xx, op_fd, op_fe, op_xx
 
 /*******************************************************************************
- * This table points to memory areas for reading instructions from emulated 
- * memory directly. It is located in this module to keep its address close to 0, 
+ * This table points to memory areas for reading instructions from emulated
+ * memory directly. It is located in this module to keep its address close to 0,
  * so we can use ADR to get its address relatively to PC.
  *
  * This table is not used to read data, see mos6502_mem.S instead.

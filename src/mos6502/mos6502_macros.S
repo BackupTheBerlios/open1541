@@ -359,6 +359,31 @@ mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
 .endm
 
 /*******************************************************************************
+ * Absolute,X addressing mode (read), w/o penalty cycle
+ * 1. Read two bytes argument behind m_pc.
+ * 2. Add X to this value, use only lower 16 bits of the result
+ * 3. Then read the byte at this calculated address
+ *
+ * In:  m_addr  Points to the opcode in the native memory
+ *
+ * Out: m_addr  Client address of the byte
+ *      m_data  The byte
+ *      m_tmp   Changed
+ *      lr      Changed
+ *
+ ******************************************************************************/
+.macro  memr_addr_mode_absx0
+        memr_pc_arg16
+
+        @ add X to address and remove overflow bit
+        add m_addr, m_addr, m_x, lsr #24
+        bic m_addr, m_addr, #(1 << 16)
+
+        @ now m_addr contains the address, read a byte from there
+        memr_addr
+.endm
+
+/*******************************************************************************
  * Absolute,X addressing mode (write)
  * 1. Read two bytes argument behind m_pc.
  * 2. Add X to this value, use only lower 16 bits of the result
@@ -596,6 +621,24 @@ mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
 
         @ now m_addr contains the address, write the byte m_data to there
         memw_data_to_addr
+.endm
+
+/*******************************************************************************
+ * Write a byte to zero page
+ *
+ * 1. Read one byte argument behind m_pc.
+ * 2. Write the byte from m_dataq[7:0] to the address read at step 1
+ *
+ * In:  m_addr  Client address of the addressed byte, must be < 0x100
+ *      m_data  Byte to be written
+ *
+ * Out: m_tmp   Changed
+ *
+ ******************************************************************************/
+.macro  memw_zp
+        @ store data byte to that address into RAM
+        ldr     m_tmp, =c1541_ram
+        strb    m_data, [m_tmp, m_addr]
 .endm
 
 /*******************************************************************************

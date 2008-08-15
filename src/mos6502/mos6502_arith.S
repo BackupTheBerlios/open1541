@@ -47,6 +47,23 @@
         update_nzcv
 .endm
 
+@ Do a DEC on m_data[7:0]
+.macro do_dec
+        mov m_data, m_data, lsl #24
+        subs m_data, m_data, #(1 << 24) @ dec, update ARM flags
+        mov m_data, m_data, lsr #24
+        update_nz
+.endm
+
+@ Do an INC on m_data[7:0]
+.macro do_inc
+        mov m_data, m_data, lsl #24
+        adds m_data, m_data, #(1 << 24) @ inc, update ARM flags
+        mov m_data, m_data, lsr #24
+        update_nz
+.endm
+
+
         .global op_61
 op_61: @ ADC ($FF,X)
         memr_addr_mode_indx
@@ -101,6 +118,13 @@ op_88: @ DEY
         update_nz               @ update 6502 flags N and Z
         op_end 1 2
 
+        .global op_c6
+op_c6: @ DEC $FF
+        memr_addr_mode_zp
+        do_dec
+        memw_zp
+        op_end 2 5
+
         .global op_c8
 op_c8:  @ INY
         adds m_y, m_y, #(1<<24) @ inc Y, update ARM flags
@@ -112,6 +136,27 @@ op_ca: @ DEX
         subs m_x, m_x, #(1<<24) @ dec X, update ARM flags
         update_nz               @ update 6502 flags N and Z
         op_end 1 2
+
+        .global op_ce
+op_ce: @ DEC $FFFF
+        memr_addr_mode_abs
+        do_dec
+        memw_data_to_addr
+        op_end 3 6
+
+        .global op_d6
+op_d6: @ DEC $FF,X
+        memr_addr_mode_zpx
+        do_dec
+        memw_zp
+        op_end 2 6
+
+        .global op_de
+op_de: @ DEC $FFFF,X
+        memr_addr_mode_absx0    @ no extra cycles on page wraps
+        do_dec
+        memw_data_to_addr
+        op_end 3 7
 
         .global op_e1
 op_e1: @ SBC ($FF,X)
@@ -131,6 +176,13 @@ op_e5: @ SBC $FF
         do_sbc
         op_end 2 3
 
+        .global op_e6
+op_e6: @ INC $FF
+        memr_addr_mode_zp
+        do_inc
+        memw_zp
+        op_end 2 5
+
         .global op_e9
 op_e9: @ SBC #$FF
         memr_pc_arg8
@@ -142,6 +194,13 @@ op_ed: @ SBC $FFFF
         memr_addr_mode_abs
         do_sbc
         op_end 3 4
+
+        .global op_ee
+op_ee: @ INC $FFFF
+        memr_addr_mode_abs
+        do_inc
+        memw_data_to_addr
+        op_end 3 6
 
         .global op_f1
 op_f1: @ SBC ($FF),Y
@@ -155,6 +214,13 @@ op_f5: @ SBC $FF,X
         do_sbc
         op_end 2 4
 
+        .global op_f6
+op_f6: @ INC $FF,X
+        memr_addr_mode_zpx
+        do_inc
+        memw_zp
+        op_end 2 6
+
         .global op_f9
 op_f9: @ SBC $FFFF,Y
         memr_addr_mode_absy     @ this increments m_t on page wraps
@@ -167,3 +233,9 @@ op_fd: @ SBC $FFFF,X
         do_sbc
         op_end 3 4
 
+        .global op_fe
+op_fe: @ INC $FFFF,X
+        memr_addr_mode_absx0    @ no extra cycles on page wraps
+        do_inc
+        memw_data_to_addr
+        op_end 3 7

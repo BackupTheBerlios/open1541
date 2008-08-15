@@ -70,14 +70,6 @@ op_1e: @ ASL $FFFF,X
 op_24: @ BIT $FF
 op_2c: @ BIT $FFFF
 op_00: @ BRK
-op_c6: @ DEC $FF
-op_d6: @ DEC $FF,X
-op_ce: @ DEC $FFFF
-op_de: @ DEC $FFFF,X
-op_e6: @ INC $FF
-op_f6: @ INC $FF,X
-op_ee: @ INC $FFFF
-op_fe: @ INC $FFFF,X
 op_6c: @ JMP ($FFFF)
 op_20: @ JSR $FFFF
 op_4a: @ LSR A

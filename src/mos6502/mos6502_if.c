@@ -71,3 +71,28 @@ void mos6502_dump_regs(void)
     uart_putcrlf();
 }
 
+/*******************************************************************************
+ * Print a hexdump of client memory to UART.
+ *
+ ******************************************************************************/
+void mos6502_dump_mem(uint16_t start, uint16_t stop)
+{
+    unsigned llen;
+
+    /* exclude "stop" from output */
+    while (start < stop)
+    {
+        llen = 16;
+        uart_puthex_padded(4, start);
+        uart_puts(": ");
+        while (llen-- && start < stop)
+        {
+            uart_puthex_padded(2, mos6502_read_mem(start));
+            uart_putc(' ');
+            if ((llen & 3) == 0)
+                uart_putc(' ');
+            start++;
+        }
+        uart_putcrlf();
+    }
+}

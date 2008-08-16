@@ -18,7 +18,14 @@
 #ifndef UTIL_H
 #define UTIL_H
 
+#include <stdint.h>
+
+/* from util-ll.S */
 uint32_t util_benchmark();
 void udelay(uint32_t us);
+
+/* from util.c */
+int util_hdigit2i(int ch);
+const char* util_parse_hex(const char* params, unsigned* v);
 
 #endif

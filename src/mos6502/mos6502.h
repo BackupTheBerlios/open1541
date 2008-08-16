@@ -36,6 +36,7 @@ uint16_t mos6502_get_pc(void);
 void mos6502_stop(void);
 void mos6502_step(void);
 void mos6502_continue(void);
+void mos6502_dump_mem(uint16_t start, uint16_t stop);
 
 /* from mos6502.S */
 void mos6502_reg_init(void);

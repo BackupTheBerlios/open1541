@@ -84,6 +84,7 @@ obj += $(objdir)/startup.o
 obj += $(objdir)/uart.o
 obj += $(objdir)/timer.o
 obj += $(objdir)/util-ll.o
+obj += $(objdir)/util.o
 obj += $(objdir)/cli.o
 obj += $(objdir)/c1541/c1541.o
 obj += $(objdir)/mos6502/mos6502.o

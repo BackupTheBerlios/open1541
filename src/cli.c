@@ -29,6 +29,7 @@ static void cli_reset_buffers(void);
 static void cli_show_line(void);
 static void cli_process_line(void);
 static void cli_help(void);
+static void cli_memdump(const char *params);
 
 // These constants are used to mark special commands
 #define VK_UP        0x100
@@ -339,6 +340,10 @@ static void cli_process_line(void)
     {
         mos6502_continue();
     }
+    else if (strncmp(command_line, "m ", 2) == 0)
+    {
+        cli_memdump(command_line + 2);
+    }
     else if (strcmp(command_line, "speed") == 0)
     {
         uart_putdec(util_benchmark());
@@ -360,11 +365,40 @@ static void cli_process_line(void)
  ******************************************************************************/
 static void cli_help(void)
 {
-    uart_puts("stop\tStop 6502 emulation\r\n"
-              "step|z\tExecute single instruction\r\n"
-              "regs|r\tShow 6502 registers\r\n"
-              "cont\tContinue 6502 emulation\r\n"
-              "speed\tStart a benchmark\r\n"
-              "help\tHelp\r\n"
-              "<F1>\tRepeat last command\r\n");
+    uart_puts("stop\t\tStop 6502 emulation\r\n"
+              "step|z\t\tExecute single instruction\r\n"
+              "regs|r\t\tShow 6502 registers\r\n"
+              "cont\t\tContinue 6502 emulation\r\n"
+              "m <a> <b>\tDump emulated memory from a to b-1\r\n"
+              "speed\t\tStart a benchmark\r\n"
+              "help\t\tHelp\r\n"
+              "<F1>\t\tRepeat last command\r\n");
+}
+
+/*******************************************************************************
+ * Parse a "m" command line and execute a memory dump.
+ *
+ ******************************************************************************/
+static void cli_memdump(const char *params)
+{
+    unsigned start;
+    unsigned stop;
+
+    params = util_parse_hex(params, &start);
+    if (!params)
+        goto syntax_error;
+
+    params = util_parse_hex(params, &stop);
+    if (!params)
+        goto syntax_error;
+
+    /* "stop" is excluded from output */
+    if (start >= 0x10000 || stop > 0x10000)
+        goto syntax_error;
+
+    mos6502_dump_mem(start, stop);
+    return;
+
+syntax_error:
+    uart_puts("?SYNTAX  ERROR\r\n");
 }

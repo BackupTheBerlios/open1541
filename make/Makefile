@@ -94,6 +94,7 @@ obj += $(objdir)/mos6502/mos6502_jmp.o
 obj += $(objdir)/mos6502/mos6502_transfer.o
 obj += $(objdir)/mos6502/mos6502_arith.o
 obj += $(objdir)/mos6502/mos6502_logic.o
+obj += $(objdir)/mos6502/mos6502_stack.o
 obj += $(objdir)/mos6502/mos6502_mem.o
 obj += $(objdir)/mos6502/mos6502_if.o
 obj += $(objdir)/mos6502/mos6502_dis.o

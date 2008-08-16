@@ -52,6 +52,14 @@
 
 #include "mos6502_macros.S"
 
+        .bss
+
+        .global mo6502_data
+mo6502_data:
+
+        .global mos6502_sp
+mos6502_sp:
+.word   0
 
         .code 32
         .text
@@ -80,6 +88,12 @@ mos6502_reg_init:
         mov     m_a, #0
         mov     m_x, #0
         mov     m_y, #0
+
+        @ initialize SP
+        @ todo: Use the new offset idea to access this
+        ldr     r1, =mos6502_sp
+        mov     r0, #0xff
+        strb    r0, [r1]
 
         @ todo: Read start address from reset vector
         mov     m_pc, #0

@@ -1,6 +1,4 @@
 /*
- * open1541.c - The main program
- *
  * (c) 2008 Thomas Giesel <skoe@directbox.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -17,33 +15,28 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include <stdint.h>
-#include <string.h>
-#include <mos6502.h>
+#include <lpc213x.h>
+#include "mos6502_macros.S"
 
-uint8_t c1541_ram[2048];
+        .global op_48
+op_48: @ PHA
+        mov     m_data, m_a, lsr #24
 
-/*******************************************************************************
- * Initialize the C1541 emulation.
- *
- ******************************************************************************/
-void c1541_init(void)
-{
-    uint8_t* p;
+        @ Get SP
+        @ todo: Use the new offset idea to access this
+        ldr     m_tmp, =mos6502_sp
+        ldrb    m_tmp, [m_tmp]
 
-    //memset(c1541_ram, 0xea, sizeof(c1541_ram));
-    p = c1541_ram;
+        @ PUSH
+        ldr     m_addr, =(c1541_ram + 0x100)
+        strb    m_data, [m_addr, m_tmp]
 
-    *p++ = 0xa9;    // LDA #$81
-    *p++ = 0x81;
+        @ dec SP, we'll only store one byte so it wraps automatically
+        sub     m_tmp, m_tmp, #1
 
-    *p++ = 0x48;    // PHA
-    *p++ = 0x48;    // PHA
-    *p++ = 0x48;    // PHA
+        @ write SP
+        @ todo: Use the new offset idea to access this
+        ldr     m_addr, =mos6502_sp
+        strb    m_tmp, [m_addr]
 
-    *p++ = 0x4c;    // JMP $0005
-    *p++ = 0x05;
-    *p++ = 0x00;
-
-    mos6502_reset();
-}
+        op_end 1 3

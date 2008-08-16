@@ -53,22 +53,22 @@
 
         @ the opcode jump table is directly behind our current ARM-PC so we can
         @ use PC + opcode to find the right entry
-        .word op_xx, op_01, op_xx, op_xx, op_xx, op_05, op_xx, op_xx @ 0
-        .word op_xx, op_09, op_0a, op_xx, op_xx, op_0d, op_xx, op_xx
-        .word op_10, op_11, op_xx, op_xx, op_xx, op_15, op_xx, op_xx @ 1
-        .word op_18, op_19, op_xx, op_xx, op_xx, op_1d, op_xx, op_xx
-        .word op_xx, op_21, op_xx, op_xx, op_xx, op_25, op_xx, op_xx @ 2
-        .word op_xx, op_29, op_xx, op_xx, op_xx, op_2d, op_xx, op_xx
-        .word op_30, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx, op_xx @ 3
-        .word op_38, op_xx, op_xx, op_xx, op_xx, op_3d, op_xx, op_xx
-        .word op_xx, op_41, op_xx, op_xx, op_xx, op_45, op_xx, op_xx @ 4
-        .word op_xx, op_49, op_xx, op_xx, op_4c, op_4d, op_xx, op_xx
-        .word op_50, op_51, op_xx, op_xx, op_xx, op_55, op_xx, op_xx @ 5
-        .word op_58, op_59, op_xx, op_xx, op_xx, op_5d, op_xx, op_xx
-        .word op_xx, op_61, op_xx, op_xx, op_xx, op_65, op_xx, op_xx @ 6
-        .word op_xx, op_69, op_xx, op_xx, op_xx, op_6d, op_xx, op_xx
-        .word op_70, op_71, op_xx, op_xx, op_xx, op_75, op_xx, op_xx @ 7
-        .word op_78, op_79, op_xx, op_xx, op_xx, op_7d, op_xx, op_xx
+        .word op_xx, op_01, op_xx, op_xx, op_xx, op_05, op_06, op_xx @ 0
+        .word op_xx, op_09, op_0a, op_xx, op_xx, op_0d, op_0e, op_xx
+        .word op_10, op_11, op_xx, op_xx, op_xx, op_15, op_16, op_xx @ 1
+        .word op_18, op_19, op_xx, op_xx, op_xx, op_1d, op_1e, op_xx
+        .word op_xx, op_21, op_xx, op_xx, op_xx, op_25, op_26, op_xx @ 2
+        .word op_xx, op_29, op_2a, op_xx, op_xx, op_2d, op_2e, op_xx
+        .word op_30, op_xx, op_xx, op_xx, op_xx, op_xx, op_36, op_xx @ 3
+        .word op_38, op_xx, op_xx, op_xx, op_xx, op_3d, op_3e, op_xx
+        .word op_xx, op_41, op_xx, op_xx, op_xx, op_45, op_46, op_xx @ 4
+        .word op_xx, op_49, op_4a, op_xx, op_4c, op_4d, op_4e, op_xx
+        .word op_50, op_51, op_xx, op_xx, op_xx, op_55, op_56, op_xx @ 5
+        .word op_58, op_59, op_xx, op_xx, op_xx, op_5d, op_5e, op_xx
+        .word op_xx, op_61, op_xx, op_xx, op_xx, op_65, op_66, op_xx @ 6
+        .word op_xx, op_69, op_6a, op_xx, op_xx, op_6d, op_6e, op_xx
+        .word op_70, op_71, op_xx, op_xx, op_xx, op_75, op_76, op_xx @ 7
+        .word op_78, op_79, op_xx, op_xx, op_xx, op_7d, op_7e, op_xx
         .word op_xx, op_81, op_xx, op_xx, op_84, op_85, op_86, op_xx @ 8
         .word op_88, op_xx, op_8a, op_xx, op_8c, op_8d, op_8e, op_xx
         .word op_90, op_91, op_xx, op_xx, op_94, op_95, op_96, op_xx @ 9

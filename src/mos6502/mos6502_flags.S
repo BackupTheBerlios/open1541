@@ -63,34 +63,15 @@ op_f8:  @ SED
 
         .global op_xx
 
-op_06: @ ASL $FF
-op_16: @ ASL $FF,X
-op_0e: @ ASL $FFFF
-op_1e: @ ASL $FFFF,X
 op_24: @ BIT $FF
 op_2c: @ BIT $FFFF
 op_00: @ BRK
 op_6c: @ JMP ($FFFF)
 op_20: @ JSR $FFFF
-op_4a: @ LSR A
-op_46: @ LSR $FF
-op_56: @ LSR $FF,X
-op_4e: @ LSR $FFFF
-op_5e: @ LSR $FFFF,X
 op_48: @ PHA
 op_08: @ PHP
 op_68: @ PLA
 op_28: @ PLP
-op_2a: @ ROL A
-op_26: @ ROL $FF
-op_36: @ ROL $FF,X
-op_2e: @ ROL $FFFF
-op_3e: @ ROL $FFFF,X
-op_6a: @ ROR A
-op_66: @ ROR $FF
-op_76: @ ROR $FF,X
-op_6e: @ ROR $FFFF
-op_7e: @ ROR $FFFF,X
 op_40: @ RTI
 op_60: @ RTS
 op_ba: @ TSX

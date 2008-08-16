@@ -23,7 +23,11 @@
  * Known limitations:
  * - Multibyte instructions at the end of memory are not executed correctly,
  *   the PC doesn't wrap around to $0000 in the middle of an instruction.
- * - Decimal mode not implemented yet
+ *
+ * Todo:
+ * - Check if we can afford more registers to get more speed like PocketNES
+ *   does
+ * - Implement BCD mode
  *
  * Implementing opcodes:
  * On entry:

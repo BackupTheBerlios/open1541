@@ -47,15 +47,19 @@ void c1541_init(void)
     *p++ = 0x00;
 // code:
 
-    *p++ = 0xa2;    // LDX #$01
-    *p++ = 0x01;
+    *p++ = 0xa9;    // LDA #$81
+    *p++ = 0x81;
 
-    *p++ = 0xde;    // DEC $0002,X
-    *p++ = 0x02;
-    *p++ = 0x00;
-
-    *p++ = 0xa5;    // LDA $03
-    *p++ = 0x03;
+    *p++ = 0x6a;    // ROR A
+    *p++ = 0x6a;    // ROR A
+    *p++ = 0x6a;    // ROR A
+    *p++ = 0x6a;    // ROR A
+    *p++ = 0x6a;    // ROR A
+    *p++ = 0x6a;    // ROR A
+    *p++ = 0x6a;    // ROR A
+    *p++ = 0x6a;    // ROR A
+    *p++ = 0x6a;    // ROR A
+    *p++ = 0x6a;    // ROR A
 
     *p++ = 0x4c;    // JMP $0000
     *p++ = 0x00;

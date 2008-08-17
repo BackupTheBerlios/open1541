@@ -22,10 +22,32 @@
 #include <lpc213x.h>
 #include "mos6502_macros.S"
 
+.macro do_bit
+        bic     m_pc, m_pc, #(MOS6502_N | MOS6502_Z | MOS6502_V)
+        tst     m_data, #(1 << 6)
+        orrne   m_pc, m_pc, #MOS6502_V
+        tst     m_data, #(1 << 7)
+        orrne   m_pc, m_pc, #MOS6502_N
+        ands    m_tmp, m_a, m_data, lsl #24
+        orreq   m_pc, m_pc, #MOS6502_Z
+.endm
+
         .global op_18
 op_18:  @ CLC
         bic m_pc, #MOS6502_C
         op_end 1 2
+
+        .global op_24
+op_24: @ BIT $FF
+        memr_addr_mode_zp
+        do_bit
+        op_end 2 3
+
+        .global op_2c
+op_2c: @ BIT $FFFF
+        memr_addr_mode_abs
+        do_bit
+        op_end 3 4
 
         .global op_38
 op_38:  @ SEC
@@ -61,10 +83,8 @@ op_f8:  @ SED
         orr m_pc, m_pc, #MOS6502_D
         op_end 1 2
 
-        .global op_xx
 
-op_24: @ BIT $FF
-op_2c: @ BIT $FFFF
+        .global op_xx
 op_00: @ BRK
 op_6c: @ JMP ($FFFF)
 op_20: @ JSR $FFFF

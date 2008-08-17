@@ -68,13 +68,8 @@ op_2c: @ BIT $FFFF
 op_00: @ BRK
 op_6c: @ JMP ($FFFF)
 op_20: @ JSR $FFFF
-op_08: @ PHP
-op_68: @ PLA
-op_28: @ PLP
 op_40: @ RTI
 op_60: @ RTS
-op_ba: @ TSX
-op_9a: @ TXS
 
 op_xx:
         op_end 1 2

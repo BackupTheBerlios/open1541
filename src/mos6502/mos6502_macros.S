@@ -44,7 +44,7 @@ m_y     .req    r11
 @ NZCF are kept in the same order and at the same position as in ARM,
 @ so they simply can be copied.
 @ The bits are:
-@ NZCV0000 DI0000Sx PPPPPPPP PPPPPPPP
+@ NZCVDI00 000000Sx PPPPPPPP PPPPPPPP
 @ P = pc
 @ x = kept for overflow, don't use
 @ 0 = reserved
@@ -57,10 +57,10 @@ MOS6502_N   = (1 << 31) @ must be same as in ARM
 MOS6502_Z   = (1 << 30) @ must be same as in ARM
 MOS6502_C   = (1 << 29) @ must be same as in ARM
 MOS6502_V   = (1 << 28) @ must be same as in ARM
-MOS6502_D   = (1 << 23)
-MOS6502_I   = (1 << 22)
+MOS6502_D   = (1 << 27)
+MOS6502_I   = (1 << 26)
 
-MOS6502_S   = (1 << 23)
+MOS6502_S   = (1 << 17)
 
 @ our device has 2 kByte of RAM
 mos6502_ramsize_shift =   11

@@ -87,8 +87,6 @@ op_f8:  @ SED
         .global op_xx
 op_00: @ BRK
 op_6c: @ JMP ($FFFF)
-op_40: @ RTI
-op_60: @ RTS
 
 op_xx:
         op_end 1 2

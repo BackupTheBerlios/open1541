@@ -31,20 +31,32 @@ void c1541_init(void)
 {
     uint8_t* p;
 
-    //memset(c1541_ram, 0xea, sizeof(c1541_ram));
     p = c1541_ram;
 
-    *p++ = 0xa9;    // LDA #$81
-    *p++ = 0x0f;
+    *p++ = 0xa9;    // LDA #$00 = ret high
+    *p++ = 0x00;
 
     *p++ = 0x48;    // PHA
 
-    *p++ = 0xa2;    // LDX #$01
-    *p++ = 0x01;
+    *p++ = 0xa9;    // LDA #$0C = ret low
+    *p++ = 0x0C;
 
-    *p++ = 0x20;    // JSR $0000
+    *p++ = 0x48;    // PHA
+
+    *p++ = 0xa9;    // LDA #$80 = flags
+    *p++ = 0x80;
+
+    *p++ = 0x48;    // PHA
+
+    *p++ = 0x4c;    // JMP $000F (fake IRQ)
+    *p++ = 0x0F;
+    *p++ = 0x00;
+// $000C:
+    *p++ = 0x4c;    // JMP $0000
     *p++ = 0x00;
     *p++ = 0x00;
+// $000F:
+    *p++ = 0x40;    // RTI
 
     mos6502_reset();
 }

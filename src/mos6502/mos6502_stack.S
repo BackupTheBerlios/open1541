@@ -38,6 +38,7 @@ op_08: @ PHP
         strb    m_tmp, [lr]
         op_end 1 3
 
+
         .global op_20
 op_20: @ JSR $FFFF
         memr_pc_arg16
@@ -73,6 +74,7 @@ op_20: @ JSR $FFFF
         add     m_pc, m_addr, m_pc, lsl #16 @ set new PC
         op_end 0 6
 
+
         .global op_28
 op_28: @ PLP
         @ get SP
@@ -94,6 +96,47 @@ op_28: @ PLP
         strb    m_tmp, [lr]
         op_end 1 4
 
+
+        .global op_40
+op_40: @ RTI
+        @ get SP
+        ldr     lr, =mos6502_sp
+        ldrb    m_tmp, [lr]
+
+        @ remove old PC and flags
+        and     m_pc, m_pc, #MOS6502_PC_EMU_MASK
+
+        @ inc SP, wrap it
+        add     m_tmp, m_tmp, #1
+        and     m_tmp, m_tmp, #0xff
+
+        @ PULL flags
+        ldr     m_addr, =(c1541_ram + 0x100)
+        ldrb    m_data, [m_addr, m_tmp]
+        orr     m_pc, m_pc, m_data, lsl #24
+
+        @ inc SP, wrap it
+        add     m_tmp, m_tmp, #1
+        and     m_tmp, m_tmp, #0xff
+
+        @ PULL low byte
+        ldr     m_addr, =(c1541_ram + 0x100)
+        ldrb    m_data, [m_addr, m_tmp]
+        orr     m_pc, m_pc, m_data
+
+        @ inc SP, wrap it
+        add     m_tmp, m_tmp, #1
+        and     m_tmp, m_tmp, #0xff
+
+        @ PULL high byte
+        ldrb    m_data, [m_addr, m_tmp]
+        orr     m_pc, m_pc, m_data, lsl #8
+
+        @ save SP
+        strb    m_tmp, [lr]
+        op_end 0 6
+
+
         .global op_48
 op_48: @ PHA
         mov     m_data, m_a, lsr #24
@@ -112,6 +155,38 @@ op_48: @ PHA
         @ save SP
         strb    m_tmp, [lr]
         op_end 1 3
+
+
+        .global op_60
+op_60: @ RTS
+        @ get SP
+        ldr     lr, =mos6502_sp
+        ldrb    m_tmp, [lr]
+
+        @ remove old PC by shifting it away
+        mov     m_pc, m_pc, lsr #16
+
+        @ inc SP, wrap it
+        add     m_tmp, m_tmp, #1
+        and     m_tmp, m_tmp, #0xff
+
+        @ PULL low byte, shift PC back
+        ldr     m_addr, =(c1541_ram + 0x100)
+        ldrb    m_data, [m_addr, m_tmp]
+        orr     m_pc, m_data, m_pc, lsl #16 @ set new PC (low)
+
+        @ inc SP, wrap it
+        add     m_tmp, m_tmp, #1
+        and     m_tmp, m_tmp, #0xff
+
+        @ PULL high byte
+        ldrb    m_data, [m_addr, m_tmp]
+        orr     m_pc, m_pc, m_data, lsl #8
+
+        @ save SP
+        strb    m_tmp, [lr]
+        op_end 1 6
+
 
         .global op_68
 op_68: @ PLA
@@ -134,6 +209,7 @@ op_68: @ PLA
         update_nz
         op_end 1 4
 
+
         .global op_ba
 op_ba: @ TSX
         @ get SP
@@ -142,6 +218,7 @@ op_ba: @ TSX
         movs    m_x, m_x, lsl #24
         update_nz
         op_end 1 2
+
 
         .global op_9a
 op_9a: @ TXS

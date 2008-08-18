@@ -27,6 +27,8 @@
  * Todo:
  * - Check if we can afford more registers to get more speed like PocketNES
  *   does
+ * - Check if we can put at least X and Y into one ARM register to get one
+ *   banked register free
  * - Implement BCD mode
  *
  * Implementing opcodes:

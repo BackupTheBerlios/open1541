@@ -62,6 +62,9 @@ MOS6502_I   = (1 << 26)
 
 MOS6502_S   = (1 << 17)
 
+@ This mask leaves only bits used by the emulation
+MOS6502_PC_EMU_MASK = 0x00ff0000
+
 @ our device has 2 kByte of RAM
 mos6502_ramsize_shift =   11
 mos6502_ramsize       =   (1 << mos6502_ramsize_shift)

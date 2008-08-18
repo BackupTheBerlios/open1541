@@ -41,17 +41,15 @@ op_08: @ PHP
         .global op_20
 op_20: @ JSR $FFFF
         memr_pc_arg16
-        @ remove flags from PC
-        bic     m_data, m_pc,   #(0xff << 24)
-        bic     m_data, m_data, #(0xff << 16)
-        @ decrement PC
-        sub     m_data, m_data, #1
 
         @ get SP
         ldr     lr, =mos6502_sp
         ldrb    m_tmp, [lr]
 
-        @ PUSH low byte
+        @ PUSH high byte
+        @ PC still points to this JSR, on stack there must be (next - 1), so + 2
+        add     m_data, m_pc, #2
+        mov     m_data, m_data, lsr #8
         ldr     lr, =(c1541_ram + 0x100)
         strb    m_data, [lr, m_tmp]
 
@@ -59,9 +57,9 @@ op_20: @ JSR $FFFF
         sub     m_tmp, m_tmp, #1
         and     m_tmp, m_tmp, #0xff
 
-        @ PUSH high byte
-        mov     m_data, m_data, lsr #8
-        ldr     lr, =(c1541_ram + 0x100)
+        @ PUSH low byte
+        @ PC still points to this JSR, on stack there must be (next - 1), so + 2
+        add     m_data, m_pc, #2            @ OPTIMIZE ME
         strb    m_data, [lr, m_tmp]
 
         @ dec SP, we'll only store one byte so it wraps automatically

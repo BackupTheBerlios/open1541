@@ -57,7 +57,7 @@
         .word op_08, op_09, op_0a, op_xx, op_xx, op_0d, op_0e, op_xx
         .word op_10, op_11, op_xx, op_xx, op_xx, op_15, op_16, op_xx @ 1
         .word op_18, op_19, op_xx, op_xx, op_xx, op_1d, op_1e, op_xx
-        .word op_xx, op_21, op_xx, op_xx, op_24, op_25, op_26, op_xx @ 2
+        .word op_20, op_21, op_xx, op_xx, op_24, op_25, op_26, op_xx @ 2
         .word op_28, op_29, op_2a, op_xx, op_2c, op_2d, op_2e, op_xx
         .word op_30, op_xx, op_xx, op_xx, op_xx, op_xx, op_36, op_xx @ 3
         .word op_38, op_xx, op_xx, op_xx, op_xx, op_3d, op_3e, op_xx

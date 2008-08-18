@@ -38,6 +38,43 @@ op_08: @ PHP
         strb    m_tmp, [lr]
         op_end 1 3
 
+        .global op_20
+op_20: @ JSR $FFFF
+        memr_pc_arg16
+        @ remove flags from PC
+        bic     m_data, m_pc,   #(0xff << 24)
+        bic     m_data, m_data, #(0xff << 16)
+        @ decrement PC
+        sub     m_data, m_data, #1
+
+        @ get SP
+        ldr     lr, =mos6502_sp
+        ldrb    m_tmp, [lr]
+
+        @ PUSH low byte
+        ldr     lr, =(c1541_ram + 0x100)
+        strb    m_data, [lr, m_tmp]
+
+        @ dec SP
+        sub     m_tmp, m_tmp, #1
+        and     m_tmp, m_tmp, #0xff
+
+        @ PUSH high byte
+        mov     m_data, m_data, lsr #8
+        ldr     lr, =(c1541_ram + 0x100)
+        strb    m_data, [lr, m_tmp]
+
+        @ dec SP, we'll only store one byte so it wraps automatically
+        sub     m_tmp, m_tmp, #1
+
+        @ save SP
+        ldr     lr, =mos6502_sp
+        strb    m_tmp, [lr]
+
+        mov     m_pc, m_pc, lsr #16         @ remove old PC
+        add     m_pc, m_addr, m_pc, lsl #16 @ set new PC
+        op_end 0 6
+
         .global op_28
 op_28: @ PLP
         @ get SP

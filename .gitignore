@@ -2,6 +2,7 @@
 *.a
 *.s
 *.armobj
+*.bin
 *~
 *.?#?
 obj-*

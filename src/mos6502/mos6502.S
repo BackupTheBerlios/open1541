@@ -67,24 +67,20 @@ mos6502_sp:
         .text
 
 /*******************************************************************************
- *
+ * Initialize all registers, load the PC with the reset vector. Put the 
+ * processor into single step mode.
  * Must be called from system mode (not from FIQ mode).
  *
  ******************************************************************************/
         .global mos6502_reg_init
 mos6502_reg_init:
+        push    {r4, lr}
+
         @ remember old processor and interrupt state
-        mrs     r3, cpsr
+        mrs     r4, cpsr
 
         @ disable IRQs so we won't be disturbed, goto FIQ mode
         msr     cpsr_c, #MODE_FIQ | PSR_I | PSR_F
-
-        @ set time to start exec in 1 ms
-        ldr     r1, =T0TC
-        ldr     m_t, [r1]
-        add     m_t, m_t, #1024
-        ldr     r1, =T0MR0
-        str     m_t, [r1]
 
         @ set all regs to 0
         mov     m_a, #0
@@ -93,14 +89,26 @@ mos6502_reg_init:
 
         @ initialize SP
         @ todo: Use the new offset idea to access this
-        ldr     r1, =mos6502_sp
-        mov     r0, #0xff
-        strb    r0, [r1]
+        ldr     m_addr, =mos6502_sp
+        mov     m_data, #0xff
+        strb    m_data, [m_addr]
 
-        @ todo: Read start address from reset vector
-        mov     m_pc, #0
+        @ Read start address from reset vector
+        mov     m_addr, #0xff00
+        add     m_addr, m_addr, #0xfc
+        memr_addr
+        mov     m_pc, m_data
+        add     m_addr, m_addr, #1
+        memr_addr
+        add     m_pc, m_data, lsl #8
 
-        b       exit_fiq_mode
+        @ set single step mode
+        orr     m_pc, m_pc, #MOS6502_S
+
+        pop     {lr}
+        @ restore old processor and interrupt state, return
+        msr     cpsr_c, r4
+        mov     pc, lr
 
 /*******************************************************************************
  * Copy the processor regs into mos6502_regs_t pointed to by r0.
@@ -142,6 +150,25 @@ mos6502_get_pc:
         @ copy PC to R0, shift away unused bits
         mov     r0, m_pc, lsl #16
         mov     r0, r0, lsr #16
+
+        b       exit_fiq_mode
+
+/*******************************************************************************
+ * Return a value != 0 if the client machine is stopped, i.e. in single step 
+ * mode.
+ * Must be called from system mode (not from FIQ mode).
+ *
+ ******************************************************************************/
+        .global mos6502_is_stopped
+mos6502_is_stopped:
+        @ remember old processor and interrupt state
+        mrs     r3, cpsr
+
+        @ disable IRQs so we won't be disturbed, goto FIQ mode
+        msr     cpsr_c, #MODE_FIQ | PSR_I | PSR_F
+
+        @ copy PC to R0, shift away unused bits
+        and     r0, m_pc, #MOS6502_S
 
         b       exit_fiq_mode
 
@@ -224,13 +251,13 @@ step_wait:
         mov     pc, lr
 
 /*******************************************************************************
- * Continue from single step mode. If the emulation is not in single step mode
- * this function does nothing.
+ * Start execution or continue from single step mode. If the emulation is not 
+ * stopped this function does nothing.
  * Must be called from system mode (not from FIQ mode).
  *
  ******************************************************************************/
-        .global mos6502_continue
-mos6502_continue:
+        .global mos6502_run
+mos6502_run:
         @ remember old processor and interrupt state
         mrs r3, cpsr
 

@@ -91,7 +91,7 @@ void uart_putcrlf()
  * Print the given string to UART.
  *
  ******************************************************************************/
-void uart_puts(char* text)
+void uart_puts(const char* text)
 {
     char ch;
 
@@ -99,6 +99,18 @@ void uart_puts(char* text)
     {
         uart_putc(ch);
     }
+}
+
+/*******************************************************************************
+ * Print a C64 style error message containing the given reason:
+ * ?<reason> ERROR<\r><\n>
+ *
+ ******************************************************************************/
+void uart_puterror(const char* reason)
+{
+    uart_putc('?');
+    uart_puts(reason);
+    uart_puts(" ERROR\r\n");
 }
 
 /*******************************************************************************

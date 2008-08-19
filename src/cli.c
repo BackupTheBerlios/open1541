@@ -30,6 +30,7 @@ static void cli_show_line(void);
 static void cli_process_line(void);
 static void cli_help(void);
 static void cli_memdump(const char *params);
+static void cli_step(void);
 
 // These constants are used to mark special commands
 #define VK_UP        0x100
@@ -311,8 +312,6 @@ static void cli_show_line(void)
  ******************************************************************************/
 static void cli_process_line(void)
 {
-    uint16_t pc;
-
     uart_putcrlf();
     if (!command_line[0])
         return;
@@ -326,10 +325,7 @@ static void cli_process_line(void)
     else if ((strcmp(command_line, "step") == 0) ||
         (strcmp(command_line, "z") == 0))
     {
-        mos6502_step();
-        mos6502_dump_regs();
-        pc = mos6502_get_pc();
-        mos6502_dis(pc, pc);
+        cli_step();
     }
     else if ((strcmp(command_line, "regs") == 0) ||
              (strcmp(command_line, "r") == 0))
@@ -338,7 +334,11 @@ static void cli_process_line(void)
     }
     else if (strcmp(command_line, "cont") == 0)
     {
-        mos6502_continue();
+        mos6502_run();
+    }
+    else if (strcmp(command_line, "reset") == 0)
+    {
+        mos6502_reset();
     }
     else if (strncmp(command_line, "m ", 2) == 0)
     {
@@ -355,7 +355,7 @@ static void cli_process_line(void)
     }
     else
     {
-        uart_puts("?SYNTAX  ERROR\r\n");
+        uart_puterror("SYNTAX");
     }
 }
 
@@ -369,6 +369,7 @@ static void cli_help(void)
               "step|z\t\tExecute single instruction\r\n"
               "regs|r\t\tShow 6502 registers\r\n"
               "cont\t\tContinue 6502 emulation\r\n"
+              "reset\t\tReset 6502, keep single step mode if set\r\n"
               "m <a> <b>\tDump emulated memory from a to b-1\r\n"
               "speed\t\tStart a benchmark\r\n"
               "help\t\tHelp\r\n"
@@ -400,5 +401,26 @@ static void cli_memdump(const char *params)
     return;
 
 syntax_error:
-    uart_puts("?SYNTAX  ERROR\r\n");
+    uart_puterror("SYNTAX");
+}
+
+/*******************************************************************************
+ * If the client is stopped, execute a signle instruction and show the
+ * registers and disassembly afterwards.
+ * Print an error message otherwise.
+ *
+ ******************************************************************************/
+static void cli_step(void)
+{
+    uint16_t pc;
+
+    if (mos6502_is_stopped())
+    {
+        mos6502_step();
+        mos6502_dump_regs();
+        pc = mos6502_get_pc();
+        mos6502_dis(pc, pc);
+    }
+    else
+        uart_puterror("STEP");
 }

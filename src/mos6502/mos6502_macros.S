@@ -69,6 +69,10 @@ MOS6502_PC_EMU_MASK = 0x00ff0000
 mos6502_ramsize_shift =   11
 mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
 
+@ our device has 16 kByte of ROM
+mos6502_romsize_shift =   14
+mos6502_romsize       =   (1 << mos6502_ramsize_shift)
+
 /*******************************************************************************
  * Load r0-r2 and lr from stack and return from FIQ.
  *

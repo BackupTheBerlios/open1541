@@ -66,7 +66,6 @@ memw_table:
  *
  * Out: m_data      The byte
  *      m_tmp       Changed
- *      lr          Changed
  *
  *
  ******************************************************************************/
@@ -78,7 +77,29 @@ memr_ram:
 
         @ load the byte, shift back r0 to have the bits in the right positions
         ldrb m_data, [m_tmp, m_data, lsr #(32 - mos6502_ramsize_shift)]
-        mov pc, r14         @ return
+        mov pc, lr          @ return
+
+/*******************************************************************************
+ * Read ROM pointed to by m_addr (client address). Return the result
+ * in m_data. Only the number of bits needed to address mos6502_romsize bytes
+ * are evaluated here.
+ *
+ * In:  m_addr      Client address to be read
+ *
+ * Out: m_data      The byte
+ *      m_tmp       Changed
+ *
+ *
+ ******************************************************************************/
+memr_rom:
+        ldr m_tmp, =dos1541
+
+        @ shift away all forbidden bits (m_data = scratch)
+        mov m_data, m_addr, lsl #(32 - mos6502_romsize_shift)
+
+        @ load the byte, shift back r0 to have the bits in the right positions
+        ldrb m_data, [m_tmp, m_data, lsr #(32 - mos6502_romsize_shift)]
+        mov pc, lr          @ return
 
 /*******************************************************************************
  * Write byte m_data to the client RAM m_addr.
@@ -102,7 +123,6 @@ memw_ram:
 
 memr_none:
 memr_via:
-memr_rom:
         mov m_data, #0xff
         mov pc, lr
 

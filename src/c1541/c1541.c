@@ -59,4 +59,5 @@ void c1541_init(void)
     *p++ = 0x40;    // RTI
 
     mos6502_reset();
+    mos6502_run();
 }

@@ -35,13 +35,14 @@ void mos6502_dump_regs(void);
 uint16_t mos6502_get_pc(void);
 void mos6502_stop(void);
 void mos6502_step(void);
-void mos6502_continue(void);
+void mos6502_run(void);
 void mos6502_dump_mem(uint16_t start, uint16_t stop);
 
 /* from mos6502.S */
-void mos6502_reg_init(void);
+void mos6502_reg_init();
 void mos6502_store_regs(mos6502_regs_t* regs);
 uint16_t mos6502_get_pc(void);
+int mos6502_is_stopped(void);
 uint8_t mos6502_read_mem(uint16_t address);
 
 /* from mos6502_dis.c */

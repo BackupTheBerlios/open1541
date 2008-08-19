@@ -28,7 +28,8 @@
         orrne   m_pc, m_pc, #MOS6502_V
         tst     m_data, #(1 << 7)
         orrne   m_pc, m_pc, #MOS6502_N
-        ands    m_tmp, m_a, m_data, lsl #24
+        a_to_tmp
+        ands    m_tmp, m_tmp, m_data, lsl #24
         orreq   m_pc, m_pc, #MOS6502_Z
 .endm
 

@@ -31,14 +31,11 @@ m_addr  .req    r2
 @ time [us] when the next instruction will start to be executed
 m_t     .req    r8
 
-@ the contents of the 6502 A register in bits 24..31
-m_a     .req    r9
+@ permanent pointer to mos6502_data
+m_pdata .req    r10
 
-@ the contents of the 6502 X register in bits 24..31
-m_x     .req    r10
-
-@ the contents of the 6502 Y register in bits 24..31
-m_y     .req    r11
+@ permanent pointer to timer0 registers
+m_ptimer .req   r11
 
 @ This register contains the processor status flags and the PC
 @ NZCF are kept in the same order and at the same position as in ARM,
@@ -72,6 +69,106 @@ mos6502_ramsize       =   (1 << mos6502_ramsize_shift)
 @ our device has 16 kByte of ROM
 mos6502_romsize_shift =   14
 mos6502_romsize       =   (1 << mos6502_ramsize_shift)
+
+/*******************************************************************************
+ * Macros to load and store data
+ *
+ ******************************************************************************/
+
+@ !!!!! Keep offsets in sync with mos6502_data table !!!!!
+MOS6502_SP_OFFSET  =  0
+MOS6502_A_OFFSET   =  4
+MOS6502_X_OFFSET   =  8
+MOS6502_Y_OFFSET   = 12
+
+.macro tmp_to_sp
+        str m_tmp, [m_pdata, #MOS6502_SP_OFFSET]
+.endm
+
+.macro tmp_to_a
+        str m_tmp, [m_pdata, #MOS6502_A_OFFSET]
+.endm
+
+.macro tmp_to_x
+        str m_tmp, [m_pdata, #MOS6502_X_OFFSET]
+.endm
+
+.macro tmp_to_y
+        str m_tmp, [m_pdata, #MOS6502_Y_OFFSET]
+.endm
+
+.macro data_to_sp
+        str m_data, [m_pdata, #MOS6502_SP_OFFSET]
+.endm
+
+.macro data_to_a
+        str m_data, [m_pdata, #MOS6502_A_OFFSET]
+.endm
+
+.macro data_to_x
+        str m_data, [m_pdata, #MOS6502_X_OFFSET]
+.endm
+
+.macro data_to_y
+        str m_data, [m_pdata, #MOS6502_Y_OFFSET]
+.endm
+
+.macro data_low_to_a
+        strb m_data, [m_pdata, #MOS6502_A_OFFSET + 3]
+.endm
+
+.macro data_low_to_x
+        strb m_data, [m_pdata, #MOS6502_X_OFFSET + 3]
+.endm
+
+.macro data_low_to_y
+        strb m_data, [m_pdata, #MOS6502_Y_OFFSET + 3]
+.endm
+
+
+.macro sp_to_tmp
+        ldr m_tmp, [m_pdata, #MOS6502_SP_OFFSET]
+.endm
+
+.macro a_to_tmp
+        ldr m_tmp, [m_pdata, #MOS6502_A_OFFSET]
+.endm
+
+.macro x_to_tmp
+        ldr m_tmp, [m_pdata, #MOS6502_X_OFFSET]
+.endm
+
+.macro y_to_tmp
+        ldr m_tmp, [m_pdata, #MOS6502_Y_OFFSET]
+.endm
+
+.macro sp_to_data
+        ldr m_data, [m_pdata, #MOS6502_SP_OFFSET]
+.endm
+
+.macro a_to_data
+        ldr m_data, [m_pdata, #MOS6502_A_OFFSET]
+.endm
+
+.macro x_to_data
+        ldr m_data, [m_pdata, #MOS6502_X_OFFSET]
+.endm
+
+.macro y_to_data
+        ldr m_data, [m_pdata, #MOS6502_Y_OFFSET]
+.endm
+
+.macro a_to_data_low
+        ldrb m_data, [m_pdata, #MOS6502_A_OFFSET + 3]
+.endm
+
+.macro x_to_data_low
+        ldrb m_data, [m_pdata, #MOS6502_X_OFFSET + 3]
+.endm
+
+.macro y_to_data_low
+        ldrb m_data, [m_pdata, #MOS6502_Y_OFFSET + 3]
+.endm
 
 /*******************************************************************************
  * Load r0-r2 and lr from stack and return from FIQ.
@@ -225,7 +322,8 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
         ldrb    m_addr, [m_addr, #1]
 
         @ now m_addr contains the zp address, add it shifted to X into r0[31:24]
-        add     m_addr, m_x, m_addr, lsl #24
+        x_to_tmp
+        add     m_addr, m_tmp, m_addr, lsl #24
 
         @ correct the bit positions
         mov     m_addr, m_addr, lsr #24
@@ -253,7 +351,8 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
         ldrb    m_addr, [m_addr, #1]
 
         @ now m_addr contains the zp address, add it shifted to X into m_addr[31:24]
-        add     m_addr, m_x, m_addr, lsl #24
+        x_to_tmp
+        add     m_addr, m_tmp, m_addr, lsl #24
 
         @ write m_data to there. correct the bit positions
         ldr     m_tmp, =c1541_ram
@@ -280,7 +379,8 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
         ldrb    m_addr, [m_addr, #1]
 
         @ now m_addr contains the zp address, add it shifted to Y into r0[31:24]
-        add     m_addr, m_y, m_addr, lsl #24
+        y_to_tmp
+        add     m_addr, m_tmp, m_addr, lsl #24
 
         @ correct the bit positions
         mov     m_addr, m_addr, lsr #24
@@ -352,7 +452,8 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
         mov m_tmp, m_addr, lsr #8
 
         @ add X to address and remove overflow bit
-        add m_addr, m_addr, m_x, lsr #24
+        x_to_data_low
+        add m_addr, m_addr, m_data
         bic m_addr, m_addr, #(1 << 16)
 
         @ check if high-byte remained same
@@ -383,7 +484,8 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
         memr_pc_arg16
 
         @ add X to address and remove overflow bit
-        add m_addr, m_addr, m_x, lsr #24
+        x_to_data_low
+        add m_addr, m_addr, m_data
         bic m_addr, m_addr, #(1 << 16)
 
         @ now m_addr contains the address, read a byte from there
@@ -408,7 +510,8 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
         memr_pc_arg16
 
         @ add X to address and remove overflow bit
-        add m_addr, m_addr, m_x, lsr #24
+        x_to_data_low
+        add m_addr, m_addr, m_data
         bic m_addr, m_addr, #(1 << 16)
 
         @ now m_addr contains the address, write the byte m_data to there
@@ -437,7 +540,8 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
         mov m_tmp, m_addr, lsr #8
 
         @ add Y to address and remove overflow bit
-        add m_addr, m_addr, m_y, lsr #24
+        y_to_data_low
+        add m_addr, m_addr, m_data
         bic m_addr, m_addr, #(1 << 16)
 
         @ check if high-byte remained same
@@ -468,7 +572,8 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
         memr_pc_arg16
 
         @ add Y to address and remove overflow bit
-        add m_addr, m_addr, m_y, lsr #24
+        y_to_data_low
+        add m_addr, m_addr, m_data
         bic m_addr, m_addr, #(1 << 16)
 
         @ now m_addr contains the address, write the byte m_data to there
@@ -495,7 +600,8 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
         ldrb    m_tmp, [m_addr, #1]
 
         @ add it to X into m_tmp[31:24]
-        add     m_tmp, m_x, m_tmp, lsl #24
+        x_to_data
+        add     m_tmp, m_data, m_tmp, lsl #24
 
         @ load a byte from there, that's the low byte of the address
         ldr     m_addr, =c1541_ram
@@ -530,7 +636,8 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
         ldrb    m_tmp, [m_addr, #1]
 
         @ add it to X into m_tmp[31:24]
-        add     m_tmp, m_x, m_tmp, lsl #24
+        x_to_data
+        add     m_tmp, m_data, m_tmp, lsl #24
 
         @ load a byte from there, that's the low byte of the address
         ldr     lr, =c1541_ram
@@ -580,7 +687,8 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
         mov     m_data, m_addr, lsr #24
 
         @ add Y to it, use 16 bits only
-        add     m_addr, m_addr, m_y, lsr #24
+        y_to_tmp
+        add     m_addr, m_addr, m_tmp, lsr #24
         bic     m_addr, m_addr, #(1 << 16)
 
         @ check if high-byte remained same
@@ -623,7 +731,8 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
         orr     m_addr, m_addr, m_tmp, lsl #8
 
         @ add Y to it, use 16 bits only
-        add     m_addr, m_addr, m_y, lsr #24
+        y_to_tmp
+        add     m_addr, m_addr, m_tmp, lsr #24
         bic     m_addr, m_addr, #(1 << 16)
 
         @ now m_addr contains the address, write the byte m_data to there
@@ -681,19 +790,14 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
 .macro inc_time time
         @ Ack timer 0 interrupt
         mov     m_tmp, #TIR_MR0
-        mov     m_addr, #(T0IR & 0xffff0000)
-        orr     m_addr, m_addr, #(T0IR & 0x0000ffff)
-        str     m_tmp, [m_addr]
+        str     m_tmp, [m_ptimer, #(T0IR - T0IR)]
 
         @ Set next timer
         add     m_t, m_t, #\time
 
-        @ Change address from T0IR to T0MR
-        add     m_addr, m_addr, #(T0MR0 - T0IR)
-
         @ program the timer match register if not in single step mode
         tst     m_pc, #MOS6502_S
-        streq   m_t, [m_addr]
+        streq   m_t, [m_ptimer, #(T0MR0 - T0IR)] @ store to T0MR0
 .endm
 
 /*******************************************************************************

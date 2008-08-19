@@ -56,11 +56,24 @@
 
         .bss
 
-        .global mo6502_data
-mo6502_data:
+@ !!!!! Keep offsets in sync with MOS6502_XXX_OFFSET constants !!!!!
+        .global mos6502_data
+mos6502_data:
 
         .global mos6502_sp
 mos6502_sp:
+.word   0
+
+        .global mos6502_a
+mos6502_areg:
+.word   0
+
+        .global mos6502_x
+mos6502_xreg:
+.word   0
+
+        .global mos6502_y
+mos6502_yreg:
 .word   0
 
         .code 32
@@ -74,24 +87,29 @@ mos6502_sp:
  ******************************************************************************/
         .global mos6502_reg_init
 mos6502_reg_init:
-        push    {r4, lr}
+        push    {lr}
 
         @ remember old processor and interrupt state
-        mrs     r4, cpsr
+        mrs     r3, cpsr
 
         @ disable IRQs so we won't be disturbed, goto FIQ mode
         msr     cpsr_c, #MODE_FIQ | PSR_I | PSR_F
 
+        @ point to base address of timer0 registers
+        ldr     m_ptimer, =T0IR
+
+        @ point to base address of data storage
+        ldr     m_pdata, =mos6502_data
+
         @ set all regs to 0
-        mov     m_a, #0
-        mov     m_x, #0
-        mov     m_y, #0
+        mov     m_tmp, #0
+        tmp_to_a
+        tmp_to_x
+        tmp_to_y
 
         @ initialize SP
-        @ todo: Use the new offset idea to access this
-        ldr     m_addr, =mos6502_sp
-        mov     m_data, #0xff
-        strb    m_data, [m_addr]
+        mov     m_tmp, #0xff
+        tmp_to_sp
 
         @ Read start address from reset vector
         mov     m_addr, #0xff00
@@ -102,13 +120,15 @@ mos6502_reg_init:
         memr_addr
         add     m_pc, m_data, lsl #8
 
+        @ uncomment this to execute test code from RAM
+        mov     m_pc, #0
+
         @ set single step mode
         orr     m_pc, m_pc, #MOS6502_S
 
-        pop     {lr}
         @ restore old processor and interrupt state, return
-        msr     cpsr_c, r4
-        mov     pc, lr
+        msr     cpsr_c, r3
+        pop     {pc}
 
 /*******************************************************************************
  * Copy the processor regs into mos6502_regs_t pointed to by r0.
@@ -123,14 +143,14 @@ mos6502_store_regs:
         @ disable IRQs so we won't be disturbed, goto FIQ mode
         msr cpsr_c, #MODE_FIQ | PSR_I | PSR_F
 
-        stmia   r0!, {r8}   @ time
-        mov     r1, r9, lsr#24  @ a
-        stmia   r0!, {r1}
-        mov     r1, r10, lsr#24 @ x
-        stmia   r0!, {r1}
-        mov     r1, r11, lsr#24 @ y
-        stmia   r0!, {r1}
-        stmia   r0!, {r12}  @ pc, flags
+        stmia   r0!, {m_t}   @ time
+        a_to_data_low
+        stmia   r0!, {m_data}
+        x_to_data_low
+        stmia   r0!, {m_data}
+        y_to_data_low
+        stmia   r0!, {m_data}
+        stmia   r0!, {m_pc}  @ pc, flags
 
         b       exit_fiq_mode
 
@@ -167,7 +187,6 @@ mos6502_is_stopped:
         @ disable IRQs so we won't be disturbed, goto FIQ mode
         msr     cpsr_c, #MODE_FIQ | PSR_I | PSR_F
 
-        @ copy PC to R0, shift away unused bits
         and     r0, m_pc, #MOS6502_S
 
         b       exit_fiq_mode
@@ -232,17 +251,18 @@ mos6502_step:
         beq     exit_fiq_mode
 
         @ program the timer match register 0 to expire in 2 us
-        ldr     r1, =T0TC
-        ldr     r0, [r1]
+        @ write T0TC
+        ldr     r0, [m_ptimer, #(T0TC - T0IR)]
         add     r0, r0, #2
-        add     r1, r1, #(T0MR0 - T0TC) @ point to T0MCR0 now
-        str     r0, [r1]
+        @ write T0MCR0
+        str     r0, [m_ptimer, #(T0MR0 - T0IR)]
+
+        @ remember pointer to T0TC, because m_ptimer will become invisible
+        add     r1, m_ptimer, #(T0TC - T0IR)
 
         @ restore old processor and interrupt state
         msr     cpsr_c, r3
 
-        @ wait until IRQ time is over
-        sub     r1, r1, #(T0MR0 - T0TC) @ point to T0TC again
 step_wait:
         ldr     r2, [r1]
         subs    r3, r0, r2
@@ -269,14 +289,12 @@ mos6502_run:
         beq 1f
 
         @ Delete bit for single step mode
-        bic m_pc, #MOS6502_S
+        bic m_pc, m_pc, #MOS6502_S
 
         @ program the timer match register 0 to expire in 2 us
-        ldr r1, =T0TC
-        ldr m_t, [r1]
-        add m_t, m_t, #2
-        add r1, r1, #(T0MR0 - T0TC)
-        str m_t, [r1]
+        ldr     m_t, [m_ptimer, #(T0TC - T0IR)]
+        add     m_t, m_t, #2
+        str     m_t, [m_ptimer, #(T0MR0 - T0IR)]
 1:
         b exit_fiq_mode
 

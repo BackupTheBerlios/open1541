@@ -28,22 +28,27 @@
 @ Do an ADC, the argument is in m_data[7:0]
 .macro do_adc
         movs    m_tmp, m_pc, lsl #3     @ set ARM C from 6502 C
-                                        @ if CS: prepare summand
-        mvncs   m_tmp, #0xff000000      @     set bits 0-23 so ARM C will work
-        orrcs   m_tmp, m_tmp, m_data, lsl #24 @ put summand into 24-31
+        a_to_tmp                        @ if CS: prepare summand
+        mvncs   lr, #0xff000000         @     set bits 0-23 so ARM C will work
+        orrcs   lr, lr, m_data, lsl #24 @ put summand into 24-31
                                         @ else prepare summand if CC:
-        movcc   m_tmp, m_data, lsl #24  @     put summand into 24-31
-        adcs    m_a, m_a, m_tmp         @ perform ADC and set ARM flags
+        movcc   lr, m_data, lsl #24     @     put summand into 24-31
+        adcs    m_tmp, m_tmp, lr        @ perform ADC and set ARM flags
+
+        tmp_to_a
         update_nzcv
 .endm
 
 @ Do an SBC, the argument is in m_data[7:0]
 .macro do_sbc
         movs    m_tmp, m_pc, lsl #3     @ set ARM C from 6502 C
-        sbcs    m_a, m_a, m_data, lsl #24
+        a_to_tmp
+        sbcs    m_tmp, m_tmp, m_data, lsl #24
 
         @ clear unused bits (may be 1 because of C)
-        ands    m_a, m_a, #(0xff << 24)
+        ands    m_tmp, m_tmp, #(0xff << 24)
+
+        tmp_to_a
         update_nzcv
 .endm
 
@@ -114,8 +119,10 @@ op_7d: @ ADC $FFFF,X
 
         .global op_88
 op_88: @ DEY
-        subs m_y, m_y, #(1<<24) @ dec Y, update ARM flags
-        update_nz               @ update 6502 flags N and Z
+        y_to_tmp
+        subs m_tmp, m_tmp, #(1<<24) @ dec Y, update ARM flags
+        tmp_to_y
+        update_nz                   @ update 6502 flags N and Z
         op_end 1 2
 
         .global op_c6
@@ -127,14 +134,18 @@ op_c6: @ DEC $FF
 
         .global op_c8
 op_c8:  @ INY
-        adds m_y, m_y, #(1<<24) @ inc Y, update ARM flags
-        update_nz               @ update 6502 flags N and Z
+        y_to_tmp
+        adds m_tmp, m_tmp, #(1<<24) @ inc Y, update ARM flags
+        tmp_to_y
+        update_nz                   @ update 6502 flags N and Z
         op_end 1 2
 
         .global op_ca
 op_ca: @ DEX
-        subs m_x, m_x, #(1<<24) @ dec X, update ARM flags
-        update_nz               @ update 6502 flags N and Z
+        x_to_tmp
+        subs m_tmp, m_tmp, #(1<<24) @ dec X, update ARM flags
+        tmp_to_x
+        update_nz                   @ update 6502 flags N and Z
         op_end 1 2
 
         .global op_ce
@@ -166,8 +177,10 @@ op_e1: @ SBC ($FF,X)
 
         .global op_e8
 op_e8:  @ INX
-        adds m_x, m_x, #(1<<24) @ inc X, update ARM flags
-        update_nz               @ update 6502 flags N and Z
+        x_to_tmp
+        adds m_tmp, m_tmp, #(1<<24) @ inc X, update ARM flags
+        tmp_to_x
+        update_nz                   @ update 6502 flags N and Z
         op_end 1 2
 
         .global op_e5

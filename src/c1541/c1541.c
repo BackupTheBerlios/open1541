@@ -33,30 +33,39 @@ void c1541_init(void)
 
     p = c1541_ram;
 
-    *p++ = 0xa9;    // LDA #$00 = ret high
-    *p++ = 0x00;
+    *p++ = 0xa2;    // LDX #$10
+    *p++ = 0x10;
 
-    *p++ = 0x48;    // PHA
+    *p++ = 0xe0;    // CPX #$10 => ZC
+    *p++ = 0x10;
 
-    *p++ = 0xa9;    // LDA #$0C = ret low
-    *p++ = 0x0C;
+    *p++ = 0xe0;    // CPX #$05 => C
+    *p++ = 0x05;
 
-    *p++ = 0x48;    // PHA
+    *p++ = 0xe0;    // CPX #$20 => N
+    *p++ = 0x20;
 
-    *p++ = 0xa9;    // LDA #$80 = flags
-    *p++ = 0x80;
+    *p++ = 0xe0;    // CPX #$E0 => -
+    *p++ = 0xe0;
 
-    *p++ = 0x48;    // PHA
+    *p++ = 0xa2;    // LDX #$F0
+    *p++ = 0xf0;
 
-    *p++ = 0x4c;    // JMP $000F (fake IRQ)
-    *p++ = 0x0F;
-    *p++ = 0x00;
-// $000C:
+    *p++ = 0xe0;    // CPX #$F0 => ZC
+    *p++ = 0xf0;
+
+    *p++ = 0xe0;    // CPX #$10 => NC
+    *p++ = 0x10;
+
+    *p++ = 0xe0;    // CPX #$E0 => C
+    *p++ = 0xe0;
+
+    *p++ = 0xe0;    // CPX #$FF => N
+    *p++ = 0xff;
+
     *p++ = 0x4c;    // JMP $0000
     *p++ = 0x00;
     *p++ = 0x00;
-// $000F:
-    *p++ = 0x40;    // RTI
 
     mos6502_reset();
     mos6502_run();

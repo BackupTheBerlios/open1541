@@ -25,6 +25,30 @@
 #include <lpc213x.h>
 #include "mos6502_macros.S"
 
+@ Do an ORA with m_data[7:0]
+.macro do_ora
+        a_to_tmp
+        orrs m_tmp, m_tmp, m_data, lsl #24
+        tmp_to_a
+        update_nz               @ update 6502 flags N and Z
+.endm
+
+@ Do an AND with m_data[7:0]
+.macro do_and
+        a_to_tmp
+        ands m_tmp, m_tmp, m_data, lsl #24
+        tmp_to_a
+        update_nz               @ update 6502 flags N and Z
+.endm
+
+@ Do an EOR with m_data[7:0]
+.macro do_eor
+        a_to_tmp
+        eors m_tmp, m_tmp, m_data, lsl #24
+        tmp_to_a
+        update_nz               @ update 6502 flags N and Z
+.endm
+
 @ Do an ASL on m_data[7:0]
 .macro do_asl
         movs    m_data, m_data, lsl #25
@@ -63,16 +87,14 @@
         .global op_01
 op_01: @ ORA ($FF,X)
         memr_addr_mode_indx
-        orrs m_a, m_a, m_data, lsl #24
-        update_nz               @ update 6502 flags N and Z
+        do_ora
 op_end_2_6:
         op_end 2 6
 
         .global op_05
 op_05: @ ORA $FF
         memr_addr_mode_zp
-        orrs m_a, m_a, m_data, lsl #24
-        update_nz               @ update 6502 flags N and Z
+        do_ora
         op_end 2 3
 
         .global op_06
@@ -85,21 +107,20 @@ op_06: @ ASL $FF
         .global op_09
 op_09: @ ORA #$FF
         memr_pc_arg8
-        orrs m_a, m_a, m_data, lsl #24
-        update_nz               @ update 6502 flags N and Z
+        do_ora
         op_end 2 2
 
         .global op_0a
 op_0a: @ ASL A
-        movs    m_a, m_a, asl #1
-        update_nzc
+        a_to_data_low
+        do_asl
+        data_low_to_a
         op_end 1 2
 
         .global op_0d
 op_0d: @ ORA $FFFF
         memr_addr_mode_abs
-        orrs m_a, m_a, m_data, lsl #24
-        update_nz               @ update 6502 flags N and Z
+        do_ora
         op_end 3 4
 
         .global op_0e
@@ -113,15 +134,13 @@ op_end_3_7:
         .global op_11
 op_11: @ ORA ($FF),Y
         memr_addr_mode_indy     @ this increments m_t on page wraps
-        orrs m_a, m_a, m_data, lsl #24
-        update_nz               @ update 6502 flags N and Z
+        do_ora
         op_end 2 5
 
         .global op_15
 op_15: @ ORA $FF,X
         memr_addr_mode_zpx
-        orrs m_a, m_a, m_data, lsl #24
-        update_nz               @ update 6502 flags N and Z
+        do_ora
         op_end 2 4
 
         .global op_16
@@ -134,15 +153,13 @@ op_16: @ ASL $FF,X
         .global op_19
 op_19: @ ORA $FFFF,Y
         memr_addr_mode_absy     @ this increments m_t on page wraps
-        orrs m_a, m_a, m_data, lsl #24
-        update_nz               @ update 6502 flags N and Z
+        do_ora
         op_end 3 4
 
         .global op_1d
 op_1d: @ ORA $FFFF,X
         memr_addr_mode_absx     @ this increments m_t on page wraps
-        orrs m_a, m_a, m_data, lsl #24
-        update_nz               @ update 6502 flags N and Z
+        do_ora
         op_end 3 4
 
         .global op_1e
@@ -155,15 +172,13 @@ op_1e: @ ASL $FFFF,X
         .global op_21
 op_21: @ AND ($FF,X)
         memr_addr_mode_indx
-        ands m_a, m_a, m_data, lsl #24
-        update_nz               @ update 6502 flags N and Z
+        do_and
         b op_end_3_7            @ no macro here to save some memory
 
         .global op_25
 op_25: @ AND $FF
         memr_addr_mode_zp
-        ands m_a, m_a, m_data, lsl #24
-        update_nz               @ update 6502 flags N and Z
+        do_and
         op_end 2 3
 
         .global op_26
@@ -176,23 +191,20 @@ op_26: @ ROL $FF
         .global op_29
 op_29: @ AND #$FF
         memr_pc_arg8
-        ands m_a, m_a, m_data, lsl #24
-        update_nz               @ update 6502 flags N and Z
+        do_and
         op_end 2 2
 
         .global op_2a
 op_2a: @ ROL A
-        movs    m_tmp, m_pc, lsl #3     @ set ARM C from 6502 C
-        orrcs   m_a, m_a, #(1 << 23)
-        movs    m_a, m_a, lsl #1  @ ROL
-        update_nzc
+        a_to_data_low
+        do_rol
+        data_low_to_a
         op_end 1 2
 
         .global op_2d
 op_2d: @ AND $FFFF
         memr_addr_mode_abs
-        ands m_a, m_a, m_data, lsl #24
-        update_nz               @ update 6502 flags N and Z
+        do_and
         op_end 3 4
 
         .global op_2e
@@ -205,15 +217,13 @@ op_2e: @ ROL $FFFF
         .global op_31
 op_31: @ AND ($FF),Y
         memr_addr_mode_indy     @ this increments m_t on page wraps
-        ands m_a, m_a, m_data, lsl #24
-        update_nz               @ update 6502 flags N and Z
+        do_and
         op_end 2 5
 
         .global op_35
 op_35: @ AND $FF,X
         memr_addr_mode_zpx
-        ands m_a, m_a, m_data, lsl #24
-        update_nz               @ update 6502 flags N and Z
+        do_and
         op_end 2 4
 
         .global op_36
@@ -226,15 +236,13 @@ op_36: @ ROL $FF,X
         .global op_39
 op_39: @ AND $FFFF,Y
         memr_addr_mode_absy     @ this increments m_t on page wraps
-        ands m_a, m_a, m_data, lsl #24
-        update_nz               @ update 6502 flags N and Z
+        do_and
         op_end 3 4
 
         .global op_3d
 op_3d: @ AND $FFFF,X
         memr_addr_mode_absx     @ this increments m_t on page wraps
-        ands m_a, m_a, m_data, lsl #24
-        update_nz               @ update 6502 flags N and Z
+        do_and
         op_end 3 4
 
         .global op_3e
@@ -247,15 +255,13 @@ op_3e: @ ROL $FFFF,X
         .global op_41
 op_41: @ EOR ($FF,X)
         memr_addr_mode_indx
-        eors m_a, m_a, m_data, lsl #24
-        update_nz               @ update 6502 flags N and Z
+        do_eor
         b op_end_3_7            @ no macro here to save some memory
 
         .global op_45
 op_45: @ EOR $FF
         memr_addr_mode_zp
-        eors m_a, m_a, m_data, lsl #24
-        update_nz               @ update 6502 flags N and Z
+        do_eor
         op_end 2 3
 
         .global op_46
@@ -268,22 +274,20 @@ op_46: @ LSR $FF
         .global op_49
 op_49: @ EOR #$FF
         memr_pc_arg8
-        eors m_a, m_a, m_data, lsl #24
-        update_nz               @ update 6502 flags N and Z
+        do_eor
         op_end 2 2
 
         .global op_4a
 op_4a: @ LSR A
-        movs    m_a, m_a, lsr #25
-        mov     m_a, m_a, lsl #24
-        update_nzc              @ N will always be 0
+        a_to_data_low
+        do_lsr
+        data_low_to_a
         op_end 1 2
 
         .global op_4d
 op_4d: @ EOR $FFFF
         memr_addr_mode_abs
-        eors m_a, m_a, m_data, lsl #24
-        update_nz               @ update 6502 flags N and Z
+        do_eor
         op_end 3 4
 
         .global op_4e
@@ -296,15 +300,13 @@ op_4e: @ LSR $FFFF
         .global op_51
 op_51: @ EOR ($FF),Y
         memr_addr_mode_indy     @ this increments m_t on page wraps
-        eors m_a, m_a, m_data, lsl #24
-        update_nz               @ update 6502 flags N and Z
+        do_eor
         op_end 2 5
 
         .global op_55
 op_55: @ EOR $FF,X
         memr_addr_mode_zpx
-        eors m_a, m_a, m_data, lsl #24
-        update_nz               @ update 6502 flags N and Z
+        do_eor
         op_end 2 4
 
         .global op_56
@@ -317,15 +319,13 @@ op_56: @ LSR $FF,X
         .global op_59
 op_59: @ EOR $FFFF,Y
         memr_addr_mode_absy     @ this increments m_t on page wraps
-        eors m_a, m_a, m_data, lsl #24
-        update_nz               @ update 6502 flags N and Z
+        do_eor
         op_end 3 4
 
         .global op_5d
 op_5d: @ EOR $FFFF,X
         memr_addr_mode_absx     @ this increments m_t on page wraps
-        eors m_a, m_a, m_data, lsl #24
-        update_nz               @ update 6502 flags N and Z
+        do_eor
         op_end 3 4
 
         .global op_5e
@@ -344,18 +344,9 @@ op_66: @ ROR $FF
 
         .global op_6a
 op_6a: @ ROR A
-        movs    m_tmp, m_pc, lsl #3     @ set ARM C from 6502 C
-        movs    m_a, m_a, rrx           @ ROR
-
-        @ update 6502 flags
-        bic     m_pc, m_pc, #(MOS6502_N | MOS6502_Z | MOS6502_C)
-        orrmi   m_pc, m_pc, #MOS6502_N
-        orreq   m_pc, m_pc, #MOS6502_Z
-        tst     m_a, #(1 << 23)
-        orrne   m_pc, m_pc, #MOS6502_C
-
-        @ remove C bit from A
-        bic     m_a, m_a, #(1 << 23)
+        a_to_data_low
+        do_ror
+        data_low_to_a
         op_end 1 2
 
         .global op_6e

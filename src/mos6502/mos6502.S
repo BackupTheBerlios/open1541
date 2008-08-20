@@ -120,9 +120,6 @@ mos6502_reg_init:
         memr_addr
         add     m_pc, m_data, lsl #8
 
-        @ uncomment this to execute test code from RAM
-        mov     m_pc, #0
-
         @ set single step mode
         orr     m_pc, m_pc, #MOS6502_S
 

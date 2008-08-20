@@ -109,5 +109,7 @@ direct_read_addresses:
         .word c1541_ram, c1541_ram, c1541_ram, c1541_ram   @ 0x6000
         .word c1541_ram, c1541_ram, c1541_ram, c1541_ram   @ 0x8000
         .word c1541_ram, c1541_ram, c1541_ram, c1541_ram   @ 0xa000
-        .word dos1541 + 0x0000, dos1541 + 0x0800, dos1541 + 0x1000, dos1541 + 0x1800   @ 0xc000
-        .word dos1541 + 0x2000, dos1541 + 0x2800, dos1541 + 0x3000, dos1541 + 0x3800   @ 0xe000
+        .word ROM_IMAGE + 0x0000, ROM_IMAGE + 0x0800       @ 0xc000
+        .word ROM_IMAGE + 0x1000, ROM_IMAGE + 0x1800       @  0xc800
+        .word ROM_IMAGE + 0x2000, ROM_IMAGE + 0x2800       @ 0xc000
+        .word ROM_IMAGE + 0x3000, ROM_IMAGE + 0x3800       @  0xe800

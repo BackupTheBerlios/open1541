@@ -32,6 +32,7 @@ project_root := $(abspath $(shell echo `pwd`)/..)
 scriptdir    := $(project_root)/scripts
 tooldir      := $(project_root)/tools
 srcdir       := $(project_root)/src
+testromdir   := $(project_root)/testrom
 incdir       := $(project_root)/include
 objdir       := $(project_root)/obj-$(platform)
 
@@ -67,6 +68,8 @@ INCLUDE += -I$(srcdir)
 INCLUDE += -I$(srcdir)/c1541
 INCLUDE += -I$(srcdir)/mos6502
 
+DEFINE  :=
+
 CFLAGS  := -Wall -Wno-trigraphs -Werror -Os -Wall
 CFLAGS  += --param max-inline-insns-auto=3
 CFLAGS  += 
@@ -75,15 +78,10 @@ CFLAGS  += -march=armv4 -mtune=arm7tdmi -std=c99
 LDFLAGS := -N -p -X -T$(scriptdir)/lpc2134.ld
 
 include $(platform).options
+include $(testromdir)/testrom.mk
 
 #############################################################################
 # Objects
-
-# Currently the 1541 ROM is compiled in.
-# Later it will be loaded from SD card into RAM or Flash.
-ifeq ("$(wildcard $(srcdir)/dos1541.bin)", "")
-$(error No 1541 ROM image in $(srcdir)/dos1541.bin)
-endif
 
 obj := $(objdir)/open1541.o
 obj += $(objdir)/startup.o
@@ -112,7 +110,19 @@ obj += $(objdir)/libc/strcmp.o
 obj += $(objdir)/libc/strncmp.o
 obj += $(objdir)/libc/memcpy.o
 obj += $(objdir)/libc/strcpy.o
-obj += $(objdir)/dos1541.o
+
+ifeq ($(rom), dos1541)
+	obj += $(objdir)/dos1541.o
+	DEFINE += -DROM_IMAGE=dos1541
+	# Currently the 1541 ROM is compiled in.
+	# Later it will be loaded from SD card into RAM or Flash.
+	ifeq ("$(wildcard $(srcdir)/dos1541.bin)", "")
+		$(error No 1541 ROM image in $(srcdir)/dos1541.bin)
+	endif
+else
+	obj += $(objdir)/testrom.o
+	DEFINE += -DROM_IMAGE=testrom
+endif
 
 extra_obj := `$(CC) -print-libgcc-file-name`
 

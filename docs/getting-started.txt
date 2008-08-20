@@ -8,7 +8,10 @@ If you want to compile open1541, your system has to meet following requirements:
 - GNU Make version 3.81 or higher
 - A native GCC to compile tools
 - An arm-elf toolchain
-
+  - See below
+- xa (aka xa65) cross assembler
+  - Comes e.g. with Debian, Ubuntu or get it at 
+    http://www.floodgap.com/retrotech/xa/
 
 Get an ARM Toolchain 
 ====================

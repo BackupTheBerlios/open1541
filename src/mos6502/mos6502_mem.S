@@ -92,7 +92,7 @@ memr_ram:
  *
  ******************************************************************************/
 memr_rom:
-        ldr m_tmp, =dos1541
+        ldr m_tmp, =ROM_IMAGE
 
         @ shift away all forbidden bits (m_data = scratch)
         mov m_data, m_addr, lsl #(32 - mos6502_romsize_shift)

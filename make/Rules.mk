@@ -54,6 +54,15 @@ $(objdir)%.s: $(srcdir)%.bin
 	hexdump -v -e '".byte " 1/1 "0x%02x\n"' $< >> $@
 
 #############################################################################
+# Create .s from .bin
+#
+%.s: %.bin
+	echo .text > $@
+	echo .global $(*F) >> $@
+	echo $(*F): >> $@
+	hexdump -v -e '".byte " 1/1 "0x%02x\n"' $< >> $@
+
+#############################################################################
 # Create .hex from elf-file in same directory
 #
 %.hex: %

@@ -17,5 +17,5 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-$(objdir)/testrom.bin: $(testromdir)/testrom.asm
-	xa -o $@ $^
+$(objdir)/testrom.bin: $(testromdir)/testrom.asm $(wildcard $(testromdir)/*.asm)
+	xa -I $(testromdir) -o $@ $<

@@ -16,8 +16,43 @@
  *
  */
 
+tmp_zp1     = $2c
+tmp_zp2     = $3b
+tmp_page    = $0700
+
+; Temporary storage for test cases
+tmp_storage = $0400
+db          = tmp_storage +  0
+ab          = tmp_storage +  1
+xb          = tmp_storage +  2
+yb          = tmp_storage +  3
+pb          = tmp_storage +  4
+sb          = tmp_storage +  5
+da          = tmp_storage +  6
+aa          = tmp_storage +  7
+xa          = tmp_storage +  8
+ya          = tmp_storage +  9
+pa          = tmp_storage + 10
+sa          = tmp_storage + 11
+dr          = tmp_storage + 12
+ar          = tmp_storage + 13
+xr          = tmp_storage + 14
+yr          = tmp_storage + 15
+pr          = tmp_storage + 16
+sr          = tmp_storage + 17
+
+; Self-modifying code may run there
+ram_code    = $0500
+
 * = $c000
 start:
+
+; test cases
+;#include <ldaa.asm>
+#include <ldaax.asm>
+
+
+
         ldx #$10    ; => -
 
         cpx #$10    ; => ZC
@@ -33,6 +68,10 @@ start:
         cpx #$ff    ; => N
 
         jmp start
+
+
+error_end:
+        jmp error_end
 
 ;===============================================================================
 ; Fill (16k - code size - vector size) with $ff

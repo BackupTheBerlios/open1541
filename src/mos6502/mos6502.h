@@ -24,6 +24,7 @@ typedef struct mos6502_regs_s
     uint32_t    a;
     uint32_t    x;
     uint32_t    y;
+    uint32_t    sp;
     uint32_t    pc;
 }
 mos6502_regs_t;

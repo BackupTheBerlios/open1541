@@ -147,6 +147,8 @@ mos6502_store_regs:
         stmia   r0!, {m_data}
         y_to_data_low
         stmia   r0!, {m_data}
+        sp_to_data
+        stmia   r0!, {m_data}
         stmia   r0!, {m_pc}  @ pc, flags
 
         b       exit_fiq_mode

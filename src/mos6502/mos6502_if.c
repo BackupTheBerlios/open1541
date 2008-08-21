@@ -50,8 +50,8 @@ void mos6502_dump_regs(void)
 
     mos6502_store_regs(&regs);
 
-    uart_puts("      TIME  PC  AC XR YR NV#BDIZC\r\n");
-    //         1234567890 1234 11 22 33 ********
+    uart_puts("      TIME  PC  AC XR YR SP NV#BDIZC\r\n");
+    //         1234567890 1234 11 22 33 44 ********
     uart_putdec_padded(10, regs.time);
     uart_putc(' ');
     uart_puthex_padded(4, regs.pc & 0xffff);
@@ -61,6 +61,8 @@ void mos6502_dump_regs(void)
     uart_puthex_padded(2, regs.x);
     uart_putc(' ');
     uart_puthex_padded(2, regs.y);
+    uart_putc(' ');
+    uart_puthex_padded(2, regs.sp);
     uart_putc(' ');
     uart_putc(regs.pc & PSR_N ? 'N' : '-');
     uart_putc(regs.pc & PSR_V ? 'V' : '-');

@@ -511,8 +511,8 @@ MOS6502_Y_OFFSET   = 12
         memr_pc_arg16
 
         @ add X to address and remove overflow bit
-        x_to_data_low
-        add m_addr, m_addr, m_data
+        x_to_tmp
+        add m_addr, m_addr, m_tmp, lsr #24
         bic m_addr, m_addr, #(1 << 16)
 
         @ now m_addr contains the address, write the byte m_data to there

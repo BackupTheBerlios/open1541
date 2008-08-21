@@ -29,7 +29,7 @@ static void cli_reset_buffers(void);
 static void cli_show_line(void);
 static void cli_process_line(void);
 static void cli_help(void);
-static void cli_memdump(const char *params);
+static void cli_memcmd(int what, const char *params);
 static void cli_step(void);
 
 // These constants are used to mark special commands
@@ -342,7 +342,11 @@ static void cli_process_line(void)
     }
     else if (strncmp(command_line, "m ", 2) == 0)
     {
-        cli_memdump(command_line + 2);
+        cli_memcmd('m', command_line + 2);
+    }
+    else if (strncmp(command_line, "d ", 2) == 0)
+    {
+        cli_memcmd('d', command_line + 2);
     }
     else if (strcmp(command_line, "speed") == 0)
     {
@@ -370,17 +374,18 @@ static void cli_help(void)
               "regs|r\t\tShow 6502 registers\r\n"
               "cont\t\tContinue 6502 emulation\r\n"
               "reset\t\tReset 6502, keep single step mode if set\r\n"
-              "m <a> <b>\tDump emulated memory from a to b-1\r\n"
+              "m <a> <b>\tDump 6502 memory range\r\n"
+              "d <a> <b>\tDisassemble 6502 memory range\r\n"
               "speed\t\tStart a benchmark\r\n"
               "help\t\tHelp\r\n"
               "<F1>\t\tRepeat last command\r\n");
 }
 
 /*******************************************************************************
- * Parse a "m" command line and execute a memory dump.
+ * Parse a "m" or "d" command line and execute a memory dump or disassembly.
  *
  ******************************************************************************/
-static void cli_memdump(const char *params)
+static void cli_memcmd(int what, const char *params)
 {
     unsigned start;
     unsigned stop;
@@ -397,7 +402,10 @@ static void cli_memdump(const char *params)
     if (start >= 0x10000 || stop > 0x10000)
         goto syntax_error;
 
-    mos6502_dump_mem(start, stop);
+    if (what == 'd')
+        mos6502_dis(start, stop);
+    else
+        mos6502_dump_mem(start, stop);
     return;
 
 syntax_error:

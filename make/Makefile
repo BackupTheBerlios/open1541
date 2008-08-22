@@ -43,9 +43,6 @@ lpcflash     := $(project_root)/tools/lpcflash/lpcflash
 .SUFFIXES:
 % : %
 
-# mark all targets as secondary to prevent their deletion
-.SECONDARY:
-
 ifneq ($(add_path), )
 PATH := $(PATH):$(add_path)
 endif

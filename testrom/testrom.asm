@@ -61,6 +61,11 @@ test_again:
 ; test cases
 #include "ldaa.asm"
 #include "ldaax.asm"
+#include "ldaay.asm"
+#include "ldaix.asm"
+#include "ldaiy.asm"
+#include "ldaz.asm"
+#include "ldazx.asm"
 
             inc test_loop_counter
             jmp test_again

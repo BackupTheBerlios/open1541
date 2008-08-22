@@ -16,8 +16,16 @@
  *
  */
 
+; this counter starts at 0 and is incremented after completing all tests 
+; successfully
+test_loop_counter = $02
+
+; two bytes in zero page
 tmp_zp1     = $2c
+
+; two bytes in zero page
 tmp_zp2     = $3b
+
 tmp_page    = $0700
 
 ; Temporary storage for test cases
@@ -46,42 +54,47 @@ ram_code    = $0500
 
 * = $c000
 start:
+            lda #0
+            sta test_loop_counter
+test_again:
 
 ; test cases
-;#include <ldaa.asm>
-#include <ldaax.asm>
+#include "ldaa.asm"
+#include "ldaax.asm"
 
 
+            ldx #$10    ; => -
 
-        ldx #$10    ; => -
+            cpx #$10    ; => ZC
+            cpx #$05    ; => C
+            cpx #$20    ; => N
+            cpx #$E0    ; => -
 
-        cpx #$10    ; => ZC
-        cpx #$05    ; => C
-        cpx #$20    ; => N
-        cpx #$E0    ; => -
+            ldx #$F0    ; => N
 
-        ldx #$F0    ; => N
+            cpx #$F0    ; => ZC
+            cpx #$10    ; => NC
+            cpx #$e0    ; => C
+            cpx #$ff    ; => N
 
-        cpx #$F0    ; => ZC
-        cpx #$10    ; => NC
-        cpx #$e0    ; => C
-        cpx #$ff    ; => N
 
-        jmp start
+            inc test_loop_counter
+            jmp test_again
 
 
 error_end:
-        jmp error_end
+            jmp error_end
 
 ;===============================================================================
 ; Fill (16k - code size - vector size) with $ff
-        .dsb $4000 - (* - start) - 6, $ff
+;        .dsb $4000 - (* - start) - 6, $ff
 ;===============================================================================
 ; Vectors
-        ; NMI vector
-        .word start
-        ; Reset vector
-        .word start
-        ; IRQ vector
-        .word start
+* = $fffa
+            ; NMI vector
+            .word start
+            ; Reset vector
+            .word start
+            ; IRQ vector
+            .word start
 ;===============================================================================

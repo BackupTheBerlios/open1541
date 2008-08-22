@@ -18,4 +18,6 @@
 #
 
 $(objdir)/testrom.bin: $(testromdir)/testrom.asm $(wildcard $(testromdir)/*.asm)
-	xa -I $(testromdir) -o $@ $<
+	dreamass -I$(testromdir) -o $@.c64 $<
+	dd if=$@.c64 of=$@ bs=1 skip=2
+

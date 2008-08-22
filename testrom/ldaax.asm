@@ -13,7 +13,7 @@ copy_code:
                 jsr ram_code
                 jmp end
 code:
-
+.pseudopc ram_code
                 lda #%00011011
                 sta db
                 lda #%11000110
@@ -102,7 +102,7 @@ nonext:
 
                 rts
 
-
+.realpc
 check:
                 lda da
                 cmp dr

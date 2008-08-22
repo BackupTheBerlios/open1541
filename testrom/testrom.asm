@@ -62,22 +62,6 @@ test_again:
 #include "ldaa.asm"
 #include "ldaax.asm"
 
-
-            ldx #$10    ; => -
-
-            cpx #$10    ; => ZC
-            cpx #$05    ; => C
-            cpx #$20    ; => N
-            cpx #$E0    ; => -
-
-            ldx #$F0    ; => N
-
-            cpx #$F0    ; => ZC
-            cpx #$10    ; => NC
-            cpx #$e0    ; => C
-            cpx #$ff    ; => N
-
-
             inc test_loop_counter
             jmp test_again
 

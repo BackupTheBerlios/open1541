@@ -6,14 +6,17 @@
                 ; copy testcode to RAM
                 ldx #0
 copy_code:
-                lda code, x
+                lda copy_this, x
                 sta ram_code, x
                 dex
                 bne copy_code
-                jsr ram_code
-                jmp end
-code:
-
+                jmp ram_code + test_start - test_name
+copy_this:
+.pseudopc ram_code
+test_name:
+                .text "ldaa"
+                .byte 0
+test_start:
                 lda #%00011011
                 sta db
                 lda #%11000110
@@ -89,7 +92,8 @@ jmpnext:        bne next
                 inc pb
                 bne jmpnext
 
-                rts
+                jmp end
+.realpc
 
 
 check:
@@ -116,7 +120,7 @@ check:
 error:
                 pla
                 pla
-                ldy pb		; error code
+                ldy pb          ; error code
                 jsr error_end
 end:
 .)

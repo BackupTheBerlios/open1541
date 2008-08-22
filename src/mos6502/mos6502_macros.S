@@ -685,7 +685,7 @@ MOS6502_Y_OFFSET   = 12
         orr     m_addr, m_data, m_tmp, lsl #8
 
         @ remember high-byte of address
-        mov     m_data, m_addr, lsr #24
+        mov     m_data, m_addr, lsr #8
 
         @ add Y to it, use 16 bits only
         y_to_tmp
@@ -693,7 +693,7 @@ MOS6502_Y_OFFSET   = 12
         bic     m_addr, m_addr, #(1 << 16)
 
         @ check if high-byte remained same
-        teq     m_data, m_addr, lsr #8
+        cmp     m_data, m_addr, lsr #8
 
         @ if not, add one cycle
         addne m_t, m_t, #1

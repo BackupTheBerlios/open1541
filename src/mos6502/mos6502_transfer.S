@@ -218,7 +218,7 @@ op_ae: @ LDX $FFFF
         .global op_b1
 op_b1: @ LDA ($FF),Y
         memr_addr_mode_indy
-        data_low_to_y
+        data_low_to_a
         movs m_data, m_data, lsl #24
         update_nz
         op_end 2 5

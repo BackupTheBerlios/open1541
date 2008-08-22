@@ -16,6 +16,7 @@
  */
 
 #include <stdint.h>
+#include <string.h>
 #include <uart.h>
 #include <arm7tdmi.h>
 #include <lpc213x.h>
@@ -79,22 +80,33 @@ void mos6502_dump_regs(void)
  ******************************************************************************/
 void mos6502_dump_mem(uint16_t start, uint16_t stop)
 {
+    uint8_t c;
+    char text[17];
     unsigned llen;
 
     /* exclude "stop" from output */
     while (start < stop)
     {
+        memset(text, 0, sizeof(text));
         llen = 16;
         uart_puthex_padded(4, start);
         uart_puts(": ");
-        while (llen-- && start < stop)
+        while (llen && start < stop)
         {
-            uart_puthex_padded(2, mos6502_read_mem(start));
+            c = mos6502_read_mem(start);
+            uart_puthex_padded(2, c);
             uart_putc(' ');
-            if ((llen & 3) == 0)
+
+            if (c < ' ' || c > 126)
+                c = '.';
+            text[16 - llen] = c;
+
+            if ((--llen & 3) == 0)
                 uart_putc(' ');
             start++;
         }
+        uart_putc(' ');
+        uart_puts(text);
         uart_putcrlf();
     }
 }

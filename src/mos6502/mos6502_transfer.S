@@ -96,7 +96,7 @@ op_95: @ STA $FF,X
         .global op_96
 op_96: @ STX $FF,Y
         x_to_data_low
-        memw_addr_mode_zpx
+        memw_addr_mode_zpy
         op_end 2 4
 
         .global op_98

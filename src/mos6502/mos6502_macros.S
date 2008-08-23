@@ -392,6 +392,32 @@ MOS6502_Y_OFFSET   = 12
 .endm
 
 /*******************************************************************************
+ * Zeropage,Y addressing mode (write)
+ * 1. Read one byte argument behind m_pc
+ * 2. Add Y to this value, use only lower 8 bits of the result
+ * 3. Write the byte from m_data to the address calculated above
+ *
+ * In:  m_addr  Points to the opcode in the native memory
+ *      m_data  Byte to be written
+ *
+ * Out: m_addr  Changed (!!!)
+ *      m_tmp   Changed
+ *
+ ******************************************************************************/
+.macro  memw_addr_mode_zpy
+        @ read argument behind PC (zeropage address)
+        ldrb    m_addr, [m_addr, #1]
+
+        @ now m_addr contains the zp address, add it shifted to Y into m_addr[31:24]
+        y_to_tmp
+        add     m_addr, m_tmp, m_addr, lsl #24
+
+        @ write m_data to there. correct the bit positions
+        ldr     m_tmp, =c1541_ram
+        strb    m_data, [m_tmp, m_addr, lsr #24]
+.endm
+
+/*******************************************************************************
  * Absolute addressing mode (read)
  * 1. Read two bytes argument behind m_pc
  * 2. Read the byte pointed to by the byte read in step 1
@@ -573,8 +599,8 @@ MOS6502_Y_OFFSET   = 12
         memr_pc_arg16
 
         @ add Y to address and remove overflow bit
-        y_to_data_low
-        add m_addr, m_addr, m_data
+        y_to_tmp
+        add m_addr, m_addr, m_tmp, lsr #24
         bic m_addr, m_addr, #(1 << 16)
 
         @ now m_addr contains the address, write the byte m_data to there
@@ -634,11 +660,11 @@ MOS6502_Y_OFFSET   = 12
  ******************************************************************************/
 .macro  memw_addr_mode_indx
         @ read argument behind PC (zeropage address)
-        ldrb    m_tmp, [m_addr, #1]
+        ldrb    lr, [m_addr, #1]
 
         @ add it to X into m_tmp[31:24]
-        x_to_data
-        add     m_tmp, m_data, m_tmp, lsl #24
+        x_to_tmp
+        add     m_tmp, m_tmp, lr, lsl #24
 
         @ load a byte from there, that's the low byte of the address
         ldr     lr, =c1541_ram

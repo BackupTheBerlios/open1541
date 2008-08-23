@@ -89,6 +89,18 @@ test_again:
 #include "stya.asm"
 #include "styz.asm"
 #include "styzx.asm"
+#include "dexn.asm"
+#include "inxn.asm"
+#include "deyn.asm"
+#include "inyn.asm"
+#include "deca.asm"
+#include "decax.asm"
+#include "decz.asm"
+#include "deczx.asm"
+#include "inca.asm"
+#include "incax.asm"
+#include "incz.asm"
+#include "inczx.asm"
 
             inc test_loop_counter
             jmp test_again

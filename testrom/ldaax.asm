@@ -105,33 +105,5 @@ nonext:
 
                 jmp end
 .realpc
-
-
-check:
-                lda da
-                cmp dr
-                bne error
-                lda aa
-                cmp ar
-                bne error
-                lda xa
-                cmp xr
-                bne error
-                lda ya
-                cmp yr
-                bne error
-                lda pa
-                cmp pr
-                bne error
-                lda sa
-                cmp sr
-                bne error
-                rts
-
-error:
-                pla
-                pla
-                ldy pb          ; error code
-                jsr error_end
 end:
 .)

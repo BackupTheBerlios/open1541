@@ -70,9 +70,28 @@ test_again:
             inc test_loop_counter
             jmp test_again
 
-
-error_end:
-            jmp error_end
+check:
+            lda da
+            cmp dr
+            bne error
+            lda aa
+            cmp ar
+            bne error
+            lda xa
+            cmp xr
+            bne error
+            lda ya
+            cmp yr
+            bne error
+            lda pa
+            cmp pr
+            bne error
+            lda sa
+            cmp sr
+            bne error
+            rts
+error:
+            jmp error
 
 ;===============================================================================
 ; Fill (16k - code size - vector size) with $ff

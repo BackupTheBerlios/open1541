@@ -14,10 +14,9 @@ copy_code:
 copy_this:
 .pseudopc ram_code
 test_name:
-test_start:
-                .text "‘ldaay"
+                .text "ldaay"
                 .byte 0
-
+test_start:
                 lda #%00011011
                 sta db
                 lda #%11000110
@@ -106,33 +105,5 @@ nonext:
 
                 jmp end
 .realpc
-
-
-check:
-                lda da
-                cmp dr
-                bne error
-                lda aa
-                cmp ar
-                bne error
-                lda xa
-                cmp xr
-                bne error
-                lda ya
-                cmp yr
-                bne error
-                lda pa
-                cmp pr
-                bne error
-                lda sa
-                cmp sr
-                bne error
-                rts
-
-error:
-                pla
-                pla
-                ldy pb          ; error code
-                jsr error_end
 end:
 .)

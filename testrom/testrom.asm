@@ -66,6 +66,7 @@ test_again:
 #include "ldaiy.asm"
 #include "ldaz.asm"
 #include "ldazx.asm"
+
 #include "staa.asm"
 #include "staax.asm"
 #include "staay.asm"
@@ -73,34 +74,68 @@ test_again:
 #include "staiy.asm"
 #include "staz.asm"
 #include "stazx.asm"
+
 #include "ldxa.asm"
 #include "ldxay.asm"
 #include "ldxb.asm"
 #include "ldxz.asm"
 #include "ldxzy.asm"
+
 #include "stxa.asm"
 #include "stxz.asm"
 #include "stxzy.asm"
+
 #include "ldya.asm"
 #include "ldyax.asm"
 #include "ldyb.asm"
 #include "ldyz.asm"
 #include "ldyzx.asm"
+
 #include "stya.asm"
 #include "styz.asm"
 #include "styzx.asm"
+
 #include "dexn.asm"
 #include "inxn.asm"
 #include "deyn.asm"
 #include "inyn.asm"
+
 #include "deca.asm"
 #include "decax.asm"
 #include "decz.asm"
 #include "deczx.asm"
+
 #include "inca.asm"
 #include "incax.asm"
 #include "incz.asm"
 #include "inczx.asm"
+
+#include "lsra.asm"
+#include "lsrax.asm"
+#include "lsrn.asm"
+#include "lsrz.asm"
+#include "lsrzx.asm"
+
+#include "rora.asm"
+#include "rorax.asm"
+#include "rorn.asm"
+#include "rorz.asm"
+#include "rorzx.asm"
+
+#include "rola.asm"
+#include "rolax.asm"
+#include "roln.asm"
+#include "rolz.asm"
+#include "rolzx.asm"
+
+; these still don't pass:
+#include "cpxa.asm"
+#include "cpxb.asm"
+#include "cpxz.asm"
+#include "cpya.asm"
+#include "cpyb.asm"
+#include "cpyz.asm"
+
 
             inc test_loop_counter
             jmp test_again

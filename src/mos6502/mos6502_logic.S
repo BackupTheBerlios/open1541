@@ -78,10 +78,12 @@
         orrcs   m_data, m_data, #(1 << 8)
         movs    m_data, m_data, lsr #1  @ ROR
 
-        orrcs   m_tmp, m_data, #(1 << 8)
-        movs    m_tmp, m_tmp, lsl #24   @ to update flags
-
-        update_nzc
+        @ update flags
+        bic     m_pc, m_pc, #(MOS6502_N | MOS6502_Z | MOS6502_C)
+        orrcs   m_pc, m_pc, #MOS6502_C
+        orreq   m_pc, m_pc, #MOS6502_Z
+        tst     m_data, #(1 << 7)
+        orrne   m_pc, m_pc, #MOS6502_N
 .endm
 
         .global op_01
@@ -231,7 +233,7 @@ op_36: @ ROL $FF,X
         memr_addr_mode_zpx
         do_rol
         memw_zp
-        b op_end_3_7            @ no macro here to save some memory
+        op_end 2 6
 
         .global op_39
 op_39: @ AND $FFFF,Y
@@ -314,7 +316,7 @@ op_56: @ LSR $FF,X
         memr_addr_mode_zpx
         do_lsr
         memw_zp
-        b op_end_3_7            @ no macro here to save some memory
+        op_end 2 6
 
         .global op_59
 op_59: @ EOR $FFFF,Y
@@ -361,7 +363,7 @@ op_76: @ ROR $FF,X
         memr_addr_mode_zpx
         do_ror
         memw_zp
-        b op_end_3_7            @ no macro here to save some memory
+        op_end 2 6
 
         .global op_7e
 op_7e: @ ROR $FFFF,X

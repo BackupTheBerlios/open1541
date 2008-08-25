@@ -59,6 +59,7 @@ start:
 test_again:
 
 ; test cases
+#if 0
 #include "ldaa.asm"
 #include "ldaax.asm"
 #include "ldaay.asm"
@@ -127,6 +128,35 @@ test_again:
 #include "roln.asm"
 #include "rolz.asm"
 #include "rolzx.asm"
+#endif
+
+#include "clcn.asm"
+#include "secn.asm"
+
+#include "taxn.asm"
+#include "txan.asm"
+#include "tayn.asm"
+#include "tyan.asm"
+#include "tsxn.asm"
+#include "txsn.asm"
+
+#include "anda.asm"
+#include "andax.asm"
+#include "anday.asm"
+#include "andb.asm"
+#include "andix.asm"
+#include "andiy.asm"
+#include "andz.asm"
+#include "andzx.asm"
+
+#include "oraa.asm"
+#include "oraax.asm"
+#include "oraay.asm"
+#include "orab.asm"
+#include "oraix.asm"
+#include "oraiy.asm"
+#include "oraz.asm"
+#include "orazx.asm"
 
 ; these still don't pass:
 #include "cpxa.asm"

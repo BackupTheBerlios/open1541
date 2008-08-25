@@ -175,7 +175,7 @@ op_1e: @ ASL $FFFF,X
 op_21: @ AND ($FF,X)
         memr_addr_mode_indx
         do_and
-        b op_end_3_7            @ no macro here to save some memory
+        op_end 2 6
 
         .global op_25
 op_25: @ AND $FF

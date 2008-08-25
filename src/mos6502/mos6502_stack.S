@@ -245,6 +245,7 @@ op_ba: @ TSX
         @ get SP
         sp_to_data
         data_low_to_x
+        movs m_data, m_data, lsl #24
         update_nz
         op_end 1 2
 

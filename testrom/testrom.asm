@@ -128,7 +128,6 @@ test_again:
 #include "roln.asm"
 #include "rolz.asm"
 #include "rolzx.asm"
-#endif
 
 #include "clcn.asm"
 #include "secn.asm"
@@ -157,15 +156,14 @@ test_again:
 #include "oraiy.asm"
 #include "oraz.asm"
 #include "orazx.asm"
+#endif
 
-; these still don't pass:
 #include "cpxa.asm"
 #include "cpxb.asm"
 #include "cpxz.asm"
 #include "cpya.asm"
 #include "cpyb.asm"
 #include "cpyz.asm"
-
 
             inc test_loop_counter
             jmp test_again

@@ -45,9 +45,6 @@
         a_to_tmp
         sbcs    m_tmp, m_tmp, m_data, lsl #24
 
-        @ clear unused bits (may be 1 because of C)
-        ands    m_tmp, m_tmp, #(0xff << 24)
-
         tmp_to_a
         update_nzcv
 .endm

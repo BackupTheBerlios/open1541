@@ -5,7 +5,7 @@
  * by David Sharp and Neal Tew.
  *
  * This modules contains all transfer, load and store instructions: 
- * LDA, LDX, LDY, STA, STX, STY, TAX, TAY, TSX, TXA, TXS, TYA
+ * LDA, LDX, LDY, STA, STX, STY, TAX, TAY, TXA, TYA
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

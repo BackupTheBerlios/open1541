@@ -312,7 +312,18 @@ static void cli_show_line(void)
  ******************************************************************************/
 static void cli_process_line(void)
 {
+    int n;
+
     uart_putcrlf();
+
+    // remove trailing and leading spaces
+    n = strlen(command_line) - 1;
+    while (command_line[n] == ' ')
+        command_line[n--] = '\0';
+    n++;
+    while (command_line[0] == ' ')
+        memmove(command_line, command_line + 1, n--);
+
     if (!command_line[0])
         return;
 
@@ -394,9 +405,18 @@ static void cli_memcmd(int what, const char *params)
     if (!params)
         goto syntax_error;
 
-    params = util_parse_hex(params, &stop);
-    if (!params)
-        goto syntax_error;
+    if (*params)
+    {
+        params = util_parse_hex(params, &stop);
+        if (!params)
+            goto syntax_error;
+    }
+    else
+    {
+        stop = start + 64;
+        if (stop > 0x10000)
+            stop = 0x10000;
+    }
 
     /* "stop" is excluded from output */
     if (start >= 0x10000 || stop > 0x10000)

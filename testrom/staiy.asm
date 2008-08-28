@@ -14,22 +14,10 @@ copy_code:
 copy_this:
 .pseudopc ram_code
 test_name:
-test_start:
                 .text "staiy"
                 .byte 0
-
-                lda #%00011011
-                sta db
-                lda #%11000110
-                sta ab
-                lda #%10110001
-                sta xb
-                lda #%01101100
-                sta yb
-                lda #0
-                sta pb
-                tsx
-                stx sb
+test_start:
+                jsr preconditions
 
                 lda #0
                 sta ab

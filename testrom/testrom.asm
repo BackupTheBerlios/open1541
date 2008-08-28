@@ -59,7 +59,6 @@ start:
 test_again:
 
 ; test cases
-#if 0
 #include "ldaa.asm"
 #include "ldaax.asm"
 #include "ldaay.asm"
@@ -156,7 +155,6 @@ test_again:
 #include "oraiy.asm"
 #include "oraz.asm"
 #include "orazx.asm"
-#endif
 
 #include "cpxa.asm"
 #include "cpxb.asm"
@@ -167,6 +165,24 @@ test_again:
 
             inc test_loop_counter
             jmp test_again
+
+preconditions:
+            lda #%00011011
+            sta db
+            lda #%11000110
+            sta ab
+            lda #%10110001
+            sta xb
+            lda #%01101100
+            sta yb
+            lda #0
+            sta pb
+            tsx
+            inx
+            inx
+            stx sb
+
+            rts
 
 check:
             lda da

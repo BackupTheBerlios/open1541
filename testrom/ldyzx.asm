@@ -17,18 +17,7 @@ test_name:
                 .text "ldyzx"
                 .byte 0
 test_start:
-                lda #%00011011
-                sta db
-                lda #%11000110
-                sta ab
-                lda #%10110001
-                sta xb
-                lda #%01101100
-                sta yb
-                lda #0
-                sta pb
-                tsx
-                stx sb
+                jsr preconditions
 
                 lda #0
                 sta db

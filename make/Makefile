@@ -107,6 +107,7 @@ obj += $(objdir)/libc/strcmp.o
 obj += $(objdir)/libc/strncmp.o
 obj += $(objdir)/libc/memcpy.o
 obj += $(objdir)/libc/strcpy.o
+obj += $(objdir)/libc/arm7tdmi.o
 
 ifeq ($(rom), dos1541)
 	obj += $(objdir)/dos1541.o

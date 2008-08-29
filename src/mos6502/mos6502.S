@@ -56,25 +56,36 @@
 
         .bss
 
+        .align 2        @ 4 bytes align
+
 @ !!!!! Keep offsets in sync with MOS6502_XXX_OFFSET constants !!!!!
         .global mos6502_data
 mos6502_data:
 
         .global mos6502_sp
 mos6502_sp:
-.word   0
+        .word   0
 
         .global mos6502_a
 mos6502_areg:
-.word   0
+        .word   0
 
         .global mos6502_x
 mos6502_xreg:
-.word   0
+        .word   0
 
         .global mos6502_y
 mos6502_yreg:
-.word   0
+        .word   0
+
+@ this should be the last entry, because it has variable size
+        .global mos6502_bp
+mos6502_bp:
+        @ 0-terminated list of break points
+#ifdef CONFIG_BREAKPOINTS
+        .space CONFIG_BREAKPOINTS * 2, 0
+        .hword 0
+#endif
 
         .code 32
         .text
@@ -173,7 +184,7 @@ mos6502_get_pc:
         b       exit_fiq_mode
 
 /*******************************************************************************
- * Return a value != 0 if the client machine is stopped, i.e. in single step 
+ * Return a value != 0 if the client machine is stopped, i.e. in single step
  * mode.
  * Must be called from system mode (not from FIQ mode).
  *
@@ -186,7 +197,7 @@ mos6502_is_stopped:
         @ disable IRQs so we won't be disturbed, goto FIQ mode
         msr     cpsr_c, #MODE_FIQ | PSR_I | PSR_F
 
-        and     r0, m_pc, #MOS6502_S
+        and     r0, m_pc, #(MOS6502_S | MOS6502_P)
 
         b       exit_fiq_mode
 
@@ -245,9 +256,13 @@ mos6502_step:
         @ disable IRQs so we won't be disturbed, goto FIQ mode
         msr     cpsr_c, #MODE_FIQ | PSR_I | PSR_F
 
-        @ Check for single step mode
-        tst     m_pc, #MOS6502_S
+        @ Check for single step or breakpoint mode
+        tst     m_pc, #(MOS6502_S | MOS6502_P)
         beq     exit_fiq_mode
+
+        @ possibly only the P flag was set but we want to single step now
+        bic     m_pc, m_pc, #MOS6502_P
+        orr     m_pc, m_pc, #MOS6502_S
 
         @ program the timer match register 0 to expire in 2 us
         @ write T0TC
@@ -270,8 +285,8 @@ step_wait:
         mov     pc, lr
 
 /*******************************************************************************
- * Start execution or continue from single step mode. If the emulation is not 
- * stopped this function does nothing.
+ * Start execution or continue from single step or break mode. If the emulation 
+ * is not stopped this function does nothing.
  * Must be called from system mode (not from FIQ mode).
  *
  ******************************************************************************/
@@ -283,12 +298,12 @@ mos6502_run:
         @ disable IRQs so we won't be disturbed, goto FIQ mode
         msr cpsr_c, #MODE_FIQ | PSR_I | PSR_F
 
-        @ Check for single step mode
-        tst m_pc, #MOS6502_S
+        @ Check for single step or break mode
+        tst m_pc, #(MOS6502_S | MOS6502_P)
         beq 1f
 
-        @ Delete bit for single step mode
-        bic m_pc, m_pc, #MOS6502_S
+        @ Delete bit for single step / break mode (in case it's set)
+        bic m_pc, m_pc, #(MOS6502_S | MOS6502_P)
 
         @ program the timer match register 0 to expire in 2 us
         ldr     m_t, [m_ptimer, #(T0TC - T0IR)]
@@ -297,3 +312,45 @@ mos6502_run:
 1:
         b exit_fiq_mode
 
+/*******************************************************************************
+ * End an opcode emulation, called from FIQ mode.
+ *
+ * Set the CPU emulation timer to expire in 'time' microseconds.
+ * If the emulated CPU is in single step mode, the new time is calculated but
+ * not programmed to the hardware timer. The timer IRQ is Ack'd in any case.
+ * Exit FIQ mode.
+ *
+ * In:  m_t     Current client CPU time
+ *      time    Number of microseconds for current operation
+ *
+ * Out: m_t     Increased by 'time'
+ *
+ ******************************************************************************/
+        .global mos6502_op_end
+mos6502_op_end:
+        @ Ack timer 0 interrupt
+        mov     m_tmp, #TIR_MR0
+        str     m_tmp, [m_ptimer, #(T0IR - T0IR)]
+
+#ifdef CONFIG_BREAKPOINTS
+        @ Check if PC points to a break point
+        add     m_addr, m_pdata, #MOS6502_BP_OFFSET
+check_next_bp:
+        ldrh    m_tmp, [m_addr], #2     @ load BP and post-increment addr
+        movs    m_tmp, m_tmp, lsl #16
+        beq     end_check_bp            @ end if terminating 0 found
+
+        cmp     m_tmp, m_pc, lsl #16    @ does PC match this BP?
+        bne     check_next_bp
+
+        orr     m_pc, m_pc, #MOS6502_P  @ breakpoint mode
+
+end_check_bp:
+#endif
+
+        @ program the timer match register if not in single step nor
+        @ breakpoint mode
+        tst     m_pc, #(MOS6502_S | MOS6502_P)
+        streq   m_t, [m_ptimer, #(T0MR0 - T0IR)] @ store to T0MR0
+
+        ret_fiq

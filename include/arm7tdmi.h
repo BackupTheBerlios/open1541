@@ -39,4 +39,10 @@
 #define PSR_Z       0x40000000
 #define PSR_N       0x80000000
 
+#ifndef __ASSEMBLER__
+/* from arm7tdmi.S */
+uint32_t disable_irqs(void);
+void restore_flags(uint32_t old_flags);
+#endif /* __ASSEMBLER__ */
+
 #endif /* ARM7TDMI_H */

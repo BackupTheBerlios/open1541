@@ -39,7 +39,14 @@ void mos6502_step(void);
 void mos6502_run(void);
 void mos6502_dump_mem(uint16_t start, uint16_t stop);
 
+#ifdef CONFIG_BREAKPOINTS
+void mos6502_show_breakpoints(void);
+int mos6502_set_breakpoint(uint16_t addr);
+void mos6502_rm_breakpoint(uint16_t addr);
+#endif
+
 /* from mos6502.S */
+extern uint16_t mos6502_bp;
 void mos6502_reg_init();
 void mos6502_store_regs(mos6502_regs_t* regs);
 uint16_t mos6502_get_pc(void);

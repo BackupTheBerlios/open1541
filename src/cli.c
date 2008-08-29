@@ -31,6 +31,10 @@ static void cli_process_line(void);
 static void cli_help(void);
 static void cli_memcmd(int what, const char *params);
 static void cli_step(void);
+#ifdef CONFIG_BREAKPOINTS
+static void cli_break(const char *params);
+static void cli_rm(const char *params);
+#endif
 
 // These constants are used to mark special commands
 #define VK_UP        0x100
@@ -343,6 +347,16 @@ static void cli_process_line(void)
     {
         mos6502_dump_regs();
     }
+#ifdef CONFIG_BREAKPOINTS
+    else if (strncmp(command_line, "break", 5) == 0)
+    {
+        cli_break(command_line + 5);
+    }
+    else if (strncmp(command_line, "rm ", 3) == 0)
+    {
+        cli_rm(command_line + 3);
+    }
+#endif
     else if (strcmp(command_line, "cont") == 0)
     {
         mos6502_run();
@@ -383,11 +397,15 @@ static void cli_help(void)
     uart_puts("stop\t\tStop 6502 emulation\r\n"
               "step|z\t\tExecute single instruction\r\n"
               "regs|r\t\tShow 6502 registers\r\n"
+#ifdef CONFIG_BREAKPOINTS
+              "break [<addr>]\tShow or set breakpoints\r\n"
+              "rm <addr>\t\tRemove breakpoint\r\n"
+#endif
               "cont\t\tContinue 6502 emulation\r\n"
               "reset\t\tReset 6502, keep single step mode if set\r\n"
               "m <a> <b>\tDump 6502 memory range\r\n"
               "d <a> <b>\tDisassemble 6502 memory range\r\n"
-              "speed\t\tStart a benchmark\r\n"
+              "speed\t\tStart benchmark\r\n"
               "help\t\tHelp\r\n"
               "<F1>\t\tRepeat last command\r\n");
 }
@@ -433,7 +451,7 @@ syntax_error:
 }
 
 /*******************************************************************************
- * If the client is stopped, execute a signle instruction and show the
+ * If the client is stopped, execute a single instruction and show the
  * registers and disassembly afterwards.
  * Print an error message otherwise.
  *
@@ -452,3 +470,50 @@ static void cli_step(void)
     else
         uart_puterror("STEP");
 }
+
+#ifdef CONFIG_BREAKPOINTS
+/*******************************************************************************
+ * Show all breakpoints or set a breakpoint if an address is given.
+ *
+ ******************************************************************************/
+static void cli_break(const char *params)
+{
+    unsigned addr;
+
+    if (*params == '\0')
+    {
+        mos6502_show_breakpoints();
+    }
+    else
+    {
+        params = util_parse_hex(params, &addr);
+        if (!params || addr >= 0x10000)
+        {
+            uart_puterror("SYNTAX");
+            return;
+        }
+        if (!mos6502_set_breakpoint(addr))
+        {
+            uart_puterror("TOO MANY BREAKPOINTS");
+            return;
+        }
+    }
+}
+
+/*******************************************************************************
+ * Remove a break point.
+ *
+ ******************************************************************************/
+static void cli_rm(const char *params)
+{
+    unsigned addr;
+
+    params = util_parse_hex(params, &addr);
+    if (!params || addr >= 0x10000)
+    {
+        uart_puterror("SYNTAX");
+        return;
+    }
+    mos6502_rm_breakpoint(addr);
+}
+#endif

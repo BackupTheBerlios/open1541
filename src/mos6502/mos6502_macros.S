@@ -41,7 +41,7 @@ m_ptimer .req   r11
 @ NZCF are kept in the same order and at the same position as in ARM,
 @ so they simply can be copied.
 @ The bits are:
-@ NZCVBDI0 000000Sx PPPPPPPP PPPPPPPP
+@ NZCVBDI0 00000PSx PPPPPPPP PPPPPPPP
 @ P = pc
 @ x = kept for overflow, don't use
 @ 0 = reserved
@@ -58,7 +58,8 @@ MOS6502_B   = (1 << 27)
 MOS6502_D   = (1 << 26)
 MOS6502_I   = (1 << 25)
 
-MOS6502_S   = (1 << 17)
+MOS6502_P   = (1 << 16) @ stopped because of a break point
+MOS6502_S   = (1 << 17) @ single step mode
 
 @ This mask leaves only bits used by the emulation
 MOS6502_PC_EMU_MASK = 0x00ff0000
@@ -81,6 +82,7 @@ MOS6502_SP_OFFSET  =  0
 MOS6502_A_OFFSET   =  4
 MOS6502_X_OFFSET   =  8
 MOS6502_Y_OFFSET   = 12
+MOS6502_BP_OFFSET  = 16
 
 .macro tmp_to_sp
         str m_tmp, [m_pdata, #MOS6502_SP_OFFSET]
@@ -802,39 +804,15 @@ MOS6502_Y_OFFSET   = 12
 .endm
 
 /*******************************************************************************
- * Set the CPU emulation timer to expire in 'time' microseconds.
- * If the emulated CPU is in single step mode, the new time is calculated but
- * not programmed to the hardware timer. The timer IRQ is Ack'd in any case.
- *
- * In:  m_t     Current client CPU time
- *      time    Number of microseconds for current operation
- *
- * Out: m_t     Increased by 'time'
- *      m_addr  Changed
- *      m_tmp   changed
- *
- ******************************************************************************/
-.macro inc_time time
-        @ Ack timer 0 interrupt
-        mov     m_tmp, #TIR_MR0
-        str     m_tmp, [m_ptimer, #(T0IR - T0IR)]
-
-        @ Set next timer
-        add     m_t, m_t, #\time
-
-        @ program the timer match register if not in single step mode
-        tst     m_pc, #MOS6502_S
-        streq   m_t, [m_ptimer, #(T0MR0 - T0IR)] @ store to T0MR0
-.endm
-
-/*******************************************************************************
  * Increment the PC by the given number, set the CPU emulation timer to expire
  * in 'time' microseconds and return from FIQ
  ******************************************************************************/
 .macro op_end pc time
         inc_pc \pc
-        inc_time \time
-        ret_fiq
+
+        @ Set next timer
+        add     m_t, m_t, #\time
+        b       mos6502_op_end
 .endm
 
 /*******************************************************************************

@@ -110,3 +110,86 @@ void mos6502_dump_mem(uint16_t start, uint16_t stop)
         uart_putcrlf();
     }
 }
+
+#ifdef CONFIG_BREAKPOINTS
+/*******************************************************************************
+ * Print a list of breakpoints set.
+ *
+ ******************************************************************************/
+void mos6502_show_breakpoints(void)
+{
+    uint32_t  old_flags;
+    uint16_t* p;
+
+    old_flags = disable_irqs();
+    p = &mos6502_bp;
+    while (*p)
+    {
+        uart_puthex_padded(4, *p);
+        uart_putcrlf();
+        p++;
+    }
+
+    restore_flags(old_flags);
+}
+
+/*******************************************************************************
+ * Set a breakpoint at addr. If there is a breakpoint at this address already,
+ * let the call succeed without setting another one.
+ * Return 1 on success, 0 otherwise.
+ *
+ ******************************************************************************/
+int mos6502_set_breakpoint(uint16_t addr)
+{
+    uint32_t  old_flags;
+    int i;
+    int ret = 0;
+
+    old_flags = disable_irqs();
+    for (i = 0; i < CONFIG_BREAKPOINTS; i++)
+    {
+        // breakpoint already there?
+        if ((&mos6502_bp)[i] == addr)
+        {
+            ret = 1;
+            break;
+        }
+
+        // end of list reached?
+        if ((&mos6502_bp)[i] == 0)
+        {
+            (&mos6502_bp)[i] = addr;
+            ret = 1;
+            break;
+        }
+    }
+
+    restore_flags(old_flags);
+    return ret;
+}
+
+/*******************************************************************************
+ * Remove a breakpoint at addr.
+ *
+ ******************************************************************************/
+void mos6502_rm_breakpoint(uint16_t addr)
+{
+    uint32_t old_flags;
+    int i;
+
+    i = 0;
+    old_flags = disable_irqs();
+
+    while ((&mos6502_bp)[i])
+    {
+        if ((&mos6502_bp)[i] == addr)
+        {
+            memmove(&mos6502_bp + i, &mos6502_bp + i + 1,
+                    sizeof(mos6502_bp) * (CONFIG_BREAKPOINTS - i) );
+        }
+        i++;
+    }
+
+    restore_flags(old_flags);
+}
+#endif /* CONFIG_BREAKPOINTS */

@@ -59,6 +59,7 @@ start:
 test_again:
 
 ; test cases
+#if 0
 #include "ldaa.asm"
 #include "ldaax.asm"
 #include "ldaay.asm"
@@ -162,6 +163,29 @@ test_again:
 #include "cpya.asm"
 #include "cpyb.asm"
 #include "cpyz.asm"
+
+#endif
+
+#include "cmpa.asm"
+#include "cmpax.asm"
+#include "cmpay.asm"
+#include "cmpb.asm"
+#include "cmpix.asm"
+#include "cmpiy.asm"
+#include "cmpz.asm"
+#include "cmpzx.asm"
+
+#include "eora.asm"
+#include "eorax.asm"
+#include "eoray.asm"
+#include "eorb.asm"
+#include "eorix.asm"
+#include "eoriy.asm"
+#include "eorz.asm"
+#include "eorzx.asm"
+
+#include "bita.asm"
+#include "bitz.asm"
 
             inc test_loop_counter
             jmp test_again

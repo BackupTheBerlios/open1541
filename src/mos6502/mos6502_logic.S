@@ -175,7 +175,7 @@ op_1e: @ ASL $FFFF,X
 op_21: @ AND ($FF,X)
         memr_addr_mode_indx
         do_and
-        op_end 2 6
+        b op_end_2_6
 
         .global op_25
 op_25: @ AND $FF
@@ -233,7 +233,7 @@ op_36: @ ROL $FF,X
         memr_addr_mode_zpx
         do_rol
         memw_zp
-        op_end 2 6
+        b op_end_2_6
 
         .global op_39
 op_39: @ AND $FFFF,Y
@@ -258,7 +258,7 @@ op_3e: @ ROL $FFFF,X
 op_41: @ EOR ($FF,X)
         memr_addr_mode_indx
         do_eor
-        b op_end_3_7            @ no macro here to save some memory
+        b op_end_2_6
 
         .global op_45
 op_45: @ EOR $FF
@@ -316,7 +316,7 @@ op_56: @ LSR $FF,X
         memr_addr_mode_zpx
         do_lsr
         memw_zp
-        op_end 2 6
+        b op_end_2_6
 
         .global op_59
 op_59: @ EOR $FFFF,Y
@@ -363,7 +363,7 @@ op_76: @ ROR $FF,X
         memr_addr_mode_zpx
         do_ror
         memw_zp
-        op_end 2 6
+        b op_end_2_6
 
         .global op_7e
 op_7e: @ ROR $FFFF,X

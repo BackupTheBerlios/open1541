@@ -25,6 +25,9 @@ else
 platform     ?= lpc2134
 endif
 
+# use "dos1541" or "testrom" here
+rom          ?= dos1541
+
 add_path     ?= /opt/arm-elf-binutils-2.18.50-gcc-4.3.0/bin
 serial_port  ?= /dev/ttyUSB0
 
@@ -112,7 +115,7 @@ obj += $(objdir)/libc/arm7tdmi.o
 ifeq ($(rom), dos1541)
 	obj += $(objdir)/dos1541.o
 	DEFINE += -DROM_IMAGE=dos1541
-	# Currently the 1541 ROM is compiled in.
+	# Currently the 1541 II ROM is compiled in.
 	# Later it will be loaded from SD card into RAM or Flash.
 	ifeq ("$(wildcard $(srcdir)/dos1541.bin)", "")
 		$(error No 1541 ROM image in $(srcdir)/dos1541.bin)

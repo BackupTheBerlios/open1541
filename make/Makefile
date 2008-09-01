@@ -40,7 +40,14 @@ incdir       := $(project_root)/include
 objdir       := $(project_root)/obj-$(platform)
 
 lpcflash     := $(project_root)/tools/lpcflash/lpcflash
+config       := $(project_root)/make/config.$(platform)
 
+CC           := arm-elf-gcc
+AS           := arm-elf-as
+LD           := arm-elf-ld
+INSIGHT      := arm-elf-insight
+OBJCOPY      := arm-elf-objcopy
+SIZE         := arm-elf-size
 
 # remove built-in rules to make debugging easier
 .SUFFIXES:
@@ -67,6 +74,7 @@ INCLUDE := -I$(incdir)
 INCLUDE += -I$(srcdir)
 INCLUDE += -I$(srcdir)/c1541
 INCLUDE += -I$(srcdir)/mos6502
+INCLUDE += -I$(objdir)
 
 DEFINE  :=
 
@@ -77,7 +85,6 @@ CFLAGS  += -march=armv4 -mtune=arm7tdmi -std=c99
 
 LDFLAGS := -N -p -X -T$(scriptdir)/lpc2134.ld
 
-include $(platform).options
 include $(testromdir)/testrom.mk
 
 #############################################################################

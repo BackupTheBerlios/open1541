@@ -1,0 +1,10 @@
+XTAL=10000000
+CCLK=60000000
+PCLK=60000000
+
+CONFIG_UART_BAUDRATE=38400
+
+# This is the maximum number of breakpoints set at once.
+# Set it to 0 to disable the breakpoint mechanism. This will save about
+# 500 Bytes of codes and speed up the emulation about 10%.
+CONFIG_BREAKPOINTS=4

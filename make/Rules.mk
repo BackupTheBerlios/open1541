@@ -20,7 +20,7 @@
 #############################################################################
 # Create .o in objdir from .c in the corresponding srcdir
 #
-$(objdir)%.o: $(srcdir)%.c
+$(objdir)%.o: $(srcdir)%.c | $(objdir)/autoconf.h
 	echo 'compiling $(notdir $<) ...'
 	mkdir -p $(dir $@)
 	$(CC) -c -MD -MT $@ -MF $(objdir)$*.d \
@@ -29,7 +29,7 @@ $(objdir)%.o: $(srcdir)%.c
 #############################################################################
 # Create .o in objdir from .S in the corresponding srcdir
 #
-$(objdir)%.o: $(srcdir)%.S
+$(objdir)%.o: $(srcdir)%.S | $(objdir)/autoconf.h
 	echo 'compiling $(notdir $<) ...'
 	mkdir -p $(dir $@)
 	$(CC) -c -MD -MT $@ -MF $(objdir)$*.d \
@@ -38,7 +38,7 @@ $(objdir)%.o: $(srcdir)%.S
 #############################################################################
 # Create .o from .s
 #
-%.o: %.s
+%.o: %.s | $(objdir)/autoconf.h
 	echo 'compiling $(notdir $<) ...'
 	mkdir -p $(dir $@)
 	$(CC) -c -MD -MT $@ -MF $(objdir)$*.d \
@@ -69,3 +69,11 @@ $(objdir)%.s: $(srcdir)%.bin
 	echo 'creating $(notdir $@) ...'
 	$(OBJCOPY) -O ihex $< $@
 	$(SIZE) $<
+
+#############################################################################
+# Generate autoconf.h from config
+#
+$(objdir)/autoconf.h: $(config)
+	mkdir -p $(dir $@)
+	sed -f $(scriptdir)/conf2h.sed $(config) > $(objdir)/autoconf.h
+#    gawk -f $(scriptdir)/conf2h.awk $(config) > $(objdir)/autoconf.h

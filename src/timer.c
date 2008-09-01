@@ -15,6 +15,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include <autoconf.h>
 #include <lpc213x.h>
 #include <timer.h>
 

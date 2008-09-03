@@ -21,9 +21,11 @@
 #define LPC213X_H
 
 #ifdef __ASSEMBLER__
-# define REG32(x) x
+# define REG32(x)         (x)
+# define REG32OFFSET(x,y) ((x)+(y))
 #else
-# define REG32(x) (*(volatile unsigned long*) x)
+# define REG32(x)         (*(volatile unsigned long*) (x))
+# define REG32OFFSET(x,y) (*(volatile unsigned long*) ((x)+(y)))
 #endif
 
 /* PLL */
@@ -96,16 +98,22 @@
 //#define PINSEL0_P00_    (0 << 0)
 
 /* GPIO */
+#define IO0     0xE0028000
+#define IO1     0xE0028010
+#define IOPIN   0x0
+#define IOSET   0x4
+#define IODIR   0x8
+#define IOCLR   0xC
 
-#define IO0PIN  REG32(0xE0028000)
-#define IO0SET  REG32(0xE0028004)
-#define IO0DIR  REG32(0xE0028008)
-#define IO0CLR  REG32(0xE002800C)
+#define IO0PIN  REG32OFFSET(IO0, IOPIN)
+#define IO0SET  REG32OFFSET(IO0, IOSET)
+#define IO0DIR  REG32OFFSET(IO0, IODIR)
+#define IO0CLR  REG32OFFSET(IO0, IOCLR)
 
-#define IO1PIN  REG32(0xE0028010)
-#define IO1SET  REG32(0xE0028014)
-#define IO1DIR  REG32(0xE0028018)
-#define IO1CLR  REG32(0xE002801C)
+#define IO1PIN  REG32OFFSET(IO1, IOPIN)
+#define IO1SET  REG32OFFSET(IO1, IOSET)
+#define IO1DIR  REG32OFFSET(IO1, IODIR)
+#define IO1CLR  REG32OFFSET(IO1, IOCLR)
 
 /* UART0 */
 

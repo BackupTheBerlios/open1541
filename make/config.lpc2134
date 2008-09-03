@@ -8,3 +8,9 @@ CONFIG_UART_BAUDRATE=38400
 # Set it to 0 to disable the breakpoint mechanism. This will save about
 # 500 Bytes of codes and speed up the emulation about 10%.
 CONFIG_BREAKPOINTS=4
+
+# I/O configuration
+DIRTY_LED_PORT  = IO0
+DIRTY_LED_PIN   =  31
+BUSY_LED_PORT   = IO0
+BUSY_LED_PIN    =  30

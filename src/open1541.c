@@ -24,6 +24,7 @@
 #include <cli.h>
 #include <mos6502.h>
 #include <c1541.h>
+#include <autoconf.h>
 
 static void init_clocks();
 
@@ -44,14 +45,14 @@ int main()
 
     cli_init();
 
-    IO0DIR |= 1 << 31;
-    IO0CLR = 1 << 31;
+    REG32OFFSET(DIRTY_LED_PORT, IODIR) |= 1 << DIRTY_LED_PIN;
+    REG32OFFSET(DIRTY_LED_PORT, IOCLR)  = 1 << DIRTY_LED_PIN;
+
+    //REG32OFFSET(BUSY_LED_PORT, IODIR) |= 1 << BUSY_LED_PIN;
+    //REG32OFFSET(BUSY_LED_PORT, IOCLR)  = 1 << BUSY_LED_PIN;
 
     for (;;)
     {
-       // uart_putdec(T0TC);
-       // uart_putcrlf();
-     //   mos6502_dump_regs();
         cli_check();
     }
 

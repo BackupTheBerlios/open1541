@@ -23,6 +23,7 @@
  */
 
 #include <lpc213x.h>
+#include "mos6502.h"
 #include "mos6502_macros.S"
 
 @ Do an ADC, the argument is in m_data[7:0]

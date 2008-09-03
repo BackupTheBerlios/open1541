@@ -51,14 +51,16 @@
 
 #include <arm7tdmi.h>
 #include <lpc213x.h>
+#include <via.h>
 
+#include "mos6502.h"
 #include "mos6502_macros.S"
 
         .bss
 
         .align 2        @ 4 bytes align
 
-@ !!!!! Keep offsets in sync with MOS6502_XXX_OFFSET constants !!!!!
+@ !!!!! Keep offsets in sync with MOS6502_XXX_OFFSET in mos6502.h !!!!!
         .global mos6502_data
 mos6502_data:
 
@@ -77,6 +79,14 @@ mos6502_xreg:
         .global mos6502_y
 mos6502_yreg:
         .word   0
+
+via1_reg_mirror:
+        .global via1_reg_mirror
+        .space VIA_REG_SIZE, 0
+
+via2_reg_mirror:
+        .global via2_reg_mirror
+        .space VIA_REG_SIZE, 0
 
 @ this should be the last entry, because it has variable size
         .global mos6502_bp

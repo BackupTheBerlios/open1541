@@ -16,6 +16,7 @@
  */
 
 #include <lpc213x.h>
+#include "mos6502.h"
 #include "mos6502_macros.S"
 
 @ put the emulated processor flags into m_data in 6502 order

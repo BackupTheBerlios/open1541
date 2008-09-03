@@ -18,6 +18,16 @@
 #ifndef MOS6502_H
 #define MOS6502_H
 
+/* !!!!! Keepin sync with mos6502_data in mos6502.S !!!!! */
+#define MOS6502_SP_OFFSET                 0
+#define MOS6502_A_OFFSET                  4
+#define MOS6502_X_OFFSET                  8
+#define MOS6502_Y_OFFSET                 12
+#define MOS6502_VIA1_REG_MIRROR_OFFSET   14
+#define MOS6502_VIA2_REG_MIRROR_OFFSET  (14 + 16)
+#define MOS6502_BP_OFFSET               (14 + 32)
+
+#ifndef __ASSEMBLER__
 typedef struct mos6502_regs_s
 {
     uint32_t    time;
@@ -28,7 +38,6 @@ typedef struct mos6502_regs_s
     uint32_t    pc;
 }
 mos6502_regs_t;
-
 
 /* from mos6502_if.c */
 void mos6502_reset(void);
@@ -55,5 +64,7 @@ uint8_t mos6502_read_mem(uint16_t address);
 
 /* from mos6502_dis.c */
 uint16_t mos6502_dis(uint16_t start, uint16_t stop);
+
+#endif /* ifndef __ASSEMBLER__ */
 
 #endif

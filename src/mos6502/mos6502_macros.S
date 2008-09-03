@@ -77,13 +77,6 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
  *
  ******************************************************************************/
 
-@ !!!!! Keep offsets in sync with mos6502_data table !!!!!
-MOS6502_SP_OFFSET  =  0
-MOS6502_A_OFFSET   =  4
-MOS6502_X_OFFSET   =  8
-MOS6502_Y_OFFSET   = 12
-MOS6502_BP_OFFSET  = 16
-
 .macro tmp_to_sp
         str m_tmp, [m_pdata, #MOS6502_SP_OFFSET]
 .endm

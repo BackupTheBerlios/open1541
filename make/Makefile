@@ -156,7 +156,7 @@ simulate: $(objdir)/open1541
 
 .PHONY: flash
 flash: $(lpcflash) $(objdir)/open1541.hex
-	$(lpcflash) -p $(serial_port) $(objdir)/open1541.hex
+	$(lpcflash) -p $(serial_port) -b 19200 $(objdir)/open1541.hex
 
 $(lpcflash):
 	make -C $(dir $@)

@@ -23,7 +23,7 @@
 
 /*******************************************************************************
  * memr_table points to functions responsible for reading data at a certain
- * memory location. Each 0x0800 = (1 << 11) = 2048 bytes block has one pointer,
+ * memory location. Each 0x0400 = (1 << 10) = 1024 bytes block has one pointer,
  * so specialized functions and memory mirroring will be possible.
  *
  * This table is not used to read opcodes, see mos6502_fiq.S instead.
@@ -31,31 +31,47 @@
  ******************************************************************************/
         .global memr_table
 memr_table:
-        .word memr_ram,  memr_none, memr_via,  memr_none  @ 0x0000
+        .word memr_ram,  memr_ram,  memr_none, memr_none  @ 0x0000
+        .word memr_none, memr_via1, memr_via2, memr_none  @ 0x1000
         .word memr_none, memr_none, memr_none, memr_none  @ 0x2000
+        .word memr_none, memr_none, memr_none, memr_none  @ 0x3000
         .word memr_none, memr_none, memr_none, memr_none  @ 0x4000
+        .word memr_none, memr_none, memr_none, memr_none  @ 0x5000
         .word memr_none, memr_none, memr_none, memr_none  @ 0x6000
+        .word memr_none, memr_none, memr_none, memr_none  @ 0x7000
         .word memr_none, memr_none, memr_none, memr_none  @ 0x8000
+        .word memr_none, memr_none, memr_none, memr_none  @ 0x9000
         .word memr_none, memr_none, memr_none, memr_none  @ 0xa000
+        .word memr_none, memr_none, memr_none, memr_none  @ 0xb000
         .word memr_rom,  memr_rom,  memr_rom,  memr_rom   @ 0xc000
+        .word memr_rom,  memr_rom,  memr_rom,  memr_rom   @ 0xd000
         .word memr_rom,  memr_rom,  memr_rom,  memr_rom   @ 0xe000
+        .word memr_rom,  memr_rom,  memr_rom,  memr_rom   @ 0xf000
 
 /*******************************************************************************
  * memw_table points to functions responsible for writing data to a certain
- * memory location. Each 0x0800 = (1 << 11) = 2048 bytes block has one pointer,
+ * memory location. Each 0x0400 = (1 << 10) = 1024 bytes block has one pointer,
  * so specialized functions and memory mirroring will be possible.
  *
  ******************************************************************************/
         .global memw_table
 memw_table:
-        .word memw_ram,  memw_none, memw_via,  memw_none  @ 0x0000
+        .word memw_ram,  memw_ram,  memw_none, memw_none  @ 0x0000
+        .word memw_none, memw_via1, memw_via2, memw_none  @ 0x1000
         .word memw_none, memw_none, memw_none, memw_none  @ 0x2000
+        .word memw_none, memw_none, memw_none, memw_none  @ 0x3000
         .word memw_none, memw_none, memw_none, memw_none  @ 0x4000
+        .word memw_none, memw_none, memw_none, memw_none  @ 0x5000
         .word memw_none, memw_none, memw_none, memw_none  @ 0x6000
+        .word memw_none, memw_none, memw_none, memw_none  @ 0x7000
         .word memw_none, memw_none, memw_none, memw_none  @ 0x8000
+        .word memw_none, memw_none, memw_none, memw_none  @ 0x9000
         .word memw_none, memw_none, memw_none, memw_none  @ 0xa000
+        .word memw_none, memw_none, memw_none, memw_none  @ 0xb000
         .word memw_none, memw_none, memw_none, memw_none  @ 0xc000
+        .word memw_none, memw_none, memw_none, memw_none  @ 0xd000
         .word memw_none, memw_none, memw_none, memw_none  @ 0xe000
+        .word memw_none, memw_none, memw_none, memw_none  @ 0xf000
 
 /*******************************************************************************
  * Read RAM pointed to by m_addr (client address). Return the result
@@ -122,10 +138,8 @@ memw_ram:
         mov     pc, lr                  @ return
 
 memr_none:
-memr_via:
         mov m_data, #0xff
         mov pc, lr
 
 memw_none:
-memw_via:
         mov pc, lr

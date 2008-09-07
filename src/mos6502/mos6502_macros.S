@@ -196,7 +196,7 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
         mov lr, pc
 
         @ call the right handler
-        ldr pc, [m_data, m_tmp, lsr #(11 - 2)]
+        ldr pc, [m_data, m_tmp, lsr #(10 - 2)]
 .endm
 
 /*******************************************************************************
@@ -215,7 +215,7 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
         ldr m_tmp, =memw_table
 
         @ each table entry points to 0x0800 bytes, use the higher bits
-        add m_tmp, m_tmp, m_addr, lsr #(11 - 2)
+        add m_tmp, m_tmp, m_addr, lsr #(10 - 2)
         bic m_tmp, m_tmp, #3
 
         @ prepare link register, will return 2 instructions behind this

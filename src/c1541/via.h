@@ -15,6 +15,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#define VIA1_BASE       0x1800
+#define VIA2_BASE       0x1c00
+
 /* MOS 6522 registers */
 #define VIA_PRB         0  /* Port B */
 #define VIA_PRA         1  /* Port A */

@@ -37,7 +37,7 @@ tooldir      := $(project_root)/tools
 srcdir       := $(project_root)/src
 testromdir   := $(project_root)/testrom
 incdir       := $(project_root)/include
-objdir       := $(project_root)/obj-$(platform)
+objdir       := $(project_root)/obj-$(platform)-$(rom)
 
 lpcflash     := $(project_root)/tools/lpcflash/lpcflash
 config       := $(project_root)/make/config.$(platform)

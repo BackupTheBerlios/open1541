@@ -23,9 +23,9 @@
 #define MOS6502_A_OFFSET            4
 #define MOS6502_X_OFFSET            8
 #define MOS6502_Y_OFFSET           12
-#define MOS6502_VIA1_REGS_OFFSET   14
-#define MOS6502_VIA2_REGS_OFFSET  (14 + 16)
-#define MOS6502_BP_OFFSET         (14 + 32)
+#define MOS6502_VIA1_REGS_OFFSET   16
+#define MOS6502_VIA2_REGS_OFFSET  (16 + 16)
+#define MOS6502_BP_OFFSET         (16 + 32)
 
 #ifndef __ASSEMBLER__
 typedef struct mos6502_regs_s
@@ -47,6 +47,7 @@ void mos6502_stop(void);
 void mos6502_step(void);
 void mos6502_run(void);
 void mos6502_dump_mem(uint16_t start, uint16_t stop);
+void mos6502_fill_mem(uint16_t from, uint16_t to, uint8_t val);
 
 #ifdef CONFIG_BREAKPOINTS
 void mos6502_show_breakpoints(void);
@@ -61,6 +62,7 @@ void mos6502_store_regs(mos6502_regs_t* regs);
 uint16_t mos6502_get_pc(void);
 int mos6502_is_stopped(void);
 uint8_t mos6502_read_mem(uint16_t address);
+uint8_t mos6502_write_mem(uint16_t address, uint8_t val);
 
 /* from mos6502_dis.c */
 uint16_t mos6502_dis(uint16_t start, uint16_t stop);

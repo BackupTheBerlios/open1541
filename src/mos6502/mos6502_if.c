@@ -17,6 +17,7 @@
 
 #include <stdint.h>
 #include <string.h>
+#include <autoconf.h>
 #include <uart.h>
 #include <arm7tdmi.h>
 #include <lpc213x.h>
@@ -75,7 +76,7 @@ void mos6502_dump_regs(void)
 }
 
 /*******************************************************************************
- * Print a hexdump of client memory to UART.
+ * Print a hexdump of client memory from <start> to <stop> (excluded) to UART.
  *
  ******************************************************************************/
 void mos6502_dump_mem(uint16_t start, uint16_t stop)
@@ -108,6 +109,18 @@ void mos6502_dump_mem(uint16_t start, uint16_t stop)
         uart_putc(' ');
         uart_puts(text);
         uart_putcrlf();
+    }
+}
+
+/*******************************************************************************
+ * Fill <from>  to <to> (included) with <val>.
+ *
+ ******************************************************************************/
+void mos6502_fill_mem(uint16_t from, uint16_t to, uint8_t val)
+{
+    while (from <= to)
+    {
+        mos6502_write_mem(from++, val);
     }
 }
 

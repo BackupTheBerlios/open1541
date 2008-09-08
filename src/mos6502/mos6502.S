@@ -49,6 +49,7 @@
  *
  */
 
+#include <autoconf.h>
 #include <arm7tdmi.h>
 #include <lpc213x.h>
 #include <via.h>
@@ -92,7 +93,7 @@ via2_reg_mirror:
         .global mos6502_bp
 mos6502_bp:
         @ 0-terminated list of break points
-#ifdef CONFIG_BREAKPOINTS
+#if CONFIG_BREAKPOINTS > 0
         .space CONFIG_BREAKPOINTS * 2, 0
         .hword 0
 #endif
@@ -232,6 +233,25 @@ mos6502_read_mem:
         b       exit_fiq_mode
 
 /*******************************************************************************
+ * Write r1 to emulated memory pointed to by r0.
+ * Must be called from system mode (not from FIQ mode).
+ *
+ ******************************************************************************/
+        .global mos6502_write_mem
+mos6502_write_mem:
+        @ remember old processor and interrupt state
+        mrs     r3, cpsr
+
+        @ disable IRQs so we won't be disturbed, goto FIQ mode
+        msr     cpsr_c, #MODE_FIQ | PSR_I | PSR_F
+
+        mov     m_addr, r0
+        mov     m_data, r1
+        memw_data_to_addr
+
+        b       exit_fiq_mode
+
+/*******************************************************************************
  * Put the 6502 into single step mode.
  * Must be called from system mode (not from FIQ mode).
  *
@@ -342,13 +362,13 @@ mos6502_op_end:
         mov     m_tmp, #TIR_MR0
         str     m_tmp, [m_ptimer, #(T0IR - T0IR)]
 
-#ifdef CONFIG_BREAKPOINTS
+#if CONFIG_BREAKPOINTS > 0
         @ Check if PC points to a break point
         add     m_addr, m_pdata, #MOS6502_BP_OFFSET
 check_next_bp:
         ldrh    m_tmp, [m_addr], #2     @ load BP and post-increment addr
-        movs    m_tmp, m_tmp, lsl #16
-        beq     end_check_bp            @ end if terminating 0 found
+        movs    m_tmp, m_tmp, lsl #16   @ shift away flags
+        beq     end_check_bp            @ end if terminating 0 was found
 
         cmp     m_tmp, m_pc, lsl #16    @ does PC match this BP?
         bne     check_next_bp

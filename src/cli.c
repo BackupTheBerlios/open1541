@@ -18,6 +18,8 @@
  */
 
 #include <string.h>
+
+#include <autoconf.h>
 #include <uart.h>
 #include <util.h>
 #include <mos6502.h>
@@ -30,6 +32,7 @@ static void cli_show_line(void);
 static void cli_process_line(void);
 static void cli_help(void);
 static void cli_memcmd(int what, const char *params);
+static void cli_fill(const char *params);
 static void cli_step(void);
 #ifdef CONFIG_BREAKPOINTS
 static void cli_break(const char *params);
@@ -365,14 +368,6 @@ static void cli_process_line(void)
     {
         mos6502_reset();
     }
-    else if (strncmp(command_line, "m ", 2) == 0)
-    {
-        cli_memcmd('m', command_line + 2);
-    }
-    else if (strncmp(command_line, "d ", 2) == 0)
-    {
-        cli_memcmd('d', command_line + 2);
-    }
     else if (strcmp(command_line, "speed") == 0)
     {
         uart_putdec(util_benchmark());
@@ -381,6 +376,21 @@ static void cli_process_line(void)
     else if (strcmp(command_line, "help") == 0)
     {
         cli_help();
+    }
+    /* these short commands may be prefixes of others, nevertheless I want 
+     * things like "m0500" to work, so put them last
+     */
+    else if (command_line[0] == 'm')
+    {
+        cli_memcmd('m', command_line + 1);
+    }
+    else if (command_line[0] == 'd')
+    {
+        cli_memcmd('d', command_line + 1);
+    }
+    else if (command_line[0] == 'f')
+    {
+        cli_fill(command_line + 1);
     }
     else
     {
@@ -399,12 +409,13 @@ static void cli_help(void)
               "regs|r\t\tShow 6502 registers\r\n"
 #ifdef CONFIG_BREAKPOINTS
               "break [<addr>]\tShow or set breakpoints\r\n"
-              "rm <addr>\t\tRemove breakpoint\r\n"
+              "rm <addr>\tRemove breakpoint\r\n"
 #endif
               "cont\t\tContinue 6502 emulation\r\n"
               "reset\t\tReset 6502, keep single step mode if set\r\n"
               "m <a> <b>\tDump 6502 memory range\r\n"
               "d <a> <b>\tDisassemble 6502 memory range\r\n"
+              "f <a> [<b>] <v>\tFill one or more bytes with <v>\r\n"
               "speed\t\tStart benchmark\r\n"
               "help\t\tHelp\r\n"
               "<F1>\t\tRepeat last command\r\n");
@@ -419,18 +430,22 @@ static void cli_memcmd(int what, const char *params)
     unsigned start;
     unsigned stop;
 
+    /* first parameter is mandatory */
     params = util_parse_hex(params, &start);
     if (!params)
         goto syntax_error;
 
+    /* if another parameter follows */
     if (*params)
     {
+        /* it must be a valid number */
         params = util_parse_hex(params, &stop);
         if (!params)
             goto syntax_error;
     }
     else
     {
+        /* otherwise we take a range of 64 bytes */
         stop = start + 64;
         if (stop > 0x10000)
             stop = 0x10000;
@@ -444,6 +459,58 @@ static void cli_memcmd(int what, const char *params)
         mos6502_dis(start, stop);
     else
         mos6502_dump_mem(start, stop);
+    return;
+
+syntax_error:
+    uart_puterror("SYNTAX");
+}
+
+/*******************************************************************************
+ * Parse a "f" or "d" command line and execute a memory fill.
+ *
+ ******************************************************************************/
+static void cli_fill(const char *params)
+{
+    unsigned start;
+    unsigned stop;
+    unsigned val;
+
+    /* first parameter is mandatory */
+    params = util_parse_hex(params, &start);
+    if (!params)
+        goto syntax_error;
+
+    /* second parameter is mandatory (that's "to" or "value") */
+    if (*params == 0)
+        goto syntax_error;
+
+    /* it must be a valid number */
+    params = util_parse_hex(params, &stop);
+    if (!params)
+        goto syntax_error;
+
+    /* third parameter is optional ("value") */
+    if (*params)
+    {
+        params = util_parse_hex(params, &val);
+        if (!params)
+            goto syntax_error;
+    }
+    else
+    {
+        /* Command line with two parameters: stop = start */
+        val  = stop;
+        stop = start;
+    }
+
+    /* "stop" is included in fill */
+    if (start >= 0x10000 || stop >= 0x10000 || val > 0xff)
+    {
+        uart_puterror("ILLEGAL QUANTITY");
+        return;
+    }
+
+    mos6502_fill_mem(start, stop, val);
     return;
 
 syntax_error:

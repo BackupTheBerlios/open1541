@@ -409,7 +409,7 @@ static void cli_help(void)
               "regs|r\t\tShow 6502 registers\r\n"
 #ifdef CONFIG_BREAKPOINTS
               "break [<addr>]\tShow or set breakpoints\r\n"
-              "rm <addr>\tRemove breakpoint\r\n"
+              "rm <addr>\t\tRemove breakpoint\r\n"
 #endif
               "cont\t\tContinue 6502 emulation\r\n"
               "reset\t\tReset 6502, keep single step mode if set\r\n"

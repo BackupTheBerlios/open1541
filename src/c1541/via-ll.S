@@ -44,10 +44,10 @@ memw_via1:
 
         @ the opcode jump table is directly behind our current ARM-PC so we can
         @ use PC + opcode to find the right entry
-        .word via1w_00,  viaw_none, viaw_none, via1w_03
+        .word via1w_00,  viaw_none, via1w_02,  via1w_03
         .word viaw_none, viaw_none, viaw_none, viaw_none
         .word viaw_none, viaw_none, viaw_none, viaw_none
-        .word viaw_none, viaw_none, viaw_none, viaw_none
+        .word via1w_0c,  viaw_none, viaw_none, viaw_none
 
 /*******************************************************************************
  * Read a byte from the VIA 1 register in m_addr and return it in m_data.
@@ -148,11 +148,31 @@ via1r_00:
         mov     pc, lr                  @ return
 
 /******************************************************************************
+ * Write to VIA1 Data Direction Register B (CLOCK, DATA etc.)
+ * 1541 II writes 0x1a here, i.e. ATN_ACK, DATA, CLOCK OUT, everything else IN.
+ * This is hard-coded in our project and cannot be changed.
+ *
+ ******************************************************************************/
+via1w_02:
+        strb    m_data, [m_pdata, #(MOS6502_VIA1_REGS_OFFSET + 2)]
+        mov     pc, lr                  @ return
+
+/******************************************************************************
  * Write to VIA1 Data Direction Register A  (Parallel cable)
- * Currently ignored
+ * Currently ignored, the 1541 II writes 0xff here.
  *
  ******************************************************************************/
 via1w_03:
+        strb    m_data, [m_pdata, #(MOS6502_VIA1_REGS_OFFSET + 3)]
+        mov     pc, lr                  @ return
+
+/******************************************************************************
+ * Write to VIA1 Peripheral Control Register
+ * Currently ignored, the 1541 II writes 0x01 here.
+ * Bit 0: ATN IRQ on positive edge
+ *
+ ******************************************************************************/
+via1w_0c:
         strb    m_data, [m_pdata, #(MOS6502_VIA1_REGS_OFFSET + 3)]
         mov     pc, lr                  @ return
 

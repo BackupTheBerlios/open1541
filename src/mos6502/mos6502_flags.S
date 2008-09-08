@@ -48,7 +48,7 @@ op_24: @ BIT $FF
         .global op_2c
 op_2c: @ BIT $FFFF
         memr_addr_mode_abs
-        @do_bit
+        do_bit
         op_end 3 4
 
         .global op_38

@@ -17,6 +17,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include <autoconf.h>
 #include "mos6502_macros.S"
 
 
@@ -32,7 +33,7 @@
         .global memr_table
 memr_table:
         .word memr_ram,  memr_ram,  memr_none, memr_none  @ 0x0000
-        .word memr_none, memr_via1, memr_via2, memr_none  @ 0x1000
+        .word memr_none, memr_none, memr_via1, memr_via2  @ 0x1000
         .word memr_none, memr_none, memr_none, memr_none  @ 0x2000
         .word memr_none, memr_none, memr_none, memr_none  @ 0x3000
         .word memr_none, memr_none, memr_none, memr_none  @ 0x4000
@@ -57,7 +58,7 @@ memr_table:
         .global memw_table
 memw_table:
         .word memw_ram,  memw_ram,  memw_none, memw_none  @ 0x0000
-        .word memw_none, memw_via1, memw_via2, memw_none  @ 0x1000
+        .word memw_none, memw_none, memw_via1, memw_via2  @ 0x1000
         .word memw_none, memw_none, memw_none, memw_none  @ 0x2000
         .word memw_none, memw_none, memw_none, memw_none  @ 0x3000
         .word memw_none, memw_none, memw_none, memw_none  @ 0x4000
@@ -91,7 +92,7 @@ memr_ram:
         @ shift away all forbidden bits (m_data = scratch)
         mov m_data, m_addr, lsl #(32 - mos6502_ramsize_shift)
 
-        @ load the byte, shift back r0 to have the bits in the right positions
+        @ load byte, shift back m_data to get the bits in the right positions
         ldrb m_data, [m_tmp, m_data, lsr #(32 - mos6502_ramsize_shift)]
         mov pc, lr          @ return
 
@@ -113,7 +114,7 @@ memr_rom:
         @ shift away all forbidden bits (m_data = scratch)
         mov m_data, m_addr, lsl #(32 - mos6502_romsize_shift)
 
-        @ load the byte, shift back r0 to have the bits in the right positions
+        @ load byte, shift back m_data to get the bits in the right positions
         ldrb m_data, [m_tmp, m_data, lsr #(32 - mos6502_romsize_shift)]
         mov pc, lr          @ return
 

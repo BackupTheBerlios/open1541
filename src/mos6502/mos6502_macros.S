@@ -189,8 +189,8 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
 .macro  memr_addr
         ldr m_data, =memr_table     @ m_data used as scratch reg
 
-        @ each table entry points to 0x0800 bytes, use the higher bits
-        and m_tmp, m_addr, #0xf800
+        @ each table entry points to 0x0400 bytes, use the higher bits
+        and m_tmp, m_addr, #0xfc00
 
         @ prepare link register, will return 2 instructions behind this
         mov lr, pc
@@ -214,7 +214,7 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
 .macro  memw_data_to_addr
         ldr m_tmp, =memw_table
 
-        @ each table entry points to 0x0800 bytes, use the higher bits
+        @ each table entry points to 0x0400 bytes, use the higher bits
         add m_tmp, m_tmp, m_addr, lsr #(10 - 2)
         bic m_tmp, m_tmp, #3
 
@@ -317,7 +317,8 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
         @ read argument behind PC (zeropage address)
         ldrb    m_addr, [m_addr, #1]
 
-        @ now m_addr contains the zp address, add it shifted to X into r0[31:24]
+        @ now m_addr contains the zp address, add it shifted to X
+        @ into m_addr[31:24]
         x_to_tmp
         add     m_addr, m_tmp, m_addr, lsl #24
 
@@ -374,7 +375,8 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
         @ read argument behind PC (zeropage address)
         ldrb    m_addr, [m_addr, #1]
 
-        @ now m_addr contains the zp address, add it shifted to Y into r0[31:24]
+        @ now m_addr contains the zp address, add it shifted to Y 
+        @ into m_addr[31:24]
         y_to_tmp
         add     m_addr, m_tmp, m_addr, lsl #24
 
@@ -841,7 +843,7 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
  *      m_tmp   Changed
  ******************************************************************************/
 .macro update_nzcv
-        mrs m_tmp, cpsr             @ get PSR into r0
+        mrs m_tmp, cpsr             @ get PSR into m_tmp
 
         @ isolate flags from CPSR and put them into 6502 flags
         and     m_tmp, m_tmp, #(MOS6502_N | MOS6502_Z | MOS6502_C | MOS6502_V)

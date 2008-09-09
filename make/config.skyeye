@@ -13,6 +13,9 @@ CONFIG_BREAKPOINTS=4
 # Set it to higher values to slow down the execution for debugging.
 CONFIG_DRIVE_CLOCK_DIV=1
 
+# Set this to print trace messages each time a VIA register gets accessed.
+CONFIG_VIA_TRACES=1
+
 # I/O configuration
 DIRTY_LED_PORT  = IO0
 DIRTY_LED_PIN   =  31

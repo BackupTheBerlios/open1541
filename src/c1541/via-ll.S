@@ -316,5 +316,8 @@ via_report_access:
 
         bl      uart_putcrlf
 
+        @ ugly hack: delay the CPU emulation so it won't stop
+        add     m_t, m_t, #0x10000  @ 65 ms
+
         pop     {r1 - r5, pc}
 #endif

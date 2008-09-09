@@ -27,6 +27,7 @@
  ******************************************************************************/
 void timer_init()
 {
-    T0PR = PCLK / 1000000;
+    /* CONFIG_DRIVE_CLOCK_DIV allows our 1 MHz to be reduced for debugging */
+    T0PR = CONFIG_DRIVE_CLOCK_DIV * PCLK / 1000000;
     T0TCR = TTCR_CTRENA;
 }

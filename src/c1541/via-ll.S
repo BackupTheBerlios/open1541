@@ -16,11 +16,34 @@
  */
 
 #include <autoconf.h>
+
 #include <lpc213x.h>
+
 #include <via.h>
 #include <mos6502.h>
 #include <mos6502_macros.S>
 
+
+#ifdef CONFIG_VIA_TRACES
+.macro via_report_access_r
+        push    {lr}
+        mov     r0, #'r'
+        bl      via_report_access
+        pop     {lr}
+.endm
+
+.macro via_report_access_w
+        push    {lr}
+        mov     r0, #'w'
+        bl      via_report_access
+        pop     {lr}
+.endm
+#else
+.macro via_report_access_r
+.endm
+.macro via_report_access_w
+.endm
+#endif
 
 /*******************************************************************************
  * Write byte m_data to the VIA 1 register in m_addr.
@@ -38,16 +61,16 @@ memw_via1:
         and     m_tmp, m_addr, #0x0f
 
         @ jump to the register handler address
-        ldr pc, [pc, m_tmp, lsl #2]
+        ldr     pc, [pc, m_tmp, lsl #2]
 
         nop
 
         @ the opcode jump table is directly behind our current ARM-PC so we can
         @ use PC + opcode to find the right entry
-        .word via1w_00,  viaw_none, via1w_02,  via1w_03
-        .word viaw_none, viaw_none, viaw_none, viaw_none
-        .word viaw_none, viaw_none, viaw_none, viaw_none
-        .word via1w_0c,  viaw_none, viaw_none, viaw_none
+        .word via1w_00, via1w_xx, via1w_02, via1w_03
+        .word via1w_xx, via1w_xx, via1w_xx, via1w_xx
+        .word via1w_xx, via1w_xx, via1w_xx, via1w_xx
+        .word via1w_0c, via1w_xx, via1w_xx, via1w_xx
 
 /*******************************************************************************
  * Read a byte from the VIA 1 register in m_addr and return it in m_data.
@@ -97,10 +120,10 @@ memw_via2:
 
         @ the opcode jump table is directly behind our current ARM-PC so we can
         @ use PC + opcode to find the right entry
-        .word via2w_00,  viaw_none, viaw_none, viaw_none
-        .word viaw_none, viaw_none, viaw_none, viaw_none
-        .word viaw_none, viaw_none, viaw_none, viaw_none
-        .word viaw_none, viaw_none, viaw_none, viaw_none
+        .word via2w_00, via2w_xx, via2w_xx, via2w_xx
+        .word via2w_xx, via2w_xx, via2w_xx, via2w_xx
+        .word via2w_xx, via2w_xx, via2w_xx, via2w_xx
+        .word via2w_xx, via2w_xx, via2w_xx, via2w_xx
 
 /*******************************************************************************
  * Read a byte from the VIA 2 register in m_addr and return it in m_data.
@@ -135,6 +158,7 @@ memr_via2:
  *
  ******************************************************************************/
 via1w_00:
+        via_report_access_w
         strb    m_data, [m_pdata, #(MOS6502_VIA1_REGS_OFFSET + 0)]
         mov     pc, lr                  @ return
 
@@ -145,6 +169,7 @@ via1w_00:
  ******************************************************************************/
 via1r_00:
         ldrb    m_data, [m_pdata, #(MOS6502_VIA1_REGS_OFFSET + 0)]
+        via_report_access_r
         mov     pc, lr                  @ return
 
 /******************************************************************************
@@ -154,6 +179,7 @@ via1r_00:
  *
  ******************************************************************************/
 via1w_02:
+        via_report_access_w
         strb    m_data, [m_pdata, #(MOS6502_VIA1_REGS_OFFSET + 2)]
         mov     pc, lr                  @ return
 
@@ -163,6 +189,7 @@ via1w_02:
  *
  ******************************************************************************/
 via1w_03:
+        via_report_access_w
         strb    m_data, [m_pdata, #(MOS6502_VIA1_REGS_OFFSET + 3)]
         mov     pc, lr                  @ return
 
@@ -173,6 +200,7 @@ via1w_03:
  *
  ******************************************************************************/
 via1w_0c:
+        via_report_access_w
         strb    m_data, [m_pdata, #(MOS6502_VIA1_REGS_OFFSET + 3)]
         mov     pc, lr                  @ return
 
@@ -181,6 +209,7 @@ via1w_0c:
  *
  ******************************************************************************/
 via2w_00:
+        @ via_report_access_w
         strb    m_data, [m_pdata, #(MOS6502_VIA2_REGS_OFFSET + 0)]
 
         @ Set LED state (this should be implemented in a better way...)
@@ -200,31 +229,74 @@ via2w_00:
  ******************************************************************************/
 via2r_00:
         ldrb    m_data, [m_pdata, #(MOS6502_VIA2_REGS_OFFSET + 0)]
+        @ via_report_access_r
         mov     pc, lr                  @ return
 
 /*******************************************************************************
- * Report unimplemented VIA write attempts
- *
- * Write the value to a mirror register and print an error message.
- *
- * In:  m_addr      Client address
- *      m_data      The byte to be written
- *
- * Out: m_addr      Changed (!!!)
- *      m_tmp       Changed
+ * Generic read function for VIA1
+ * Write the value to a VIA mirror register.
  *
  ******************************************************************************/
-viaw_none:
-        stmfd   sp!, {r1 - r5, lr}
-
+via1w_xx:
+        via_report_access_w
         and     m_tmp, m_addr, #0x0f
-        cmp     m_addr, #VIA2_BASE
-        addlo   m_tmp, m_tmp, #MOS6502_VIA1_REGS_OFFSET
-        addge   m_tmp, m_tmp, #MOS6502_VIA2_REGS_OFFSET
+        add     m_tmp, m_tmp, #MOS6502_VIA1_REGS_OFFSET
         strb    m_data, [m_pdata, m_tmp]
+        mov     pc, lr                  @ return
+
+/*******************************************************************************
+ * Generic read function for VIA1
+ * Return the last value written to a mirror register.
+ *
+ ******************************************************************************/
+via1r_xx:
+        and     m_tmp, m_addr, #0x0f
+        add     m_tmp, m_tmp, #MOS6502_VIA1_REGS_OFFSET
+        ldrb    m_data, [m_pdata, m_tmp]
+        via_report_access_r
+        mov     pc, lr                  @ return
+
+/*******************************************************************************
+ * Generic read function for VIA1
+ * Write the value to a VIA mirror register.
+ *
+ ******************************************************************************/
+via2w_xx:
+        via_report_access_w
+        and     m_tmp, m_addr, #0x0f
+        add     m_tmp, m_tmp, #MOS6502_VIA2_REGS_OFFSET
+        strb    m_data, [m_pdata, m_tmp]
+        mov     pc, lr                  @ return
+
+/*******************************************************************************
+ * Generic read function for VIA2
+ * Return the last value written to a mirror register.
+ *
+ ******************************************************************************/
+via2r_xx:
+        and     m_tmp, m_addr, #0x0f
+        add     m_tmp, m_tmp, #MOS6502_VIA2_REGS_OFFSET
+        ldrb    m_data, [m_pdata, m_tmp]
+        via_report_access_r
+        mov     pc, lr                  @ return
+
+
+#ifdef CONFIG_VIA_TRACES
+/*******************************************************************************
+ * Report VIA register accesses
+ * input: r0 = 'w' for write, r0 = 'r' for read
+ *
+ ******************************************************************************/
+via_report_access:
+        push    {r1 - r5, lr}
 
         mov     r4, m_addr          @ save regs
         mov     r5, m_data
+
+        bl      uart_putc           @ 'w' or 'r'
+
+        mov     r0, #':'
+        bl      uart_putc
 
         mov     r0, m_pc, lsl #16   @ get PC, remove flags
         mov     r0, r0, lsr #16
@@ -244,26 +316,5 @@ viaw_none:
 
         bl      uart_putcrlf
 
-        ldmfd   sp!, {r1 - r5, pc}
-
-/*******************************************************************************
- * Generic read function for VIA1
- * Return the last value written to a mirror register.
- *
- ******************************************************************************/
-via1r_xx:
-        and     m_tmp, m_addr, #0x0f
-        add     m_tmp, m_tmp, #MOS6502_VIA1_REGS_OFFSET
-        ldrb    m_data, [m_pdata, m_tmp]
-        mov     pc, lr                  @ return
-
-/*******************************************************************************
- * Generic read function for VIA2
- * Return the last value written to a mirror register.
- *
- ******************************************************************************/
-via2r_xx:
-        and     m_tmp, m_addr, #0x0f
-        add     m_tmp, m_tmp, #MOS6502_VIA2_REGS_OFFSET
-        ldrb    m_data, [m_pdata, m_tmp]
-        mov     pc, lr                  @ return
+        pop     {r1 - r5, pc}
+#endif

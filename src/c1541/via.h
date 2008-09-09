@@ -19,25 +19,35 @@
 #define VIA2_BASE       0x1c00
 
 /* MOS 6522 registers */
-#define VIA_PRB         0  /* Port B */
-#define VIA_PRA         1  /* Port A */
-#define VIA_DDRB        2  /* Data direction register for port B */
-#define VIA_DDRA        3  /* Data direction register for port A */
+#define VIA_PRB         0x00    /* Port B */
+#define VIA_PRA         0x01    /* Port A */
+#define VIA_DDRB        0x02    /* Data direction register for port B */
+#define VIA_DDRA        0x03    /* Data direction register for port A */
 
-#define VIA_T1CL        4  /* Timer 1 count low */
-#define VIA_T1CH        5  /* Timer 1 count high */
-#define VIA_T1LL        6  /* Timer 1 latch low */
-#define VIA_T1LH        7  /* Timer 1 latch high */
-#define VIA_T2CL        8  /* Timer 2 count low - read only */
-#define VIA_T2LL        8  /* Timer 2 latch low - write only */
-#define VIA_T2CH        9  /* Timer 2 latch/count high */
+#define VIA_T1CL        0x04    /* Timer 1 count low */
+#define VIA_T1CH        0x05    /* Timer 1 count high */
+#define VIA_T1LL        0x06    /* Timer 1 latch low */
+#define VIA_T1LH        0x07    /* Timer 1 latch high */
+#define VIA_T2CL        0x08    /* Timer 2 count low - read only */
+#define VIA_T2LL        0x08    /* Timer 2 latch low - write only */
+#define VIA_T2CH        0x09    /* Timer 2 latch/count high */
 
-#define VIA_SR          10 /* Serial port shift register */
-#define VIA_ACR         11 /* Auxiliary control register */
-#define VIA_PCR         12 /* Peripheral control register */
+#define VIA_SR          0x0a    /* Serial port shift register */
+#define VIA_ACR         0x0b    /* Auxiliary control register */
+#define VIA_PCR         0x0c    /* Peripheral control register */
 
-#define VIA_IFR         13 /* Interrupt flag register */
-#define VIA_IER         14 /* Interrupt control register */
-#define VIA_PRA_NHS     15 /* Port A with no handshake */
+#define VIA_IFR         0x0d    /* Interrupt flag register */
+#define VIA_IER         0x0e    /* Interrupt control register */
+#define VIA_PRA_NHS     0x0f    /* Port A with no handshake */
 
-#define VIA_REG_SIZE    16 /* Number of VIA registers */
+#define VIA_REG_SIZE    0x10    /* Number of VIA registers */
+
+/* Interrupt Masks  */
+#define VIA_IM_IRQ      0x80    /* Control Bit */
+#define VIA_IM_T1       0x40    /* Timer 1 underflow */
+#define VIA_IM_T2       0x20    /* Timer 2 underflow */
+#define VIA_IM_CB1      0x10    /* Handshake */
+#define VIA_IM_CB2      0x08    /* Handshake */
+#define VIA_IM_SR       0x04    /* Shift Register completion */
+#define VIA_IM_CA1      0x02    /* Handshake */
+#define VIA_IM_CA2      0x01    /* Handshake */

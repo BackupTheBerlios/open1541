@@ -34,7 +34,7 @@ static void cli_help(void);
 static void cli_memcmd(int what, const char *params);
 static void cli_fill(const char *params);
 static void cli_step(void);
-#ifdef CONFIG_BREAKPOINTS
+#if CONFIG_BREAKPOINTS > 0
 static void cli_break(const char *params);
 static void cli_rm(const char *params);
 #endif
@@ -350,7 +350,7 @@ static void cli_process_line(void)
     {
         mos6502_dump_regs();
     }
-#ifdef CONFIG_BREAKPOINTS
+#if CONFIG_BREAKPOINTS > 0
     else if (strncmp(command_line, "break", 5) == 0)
     {
         cli_break(command_line + 5);
@@ -407,7 +407,7 @@ static void cli_help(void)
     uart_puts("stop\t\tStop 6502 emulation\r\n"
               "step|z\t\tExecute single instruction\r\n"
               "regs|r\t\tShow 6502 registers\r\n"
-#ifdef CONFIG_BREAKPOINTS
+#if CONFIG_BREAKPOINTS > 0
               "break [<addr>]\tShow or set breakpoints\r\n"
               "rm <addr>\t\tRemove breakpoint\r\n"
 #endif
@@ -538,7 +538,7 @@ static void cli_step(void)
         uart_puterror("STEP");
 }
 
-#ifdef CONFIG_BREAKPOINTS
+#if CONFIG_BREAKPOINTS > 0
 /*******************************************************************************
  * Show all breakpoints or set a breakpoint if an address is given.
  *

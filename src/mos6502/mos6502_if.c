@@ -124,7 +124,7 @@ void mos6502_fill_mem(uint16_t from, uint16_t to, uint8_t val)
     }
 }
 
-#ifdef CONFIG_BREAKPOINTS
+#if CONFIG_BREAKPOINTS > 0
 /*******************************************************************************
  * Print a list of breakpoints set.
  *

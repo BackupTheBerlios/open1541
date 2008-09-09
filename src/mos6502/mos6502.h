@@ -18,7 +18,7 @@
 #ifndef MOS6502_H
 #define MOS6502_H
 
-/* !!!!! Keepin sync with mos6502_data in mos6502.S !!!!! */
+/* !!!!! Keep in sync with mos6502_data in mos6502.S !!!!! */
 #define MOS6502_SP_OFFSET           0
 #define MOS6502_A_OFFSET            4
 #define MOS6502_X_OFFSET            8
@@ -28,6 +28,9 @@
 #define MOS6502_BP_OFFSET         (16 + 32)
 
 #ifndef __ASSEMBLER__
+
+#include <stdint.h>
+
 typedef struct mos6502_regs_s
 {
     uint32_t    time;
@@ -49,7 +52,7 @@ void mos6502_run(void);
 void mos6502_dump_mem(uint16_t start, uint16_t stop);
 void mos6502_fill_mem(uint16_t from, uint16_t to, uint8_t val);
 
-#ifdef CONFIG_BREAKPOINTS
+#if CONFIG_BREAKPOINTS > 0
 void mos6502_show_breakpoints(void);
 int mos6502_set_breakpoint(uint16_t addr);
 void mos6502_rm_breakpoint(uint16_t addr);

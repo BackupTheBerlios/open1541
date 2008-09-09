@@ -17,14 +17,16 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+
+#include <autoconf.h>
+
 #include <lpc213x.h>
 #include <uart.h>
 #include <timer.h>
 #include <util.h>
 #include <cli.h>
-#include <mos6502.h>
 #include <c1541.h>
-#include <autoconf.h>
+#include <mos6502.h>
 
 static void init_clocks();
 

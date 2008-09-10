@@ -26,7 +26,7 @@ MACH_DATA_DECLARE = 1
 #include <mach_data.S>
 
 
-#ifdef CONFIG_VIA_TRACES
+#if CONFIG_VIA_TRACES
 .macro via_report_access_r
         push    {lr}
         mov     r0, #'r'
@@ -70,7 +70,7 @@ memw_via1:
         @ the opcode jump table is directly behind our current ARM-PC so we can
         @ use PC + opcode to find the right entry
         .word via1w_00, via1w_xx, via1w_02, via1w_03
-        .word via1w_xx, via1w_xx, via1w_xx, via1w_xx
+        .word via1w_xx, via1w_05, via1w_xx, via1w_xx
         .word via1w_xx, via1w_xx, via1w_xx, via1w_xx
         .word via1w_0c, via1w_xx, via1w_xx, via1w_xx
 
@@ -96,7 +96,7 @@ memr_via1:
         @ the opcode jump table is directly behind our current ARM-PC so we can
         @ use PC + opcode to find the right entry
         .word via1r_00, via1r_xx, via1r_xx, via1r_xx
-        .word via1r_xx, via1r_xx, via1r_xx, via1r_xx
+        .word via1r_04, via1r_05, via1r_xx, via1r_xx
         .word via1r_xx, via1r_xx, via1r_xx, via1r_xx
         .word via1r_xx, via1r_xx, via1r_xx, via1r_xx
 
@@ -161,7 +161,7 @@ memr_via2:
  ******************************************************************************/
 via1w_00:
         via_report_access_w
-        strb    m_data, [m_pdata, #(MOS6502_VIA1_REGS_OFFSET + 0)]
+        strb    m_data, [m_pdata, #(VIA1_REGS_OFFSET + 0)]
         mov     pc, lr                  @ return
 
 /******************************************************************************
@@ -170,7 +170,7 @@ via1w_00:
  *
  ******************************************************************************/
 via1r_00:
-        ldrb    m_data, [m_pdata, #(MOS6502_VIA1_REGS_OFFSET + 0)]
+        ldrb    m_data, [m_pdata, #(VIA1_REGS_OFFSET + 0)]
         via_report_access_r
         mov     pc, lr                  @ return
 
@@ -182,7 +182,7 @@ via1r_00:
  ******************************************************************************/
 via1w_02:
         via_report_access_w
-        strb    m_data, [m_pdata, #(MOS6502_VIA1_REGS_OFFSET + 2)]
+        strb    m_data, [m_pdata, #(VIA1_REGS_OFFSET + 2)]
         mov     pc, lr                  @ return
 
 /******************************************************************************
@@ -192,7 +192,69 @@ via1w_02:
  ******************************************************************************/
 via1w_03:
         via_report_access_w
-        strb    m_data, [m_pdata, #(MOS6502_VIA1_REGS_OFFSET + 3)]
+        strb    m_data, [m_pdata, #(VIA1_REGS_OFFSET + 3)]
+        mov     pc, lr                  @ return
+
+/******************************************************************************
+ * Write to VIA1 T1CH
+ * Write low byte latch, reset T1 interrupt flag.
+ *
+ ******************************************************************************/
+via1w_04:
+        strb    m_data, [m_pdata, #(VIA1_REGS_OFFSET + VIA_T1LL)]
+        @ todo: reset T1 IRQ flag
+        mov     pc, lr                  @ return
+
+/******************************************************************************
+ * Read from VIA1 T1CL
+ * Return low byte of counter 1
+ *
+ ******************************************************************************/
+via1r_04:
+        ldr     m_data, [m_pdata, #VIA1_T1_EXP_OFFSET]
+
+        @ todo: that's not cycle accurate
+        sub     m_data, m_data, m_t     @ calc time to exp
+        and     m_data, m_data, #0xff   @ isolate low byte
+        via_report_access_r
+        mov     pc, lr                  @ return
+
+/******************************************************************************
+ * Write to VIA1 T1CH
+ * Write high byte latch, transfer high:low latch into counter,
+ * reset T1 interrupt flag.
+ *
+ ******************************************************************************/
+via1w_05:
+        @ We write to high latch first
+        strb    m_data, [m_pdata, #(VIA1_REGS_OFFSET + VIA_T1LH)]
+
+        @ take low byte latch and combine them
+        ldrb    m_tmp, [m_pdata, #(VIA1_REGS_OFFSET + VIA_T1LL)]
+        orr     m_data, m_tmp, m_data, lsl #8
+
+        @ todo: that's not cycle accurate
+        @ add current time to it and remember timeout
+        add     m_data, m_data, m_t
+        str     m_data, [m_pdata, #VIA1_T1_EXP_OFFSET]
+
+        @ todo: reset T1 IRQ flag
+
+        mov     pc, lr                  @ return
+
+/******************************************************************************
+ * Read from VIA1 T1CH
+ * Return high byte of counter 1
+ *
+ ******************************************************************************/
+via1r_05:
+        ldr     m_data, [m_pdata, #VIA1_T1_EXP_OFFSET]
+
+        @ todo: that's not cycle accurate
+        sub     m_data, m_data, m_t     @ calc time to exp
+        mov     m_data, m_data, lsr# 8  @ get high byte
+        and     m_data, m_data, #0xff   @ isolate 8 bits
+        via_report_access_r
         mov     pc, lr                  @ return
 
 /******************************************************************************
@@ -203,7 +265,7 @@ via1w_03:
  ******************************************************************************/
 via1w_0c:
         via_report_access_w
-        strb    m_data, [m_pdata, #(MOS6502_VIA1_REGS_OFFSET + 3)]
+        strb    m_data, [m_pdata, #(VIA1_REGS_OFFSET + 3)]
         mov     pc, lr                  @ return
 
 /*******************************************************************************
@@ -212,7 +274,7 @@ via1w_0c:
  ******************************************************************************/
 via2w_00:
         @ via_report_access_w
-        strb    m_data, [m_pdata, #(MOS6502_VIA2_REGS_OFFSET + 0)]
+        strb    m_data, [m_pdata, #(VIA2_REGS_OFFSET + 0)]
 
         @ Set LED state (this should be implemented in a better way...)
         ldr     m_addr, =(DIRTY_LED_PORT + IOPIN)
@@ -230,7 +292,7 @@ via2w_00:
  *
  ******************************************************************************/
 via2r_00:
-        ldrb    m_data, [m_pdata, #(MOS6502_VIA2_REGS_OFFSET + 0)]
+        ldrb    m_data, [m_pdata, #(VIA2_REGS_OFFSET + 0)]
         @ via_report_access_r
         mov     pc, lr                  @ return
 
@@ -242,7 +304,7 @@ via2r_00:
 via1w_xx:
         via_report_access_w
         and     m_tmp, m_addr, #0x0f
-        add     m_tmp, m_tmp, #MOS6502_VIA1_REGS_OFFSET
+        add     m_tmp, m_tmp, #VIA1_REGS_OFFSET
         strb    m_data, [m_pdata, m_tmp]
         mov     pc, lr                  @ return
 
@@ -253,7 +315,7 @@ via1w_xx:
  ******************************************************************************/
 via1r_xx:
         and     m_tmp, m_addr, #0x0f
-        add     m_tmp, m_tmp, #MOS6502_VIA1_REGS_OFFSET
+        add     m_tmp, m_tmp, #VIA1_REGS_OFFSET
         ldrb    m_data, [m_pdata, m_tmp]
         via_report_access_r
         mov     pc, lr                  @ return
@@ -266,7 +328,7 @@ via1r_xx:
 via2w_xx:
         via_report_access_w
         and     m_tmp, m_addr, #0x0f
-        add     m_tmp, m_tmp, #MOS6502_VIA2_REGS_OFFSET
+        add     m_tmp, m_tmp, #VIA2_REGS_OFFSET
         strb    m_data, [m_pdata, m_tmp]
         mov     pc, lr                  @ return
 
@@ -277,13 +339,13 @@ via2w_xx:
  ******************************************************************************/
 via2r_xx:
         and     m_tmp, m_addr, #0x0f
-        add     m_tmp, m_tmp, #MOS6502_VIA2_REGS_OFFSET
+        add     m_tmp, m_tmp, #VIA2_REGS_OFFSET
         ldrb    m_data, [m_pdata, m_tmp]
         via_report_access_r
         mov     pc, lr                  @ return
 
 
-#ifdef CONFIG_VIA_TRACES
+#if CONFIG_VIA_TRACES
 /*******************************************************************************
  * Report VIA register accesses
  * input: r0 = 'w' for write, r0 = 'r' for read

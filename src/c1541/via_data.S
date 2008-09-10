@@ -28,6 +28,11 @@
 
 #include <via.h>
 
-@    size         symbol          offset to be defined
-data VIA_REG_SIZE via1_reg_mirror MOS6502_VIA1_REGS_OFFSET
-data VIA_REG_SIZE via2_reg_mirror MOS6502_VIA2_REGS_OFFSET
+@    size           symbol              offset to be defined
+data VIA_REG_SIZE   via1_reg_mirror     VIA1_REGS_OFFSET
+data VIA_REG_SIZE   via2_reg_mirror     VIA2_REGS_OFFSET
+
+data 4              via1_t1_exp         VIA1_T1_EXP_OFFSET
+data 4              via1_t2_exp         VIA1_T2_EXP_OFFSET
+data 4              via2_t1_exp         VIA2_T1_EXP_OFFSET
+data 4              via2_t2_exp         VIA2_T2_EXP_OFFSET

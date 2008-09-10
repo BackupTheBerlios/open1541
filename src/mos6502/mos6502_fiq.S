@@ -29,8 +29,8 @@
  ******************************************************************************/
         stmfd sp!, {r0 - r2, lr}
 
-        @ read opcode
-        ldrb    m_tmp, [m_pc]
+        @ read opcode and inc PC
+        ldrb    m_tmp, [m_pc], #1
 
         @ jump to the opcode address
         ldr pc, [pc, m_tmp, lsl #2]

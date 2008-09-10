@@ -279,25 +279,21 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
 .endm
 
 /*******************************************************************************
- * Read one byte argument behind m_pc.
- * This macros uses m_pc which must point to the opcode in the native memory.
- * It reads *(pc + 1)
+ * Read one byte argument at m_pc and increment m_pc.
  *
- * In:  m_addr  Points to native memory related to m_flags
+ * In:  m_pc    Points to native memory corresponding to PC
  *
  * Out: m_data  The byte
  *
  ******************************************************************************/
 .macro  memr_pc_arg8
-        ldrb    m_data, [m_pc, #1]
+        ldrb    m_data, [m_pc], #1
 .endm
 
 /*******************************************************************************
- * Read a two byte argument behind m_pc.
- * This macros uses m_pc which must point to the opcode in the native memory.
- * It reads *(pc + 1) | (*(pc + 2) << 8).
+ * Read a two byte argument behind m_pc and increment m_pc two times.
  *
- * In:  m_pc   Points to native memory corresponding to client PC
+ * In:  m_pc    Points to native memory corresponding to PC
  *
  * Out: m_addr  Two bytes behind opcode (little endian [15:0] )
  *      m_tmp   Changed
@@ -305,17 +301,17 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
  *
  ******************************************************************************/
 .macro  memr_pc_arg16
-        ldrb    m_tmp, [m_pc, #1]
-        ldrb    m_addr, [m_pc, #2]
+        ldrb    m_tmp, [m_pc], #1
+        ldrb    m_addr, [m_pc], #1
         orr     m_addr, m_tmp, m_addr, lsl #8
 .endm
 
 /*******************************************************************************
  * Zero page addressing mode (read)
- * 1. Read one byte argument behind m_pc.
+ * 1. Read one byte at m_pc, increment m_pc.
  * 2. Then read the byte pointed to by the byte read at step 1
  *
- * In:  m_pc   Points to the opcode in the native memory
+ * In:  m_pc    Points to native memory corresponding to PC
  *
  * Out: m_addr  Client address of the byte
  *      m_data  The byte
@@ -323,8 +319,8 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
  *
  ******************************************************************************/
 .macro  memr_addr_mode_zp
-        @ read argument behind PC (zeropage address)
-        ldrb    m_addr, [m_pc, #1]
+        @ read argument at PC (zeropage address)
+        ldrb    m_addr, [m_pc], #1
 
         @ now m_addr contains the zp address, read a byte from there
         ldr     m_tmp, =c1541_ram
@@ -333,10 +329,10 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
 
 /*******************************************************************************
  * Zero page addressing mode (write)
- * 1. Read one byte argument behind m_pc.
+ * 1. Read one byte at m_pc, increment m_pc.
  * 2. Write the byte from m_dataq[7:0] to the address read at step 1
  *
- * In:  m_addr  Points to the opcode in the native memory
+ * In:  m_pc    Points to native memory corresponding to PC
  *      m_data  Byte to be written
  *
  * Out: m_addr  Client address of the byte
@@ -344,8 +340,8 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
  *
  ******************************************************************************/
 .macro  memw_addr_mode_zp
-        @ read argument behind PC (zeropage address)
-        ldrb    m_addr, [m_pc, #1]
+        @ read argument at PC (zeropage address)
+        ldrb    m_addr, [m_pc], #1
 
         @ store data byte to that address into RAM
         ldr     m_tmp, =c1541_ram
@@ -354,11 +350,11 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
 
 /*******************************************************************************
  * Zeropage,X addressing mode (read)
- * 1. Read one byte argument behind m_pc
+ * 1. Read one byte at m_pc, increment m_pc.
  * 2. Add X to this value, use only lower 8 bits of the result
  * 3. Then read the byte at this calculated address
  *
- * In:  m_pc   Points to the opcode in the native memory
+ * In:  m_pc    Points to native memory corresponding to PC
  *
  * Out: m_addr  Client address of the addressed byte
  *      m_data  Byte read from there
@@ -367,8 +363,8 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
  *
  ******************************************************************************/
 .macro  memr_addr_mode_zpx
-        @ read argument behind PC (zeropage address)
-        ldrb    m_addr, [m_pc, #1]
+        @ read argument at PC (zeropage address)
+        ldrb    m_addr, [m_pc], #1
 
         @ now m_addr contains the zp address, add it shifted to X
         @ into m_addr[31:24]
@@ -385,11 +381,11 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
 
 /*******************************************************************************
  * Zeropage,X addressing mode (write)
- * 1. Read one byte argument behind m_pc
+ * 1. Read one byte at m_pc, increment m_pc.
  * 2. Add X to this value, use only lower 8 bits of the result
  * 3. Write the byte from m_data to the address calculated above
  *
- * In:  m_pc   Points to the opcode in the native memory
+ * In:  m_pc    Points to native memory corresponding to PC
  *      m_data  Byte to be written
  *
  * Out: m_addr  Changed (!!!)
@@ -397,8 +393,8 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
  *
  ******************************************************************************/
 .macro  memw_addr_mode_zpx
-        @ read argument behind PC (zeropage address)
-        ldrb    m_addr, [m_pc, #1]
+        @ read argument at PC (zeropage address)
+        ldrb    m_addr, [m_pc], #1
 
         @ now m_addr contains the zp address, add it shifted to X into m_addr[31:24]
         x_to_tmp
@@ -412,11 +408,11 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
 
 /*******************************************************************************
  * Zeropage,Y addressing mode (read)
- * 1. Read one byte argument behind m_pc
+ * 1. Read one byte at m_pc, increment m_pc.
  * 2. Add Y to this value, use only lower 8 bits of the result
  * 3. Then read the byte at this calculated address
  *
- * In:  m_pc   Points to the opcode in the native memory
+ * In:  m_pc    Points to native memory corresponding to PC
  *
  * Out: m_addr  Client address of the addressed byte
  *      m_data  Byte read from there
@@ -425,8 +421,8 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
  *
  ******************************************************************************/
 .macro  memr_addr_mode_zpy
-        @ read argument behind PC (zeropage address)
-        ldrb    m_addr, [m_pc, #1]
+        @ read argument at PC (zeropage address)
+        ldrb    m_addr, [m_pc], #1
 
         @ now m_addr contains the zp address, add it shifted to Y 
         @ into m_addr[31:24]
@@ -443,11 +439,11 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
 
 /*******************************************************************************
  * Zeropage,Y addressing mode (write)
- * 1. Read one byte argument behind m_pc
+ * 1. Read one byte at m_pc, increment m_pc.
  * 2. Add Y to this value, use only lower 8 bits of the result
  * 3. Write the byte from m_data to the address calculated above
  *
- * In:  m_pc   Points to the opcode in the native memory
+ * In:  m_pc    Points to native memory corresponding to PC
  *      m_data  Byte to be written
  *
  * Out: m_addr  Changed (!!!)
@@ -455,8 +451,8 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
  *
  ******************************************************************************/
 .macro  memw_addr_mode_zpy
-        @ read argument behind PC (zeropage address)
-        ldrb    m_addr, [m_pc, #1]
+        @ read argument at PC (zeropage address)
+        ldrb    m_addr, [m_pc], #1
 
         @ now m_addr contains the zp address, add it shifted to Y into m_addr[31:24]
         y_to_tmp
@@ -469,10 +465,10 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
 
 /*******************************************************************************
  * Absolute addressing mode (read)
- * 1. Read two bytes argument behind m_pc
+ * 1. Read two bytes argument at m_pc, increment m_pc two times
  * 2. Read the byte pointed to by the byte read in step 1
  *
- * In:  m_pc   Points to the opcode in the native memory
+ * In:  m_pc    Points to native memory corresponding to PC
  *
  * Out: m_addr  Client address of the byte
  *      m_data  The byte
@@ -489,10 +485,10 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
 
 /*******************************************************************************
  * Absolute addressing mode (write)
- * 1. Read two bytes argument behind m_pc.
+ * 1. Read two bytes argument at m_pc, increment m_pc two times
  * 2. Write m_data to the address read in step 1
  *
- * In:  m_pc   Points to the opcode in the native memory
+ * In:  m_pc    Points to native memory corresponding to PC
  *      m_data  The byte to be written
  *
  * Out: m_addr  Changed (!!!)
@@ -509,12 +505,12 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
 
 /*******************************************************************************
  * Absolute,X addressing mode (read)
- * 1. Read two bytes argument behind m_pc.
+ * 1. Read two bytes argument at m_pc, increment m_pc two times
  * 2. Add X to this value, use only lower 16 bits of the result
  * 3. Then read the byte at this calculated address
  * One penalty cycle is added here if the page wraps.
  *
- * In:  m_pc   Points to the opcode in the native memory
+ * In:  m_pc    Points to native memory corresponding to PC
  *
  * Out: m_addr  Client address of the byte
  *      m_data  The byte
@@ -545,11 +541,11 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
 
 /*******************************************************************************
  * Absolute,X addressing mode (read), w/o penalty cycle
- * 1. Read two bytes argument behind m_pc.
+ * 1. Read two bytes argument at m_pc, increment m_pc two times
  * 2. Add X to this value, use only lower 16 bits of the result
  * 3. Then read the byte at this calculated address
  *
- * In:  m_pc   Points to the opcode in the native memory
+ * In:  m_pc    Points to native memory corresponding to PC
  *
  * Out: m_addr  Client address of the byte
  *      m_data  The byte
@@ -571,11 +567,11 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
 
 /*******************************************************************************
  * Absolute,X addressing mode (write)
- * 1. Read two bytes argument behind m_pc.
+ * 1. Read two bytes argument at m_pc, increment m_pc two times
  * 2. Add X to this value, use only lower 16 bits of the result
  * 3. Write the byte from r1[7:0] to the address calculated above
  *
- * In:  m_pc   Points to the opcode in the native memory
+ * In:  m_pc    Points to native memory corresponding to PC
  *      m_data  The byte to be written
  *
  * Out: m_addr  Changed (!!!)
@@ -597,12 +593,12 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
 
 /*******************************************************************************
  * Absolute,Y addressing mode (read)
- * 1. Read two bytes argument behind m_pc.
+ * 1. Read two bytes argument at m_pc, increment m_pc two times
  * 2. Add Y to this value, use only lower 16 bits of the result
  * 3. Then read the byte at this calculated address
  * One penalty cycle is added here if the page wraps.
  *
- * In:  m_pc   Points to the opcode in the native memory
+ * In:  m_pc    Points to native memory corresponding to PC
  *
  * Out: m_addr  Client address of the byte
  *      m_data  The byte
@@ -633,11 +629,11 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
 
 /*******************************************************************************
  * Absolute,Y addressing mode (write)
- * 1. Read two bytes argument behind m_pc.
+ * 1. Read two bytes argument at m_pc, increment m_pc two times
  * 2. Add Y to this value, use only lower 16 bits of the result
  * 3. Write the byte from r1[7:0] to the address calculated above
  *
- * In:  m_pc   Points to the opcode in the native memory
+ * In:  m_pc    Points to native memory corresponding to PC
  *      m_data  The byte to be written
  *
  * Out: m_addr  Changed (!!!)
@@ -659,12 +655,12 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
 
 /*******************************************************************************
  * (Indirect,X) adressing mode (read)
- * 1. Read one byte argument behind m_pc.
+ * 1. Read one byte argument at m_pc, increment m_pc
  * 2. Add X to this value, use only lower 8 bits of the result
  * 3. Then read two bytes at this calculated address, that's the address we need
  * 4. Load the value from there
  *
- * In:  m_pc   Points to the opcode in the native memory
+ * In:  m_pc    Points to native memory corresponding to PC
  *
  * Out: m_addr  Client address of the addressed byte
  *      m_data  Byte read from there
@@ -673,8 +669,8 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
  *
  ******************************************************************************/
 .macro  memr_addr_mode_indx
-        @ read argument behind PC (zeropage address)
-        ldrb    m_tmp, [m_pc, #1]
+        @ read argument at PC (zeropage address)
+        ldrb    m_tmp, [m_pc], #1
 
         @ add it to X into m_tmp[31:24]
         x_to_data
@@ -695,12 +691,12 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
 
 /*******************************************************************************
  * (Indirect,X) adressing mode (write)
- * 1. Read one byte argument behind m_pc.
+ * 1. Read one byte argument at m_pc, increment m_pc
  * 2. Add X to this value, use only lower 8 bits of the result
  * 3. Then read two bytes at this calculated address, that's the address we need
  * 4. Store m_data to there
  *
- * In:  m_pc   Points to the opcode in the native memory
+ * In:  m_pc    Points to native memory corresponding to PC
  *      m_data  Byte to be written
  *
  * Out: m_addr  Changed (!!!)
@@ -709,8 +705,8 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
  *
  ******************************************************************************/
 .macro  memw_addr_mode_indx
-        @ read argument behind PC (zeropage address)
-        ldrb    lr, [m_pc, #1]
+        @ read argument at PC (zeropage address)
+        ldrb    lr, [m_pc], #1
 
         @ add it to X into m_tmp[31:24]
         x_to_tmp
@@ -731,13 +727,13 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
 
 /*******************************************************************************
  * (Indirect),Y adressing mode (read)
- * 1. Read one byte argument behind m_pc
+ * 1. Read one byte argument at m_pc, increment m_pc
  * 2. Read two bytes at this, that's the base address
  * 3. Add Y to this base address, use only lower 16 bits of the result
  * 4. Load the value from there
  * One penalty cycle is added here if the page wraps.
  *
- * In:  m_pc   Points to the opcode in the native memory
+ * In:  m_pc    Points to native memory corresponding to PC
  *
  * Out: m_addr  Client address of the addressed byte
  *      m_data  Byte read from there
@@ -746,8 +742,8 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
  *
  ******************************************************************************/
 .macro  memr_addr_mode_indy
-        @ read argument behind PC (zeropage address)
-        ldrb    m_addr, [m_pc, #1]
+        @ read argument at PC (zeropage address)
+        ldrb    m_addr, [m_pc], #1
 
         @ now m_addr contains the zp address
         @ load a byte from there, that's the low byte of the address
@@ -780,12 +776,12 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
 
 /*******************************************************************************
  * (Indirect),Y adressing mode (write)
- * 1. Read one byte argument behind m_pc
+ * 1. Read one byte argument at m_pc, increment m_pc
  * 2. Read two bytes at this, that's the base address
  * 3. Add Y to this base address, use only lower 16 bits of the result
  * 4. Store m_data to there
  *
- * In:  m_pc   Points to the opcode in the native memory
+ * In:  m_pc    Points to native memory corresponding to PC
  *      m_data  Byte to be written
  *
  * Out: m_addr  Changed (!!!)
@@ -795,7 +791,7 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
  ******************************************************************************/
 .macro  memw_addr_mode_indy
         @ read argument behind PC (zeropage address)
-        ldrb    m_tmp, [m_pc, #1]
+        ldrb    m_tmp, [m_pc], #1
 
         @ load a byte from there, that's the low byte of the address
         ldr     lr, =c1541_ram
@@ -835,29 +831,10 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
 .endm
 
 /*******************************************************************************
- * Increment PC by the given value.
- *
- * In:  m_flags    Current client PC
- *      num     Number of bytes to add
- *
- * Out: m_flags    Increased by num
- ******************************************************************************/
-.macro inc_pc num
-.ifne \num
-        add m_pc, m_pc, #\num
-        @ todo: Delete bit 16 at a convinient place. This may be set if the PC
-        @ wraps from 0xffff to 0, Don't wanna spend a cycle here for this
-        @ unlikely case
-.endif
-.endm
-
-/*******************************************************************************
  * Increment the PC by the given number, set the CPU emulation timer to expire
  * in 'time' microseconds and return from FIQ
  ******************************************************************************/
-.macro op_end pc time
-        inc_pc \pc
-
+.macro op_end time
         @ Set next timer
         add     m_t, m_t, #\time
         b       mos6502_op_end

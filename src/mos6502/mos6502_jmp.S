@@ -29,7 +29,6 @@
 @ the timer is also updated here.
 .macro do_branch
         memr_pc_arg8                @ get argument
-        inc_pc 2                    @ advance the pc as usual
         and m_tmp, m_pc, #0xff00    @ remember page before branch
         mov m_data, m_data, lsl #24 @ use asr below to get a real signed value
         add m_pc, m_pc, m_data, asr #24 @ branch
@@ -37,7 +36,7 @@
         and m_data, m_pc, #0xff00   @ get page after branch
         cmp m_data, m_tmp
         addne m_t, m_t, #1          @ extra cycle for page crossing
-        op_end 0 3
+        op_end 3
 .endm
 
         .global op_10
@@ -83,7 +82,8 @@ op_d0:  @ BNE
         do_branch
 
 no_branch:
-        op_end 2 2
+        add     m_pc, m_pc, #1
+        op_end 2
 
         .global op_f0
 op_f0:  @ BEQ
@@ -96,4 +96,4 @@ op_4c:  @ JMP abs
         memr_pc_arg16
         mov     m_pc, m_addr
         pc_client_to_host
-        op_end 0 3
+        op_end 3

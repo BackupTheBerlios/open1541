@@ -28,7 +28,7 @@ op_c0: @ CPY #$FF
         y_to_tmp
         cmp m_tmp, m_data, lsl #24
         update_nzc              @ update 6502 flags
-        op_end 2 2
+        op_end 2
 
         .global op_c1
 op_c1: @ CMP ($FF,X)
@@ -36,7 +36,7 @@ op_c1: @ CMP ($FF,X)
         a_to_tmp
         cmp m_tmp, m_data, lsl #24
         update_nzc              @ update 6502 flags
-        op_end 2 6
+        op_end 6
 
         .global op_c4
 op_c4: @ CPY $FF
@@ -44,7 +44,7 @@ op_c4: @ CPY $FF
         y_to_tmp
         cmp m_tmp, m_data, lsl #24
         update_nzc              @ update 6502 flags
-        op_end 2 3
+        op_end 3
 
         .global op_c5
 op_c5: @ CMP $FF
@@ -52,7 +52,7 @@ op_c5: @ CMP $FF
         a_to_tmp
         cmp m_tmp, m_data, lsl #24
         update_nzc              @ update 6502 flags
-        op_end 2 3
+        op_end 3
 
         .global op_c9
 op_c9: @ CMP #$FF
@@ -60,7 +60,7 @@ op_c9: @ CMP #$FF
         a_to_tmp
         cmp m_tmp, m_data, lsl #24
         update_nzc              @ update 6502 flags
-        op_end 2 2
+        op_end 2
 
         .global op_cc
 op_cc: @ CPY $FFFF
@@ -68,7 +68,7 @@ op_cc: @ CPY $FFFF
         y_to_tmp
         cmp m_tmp, m_data, lsl #24
         update_nzc              @ update 6502 flags
-        op_end 3 4
+        op_end 4
 
         .global op_cd
 op_cd: @ CMP $FFFF
@@ -76,7 +76,7 @@ op_cd: @ CMP $FFFF
         a_to_tmp
         cmp m_tmp, m_data, lsl #24
         update_nzc              @ update 6502 flags
-        op_end 3 4
+        op_end 4
 
         .global op_d1
 op_d1: @ CMP ($FF),Y
@@ -84,7 +84,7 @@ op_d1: @ CMP ($FF),Y
         a_to_tmp
         cmp m_tmp, m_data, lsl #24
         update_nzc              @ update 6502 flags
-        op_end 2 5
+        op_end 5
 
         .global op_d5
 op_d5: @ CMP $FF,X
@@ -92,7 +92,7 @@ op_d5: @ CMP $FF,X
         a_to_tmp
         cmp m_tmp, m_data, lsl #24
         update_nzc              @ update 6502 flags
-        op_end 2 4
+        op_end 4
 
         .global op_d9
 op_d9: @ CMP $FFFF,Y
@@ -100,7 +100,7 @@ op_d9: @ CMP $FFFF,Y
         a_to_tmp
         cmp m_tmp, m_data, lsl #24
         update_nzc              @ update 6502 flags
-        op_end 3 4
+        op_end 4
 
         .global op_dd
 op_dd: @ CMP $FFFF,X
@@ -108,7 +108,7 @@ op_dd: @ CMP $FFFF,X
         a_to_tmp
         cmp m_tmp, m_data, lsl #24
         update_nzc              @ update 6502 flags
-        op_end 3 4
+        op_end 4
 
         .global op_e0
 op_e0: @ CPX #$FF
@@ -116,7 +116,7 @@ op_e0: @ CPX #$FF
         x_to_tmp
         cmp m_tmp, m_data, lsl #24
         update_nzc              @ update 6502 flags
-        op_end 2 2
+        op_end 2
 
         .global op_e4
 op_e4: @ CPX $FF
@@ -124,7 +124,7 @@ op_e4: @ CPX $FF
         x_to_tmp
         cmp m_tmp, m_data, lsl #24
         update_nzc              @ update 6502 flags
-        op_end 2 3
+        op_end 3
 
         .global op_ec
 op_ec: @ CPX $FFFF
@@ -132,4 +132,4 @@ op_ec: @ CPX $FFFF
         x_to_tmp
         cmp m_tmp, m_data, lsl #24
         update_nzc              @ update 6502 flags
-        op_end 3 4
+        op_end 4

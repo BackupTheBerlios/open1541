@@ -76,7 +76,7 @@ op_08: @ PHP
 
         @ save SP
         tmp_to_sp
-        op_end 1 3
+        op_end 3
 
 
         .global op_20
@@ -89,8 +89,8 @@ op_20: @ JSR $FFFF
         sp_to_tmp
 
         @ PUSH high byte
-        @ PC still points to this JSR, on stack there must be (next - 1), so + 2
-        add     m_data, m_pc, #2
+        @ PC points to next op, on stack there must be (next - 1)
+        sub     m_data, m_pc, #1
         mov     m_data, m_data, lsr #8
         ldr     lr, =(c1541_ram + 0x100)
         strb    m_data, [lr, m_tmp]
@@ -100,8 +100,8 @@ op_20: @ JSR $FFFF
         and     m_tmp, m_tmp, #0xff
 
         @ PUSH low byte
-        @ PC still points to this JSR, on stack there must be (next - 1), so + 2
-        add     m_data, m_pc, #2            @ OPTIMIZE ME
+        @ PC points to next op, on stack there must be (next - 1)
+        sub     m_data, m_pc, #1            @ OPTIMIZE ME
         strb    m_data, [lr, m_tmp]
 
         @ dec SP, we'll only store one byte so it wraps automatically
@@ -113,7 +113,7 @@ op_20: @ JSR $FFFF
         mov     m_pc, m_addr
         pc_client_to_host
 
-        op_end 0 6
+        op_end 6
 
 
         .global op_28
@@ -133,7 +133,7 @@ op_28: @ PLP
 
         @ save SP
         tmp_to_sp
-        op_end 1 4
+        op_end 4
 
 
         .global op_40
@@ -171,7 +171,7 @@ op_40: @ RTI
         @ save SP
         tmp_to_sp
         pc_client_to_host
-        op_end 0 6
+        op_end 6
 
 
         .global op_48
@@ -188,7 +188,7 @@ op_48: @ PHA
         sub     m_tmp, m_tmp, #1
 
         tmp_to_sp
-        op_end 1 3
+        op_end 3
 
 
         .global op_60
@@ -213,7 +213,7 @@ op_60: @ RTS
 
         tmp_to_sp
         pc_client_to_host
-        op_end 1 6
+        op_end 6
 
 
         .global op_68
@@ -233,7 +233,7 @@ op_68: @ PLA
         @ save SP
         tmp_to_sp
         update_nz
-        op_end 1 4
+        op_end 4
 
 
         .global op_ba
@@ -243,11 +243,11 @@ op_ba: @ TSX
         data_low_to_x
         movs m_data, m_data, lsl #24
         update_nz
-        op_end 1 2
+        op_end 2
 
 
         .global op_9a
 op_9a: @ TXS
         x_to_data_low
         data_to_sp
-        op_end 1 2
+        op_end 2

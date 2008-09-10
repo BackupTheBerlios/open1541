@@ -93,13 +93,11 @@ mos6502_reg_init:
         mov     m_addr, #0xff00
         add     m_addr, m_addr, #0xfc
         memr_addr
-        mov     m_flags, m_data
+        mov     m_pc, m_data
         add     m_addr, m_addr, #1
         memr_addr
-        add     m_flags, m_data, lsl #8
+        orr     m_pc, m_data, lsl #8
 
-        mov     m_pc, m_flags, lsl #16
-        mov     m_pc, m_pc, lsr #16
         pc_client_to_host
 
         @ set single step mode

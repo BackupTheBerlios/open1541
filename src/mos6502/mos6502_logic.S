@@ -23,7 +23,6 @@
  */
 
 #include <lpc213x.h>
-#include "mos6502.h"
 #include "mos6502_macros.S"
 
 @ Do an ORA with m_data[7:0]

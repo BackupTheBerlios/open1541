@@ -26,7 +26,8 @@
 
 #include <uart.h>
 #include <stdint.h>
-#include <mos6502.h>
+
+#include "mos6502.h"
 
 static uint16_t  base;
 static uint8_t   opcode;

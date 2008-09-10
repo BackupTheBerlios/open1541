@@ -20,8 +20,10 @@
 #include <lpc213x.h>
 
 #include <via.h>
-#include <mos6502.h>
 #include <mos6502_macros.S>
+
+MACH_DATA_DECLARE = 1
+#include <mach_data.S>
 
 
 #ifdef CONFIG_VIA_TRACES

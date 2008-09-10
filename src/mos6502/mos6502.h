@@ -18,17 +18,6 @@
 #ifndef MOS6502_H
 #define MOS6502_H
 
-/* !!!!! Keep in sync with mos6502_data in mos6502.S !!!!! */
-#define MOS6502_SP_OFFSET           0
-#define MOS6502_A_OFFSET            4
-#define MOS6502_X_OFFSET            8
-#define MOS6502_Y_OFFSET           12
-#define MOS6502_VIA1_REGS_OFFSET   16
-#define MOS6502_VIA2_REGS_OFFSET  (16 + 16)
-#define MOS6502_BP_OFFSET         (16 + 32)
-
-#ifndef __ASSEMBLER__
-
 #include <stdint.h>
 
 typedef struct mos6502_regs_s
@@ -69,7 +58,5 @@ uint8_t mos6502_write_mem(uint16_t address, uint8_t val);
 
 /* from mos6502_dis.c */
 uint16_t mos6502_dis(uint16_t start, uint16_t stop);
-
-#endif /* ifndef __ASSEMBLER__ */
 
 #endif

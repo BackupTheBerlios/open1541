@@ -54,52 +54,7 @@
 #include <lpc213x.h>
 #include <via.h>
 
-#include "mos6502.h"
 #include "mos6502_macros.S"
-
-        .bss
-
-        .align 2        @ 4 bytes align
-
-@ !!!!! Keep offsets in sync with MOS6502_XXX_OFFSET in mos6502.h !!!!!
-        .global mos6502_data
-mos6502_data:
-
-        .global mos6502_sp
-mos6502_sp:
-        .word   0
-
-        .global mos6502_a
-mos6502_areg:
-        .word   0
-
-        .global mos6502_x
-mos6502_xreg:
-        .word   0
-
-        .global mos6502_y
-mos6502_yreg:
-        .word   0
-
-via1_reg_mirror:
-        .global via1_reg_mirror
-        .space VIA_REG_SIZE, 0
-
-via2_reg_mirror:
-        .global via2_reg_mirror
-        .space VIA_REG_SIZE, 0
-
-@ this should be the last entry, because it has variable size
-        .global mos6502_bp
-mos6502_bp:
-        @ 0-terminated list of break points
-#if CONFIG_BREAKPOINTS > 0
-        .space CONFIG_BREAKPOINTS * 2, 0
-        .hword 0
-#endif
-
-        .code 32
-        .text
 
 /*******************************************************************************
  * Initialize all registers, load the PC with the reset vector. Put the 
@@ -121,7 +76,7 @@ mos6502_reg_init:
         ldr     m_ptimer, =T0IR
 
         @ point to base address of data storage
-        ldr     m_pdata, =mos6502_data
+        ldr     m_pdata, =mach_data
 
         @ set all regs to 0
         mov     m_tmp, #0

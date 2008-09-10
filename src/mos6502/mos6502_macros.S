@@ -15,6 +15,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+MACH_DATA_DECLARE = 1
+#include <mach_data.S>
+
 @ may be used as scratch register
 m_tmp   .req    r0
 

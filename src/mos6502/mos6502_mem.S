@@ -27,7 +27,7 @@
  * memory location. Each 0x0400 = (1 << 10) = 1024 bytes block has one pointer,
  * so specialized functions and memory mirroring will be possible.
  *
- * This table is not used to read opcodes, see mos6502_fiq.S instead.
+ * This table is not used to read opcodes.
  *
  ******************************************************************************/
         .global memr_table
@@ -73,6 +73,36 @@ memw_table:
         .word memw_none, memw_none, memw_none, memw_none  @ 0xd000
         .word memw_none, memw_none, memw_none, memw_none  @ 0xe000
         .word memw_none, memw_none, memw_none, memw_none  @ 0xf000
+
+/*******************************************************************************
+ * This table points to memory areas for reading instructions from emulated
+ * memory directly.
+ *
+ * This table is not used to read data.
+ *
+ * Each 0x0800 = (1 << 11) = 2048 bytes block has one pointer,
+ *
+ * Currently the emulated RAM can be read every 2 kBytes.
+ *
+ ******************************************************************************/
+        .global mem_access_table
+mem_access_table:
+        .word c1541_ram - 0x0000, c1541_ram - 0x0800 @ 0x0000
+        .word c1541_ram - 0x1000, c1541_ram - 0x1800 @ 0x1000
+        .word c1541_ram - 0x2000, c1541_ram - 0x2800 @ 0x2000
+        .word c1541_ram - 0x3000, c1541_ram - 0x3800 @ 0x3000
+        .word c1541_ram - 0x4000, c1541_ram - 0x4800 @ 0x4000
+        .word c1541_ram - 0x5000, c1541_ram - 0x5800 @ 0x5000
+        .word c1541_ram - 0x6000, c1541_ram - 0x6800 @ 0x6000
+        .word c1541_ram - 0x7000, c1541_ram - 0x7800 @ 0x7000
+        .word c1541_ram - 0x8000, c1541_ram - 0x8800 @ 0x8000
+        .word c1541_ram - 0x9000, c1541_ram - 0x9800 @ 0x9000
+        .word c1541_ram - 0xa000, c1541_ram - 0xa800 @ 0xa000
+        .word c1541_ram - 0xb000, c1541_ram - 0xb800 @ 0xb000
+        .word ROM_IMAGE - 0xc000, ROM_IMAGE - 0xc000 @ 0xc000
+        .word ROM_IMAGE - 0xc000, ROM_IMAGE - 0xc000 @ 0xd000
+        .word ROM_IMAGE - 0xc000, ROM_IMAGE - 0xc000 @ 0xe000
+        .word ROM_IMAGE - 0xc000, ROM_IMAGE - 0xc000 @ 0xf000
 
 /*******************************************************************************
  * Read RAM pointed to by m_addr (client address). Return the result

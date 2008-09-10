@@ -26,11 +26,12 @@
 
 /* This file must be included into mach_data.S */
 
-@    size   symbol          offset to be defined
-data    4   mos6502_sp      MOS6502_SP_OFFSET
-data    4   mos6502_areg    MOS6502_A_OFFSET
-data    4   mos6502_xreg    MOS6502_X_OFFSET
-data    4   mos6502_yreg    MOS6502_Y_OFFSET
+@    size   symbol              offset to be defined
+data    4   mos6502_sp          MOS6502_SP_OFFSET
+data    4   mos6502_areg        MOS6502_A_OFFSET
+data    4   mos6502_xreg        MOS6502_X_OFFSET
+data    4   mos6502_yreg        MOS6502_Y_OFFSET
+data    4   mos6503_pc_offset   MOS6502_PC_OFFSET_OFFSET
 
 #if CONFIG_BREAKPOINTS > 0
 breakpoint_space = CONFIG_BREAKPOINTS * 2

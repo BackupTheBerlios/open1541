@@ -27,7 +27,7 @@
 
 @ Do an ADC, the argument is in m_data[7:0]
 .macro do_adc
-        movs    m_tmp, m_pc, lsl #3     @ set ARM C from 6502 C
+        movs    m_tmp, m_flags, lsl #3     @ set ARM C from 6502 C
         a_to_tmp                        @ if CS: prepare summand
         mvncs   lr, #0xff000000         @     set bits 0-23 so ARM C will work
         orrcs   lr, lr, m_data, lsl #24 @ put summand into 24-31
@@ -41,7 +41,7 @@
 
 @ Do an SBC, the argument is in m_data[7:0]
 .macro do_sbc
-        movs    m_tmp, m_pc, lsl #3     @ set ARM C from 6502 C
+        movs    m_tmp, m_flags, lsl #3     @ set ARM C from 6502 C
         a_to_tmp
         sbcs    m_tmp, m_tmp, m_data, lsl #24
 

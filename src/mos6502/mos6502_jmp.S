@@ -42,43 +42,43 @@
 
         .global op_10
 op_10:  @ BPL
-        tst m_pc, #MOS6502_N    @ check if emulated N bit is set
+        tst m_flags, #MOS6502_N @ check if emulated N bit is set
         bne no_branch           @ set => no branch
         do_branch
 
         .global op_30
 op_30:  @ BMI
-        tst m_pc, #MOS6502_N    @ check if emulated N bit is set
+        tst m_flags, #MOS6502_N @ check if emulated N bit is set
         beq no_branch           @ clear => no branch
         do_branch
 
         .global op_50
 op_50:  @ BVC
-        tst m_pc, #MOS6502_V    @ check if emulated V bit is set
+        tst m_flags, #MOS6502_V @ check if emulated V bit is set
         bne no_branch           @ set => no branch
         do_branch
 
         .global op_70
 op_70:  @ BVS
-        tst m_pc, #MOS6502_V    @ check if emulated V bit is set
+        tst m_flags, #MOS6502_V @ check if emulated V bit is set
         beq no_branch           @ clear => no branch
         do_branch
 
         .global op_90
 op_90:  @ BCC
-        tst m_pc, #MOS6502_C    @ check if emulated C bit is set
+        tst m_flags, #MOS6502_C @ check if emulated C bit is set
         bne no_branch           @ set => no branch
         do_branch
 
         .global op_b0
 op_b0:  @ BCS
-        tst m_pc, #MOS6502_C    @ check if emulated C bit is set
+        tst m_flags, #MOS6502_C @ check if emulated C bit is set
         beq no_branch           @ clear => no branch
         do_branch
 
         .global op_d0
 op_d0:  @ BNE
-        tst m_pc, #MOS6502_Z    @ check if emulated Z bit is set
+        tst m_flags, #MOS6502_Z @ check if emulated Z bit is set
         bne no_branch           @ set => no branch
         do_branch
 
@@ -87,14 +87,13 @@ no_branch:
 
         .global op_f0
 op_f0:  @ BEQ
-        tst m_pc, #MOS6502_Z    @ check if emulated Z bit is set
+        tst m_flags, #MOS6502_Z @ check if emulated Z bit is set
         beq no_branch           @ clear => no branch
         do_branch
 
         .global op_4c
 op_4c:  @ JMP abs
         memr_pc_arg16
-        mov m_pc, m_pc, lsr #16         @ remove old PC
-        add m_pc, m_addr, m_pc, lsl #16 @ set new PC
+        mov     m_pc, m_addr
+        pc_client_to_host
         op_end 0 3
-

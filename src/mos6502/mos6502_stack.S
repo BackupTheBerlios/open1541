@@ -22,39 +22,39 @@
 .macro flags_to_data
         @ That's stupid, can't we do this easier?
         mov     m_data, #(1 << 5)
-        tst     m_pc, #MOS6502_N
+        tst     m_flags, #MOS6502_N
         orrne   m_data, m_data, #(1 << 7)
-        tst     m_pc, #MOS6502_V
+        tst     m_flags, #MOS6502_V
         orrne   m_data, m_data, #(1 << 6)
-        tst     m_pc, #MOS6502_D
+        tst     m_flags, #MOS6502_D
         orrne   m_data, m_data, #(1 << 3)
-        tst     m_pc, #MOS6502_I
+        tst     m_flags, #MOS6502_I
         orrne   m_data, m_data, #(1 << 2)
-        tst     m_pc, #MOS6502_Z
+        tst     m_flags, #MOS6502_Z
         orrne   m_data, m_data, #(1 << 1)
-        tst     m_pc, #MOS6502_C
+        tst     m_flags, #MOS6502_C
         orrne   m_data, m_data, #(1 << 0)
 .endm
 
 @ get the emulated processor flags from m_data in 6502 order
 .macro data_to_flags
         @ That's stupid, can't we do this easier?
-        bic     m_pc, m_pc, #(0xff << 24)
+        bic     m_flags, m_flags, #(0xff << 24)
         tst     m_data, #(1 << 7)
-        orrne   m_pc, m_pc, #MOS6502_N
+        orrne   m_flags, m_flags, #MOS6502_N
         tst     m_data, #(1 << 6)
         @ todo: Check what to do here
-        @ orrne   m_pc, m_pc, #MOS6502_B
+        @ orrne   m_flags, m_flags, #MOS6502_B
         @ tst     m_data, #(1 << 4)
-        orrne   m_pc, m_pc, #MOS6502_V
+        orrne   m_flags, m_flags, #MOS6502_V
         tst     m_data, #(1 << 3)
-        orrne   m_pc, m_pc, #MOS6502_D
+        orrne   m_flags, m_flags, #MOS6502_D
         tst     m_data, #(1 << 2)
-        orrne   m_pc, m_pc, #MOS6502_I
+        orrne   m_flags, m_flags, #MOS6502_I
         tst     m_data, #(1 << 1)
-        orrne   m_pc, m_pc, #MOS6502_Z
+        orrne   m_flags, m_flags, #MOS6502_Z
         tst     m_data, #(1 << 0)
-        orrne   m_pc, m_pc, #MOS6502_C
+        orrne   m_flags, m_flags, #MOS6502_C
 .endm
 
 
@@ -83,6 +83,8 @@ op_08: @ PHP
 op_20: @ JSR $FFFF
         memr_pc_arg16
 
+        pc_host_to_client m_pc
+
         @ get SP
         sp_to_tmp
 
@@ -108,8 +110,9 @@ op_20: @ JSR $FFFF
         @ save SP
         tmp_to_sp
 
-        mov     m_pc, m_pc, lsr #16         @ remove old PC
-        add     m_pc, m_addr, m_pc, lsl #16 @ set new PC
+        mov     m_pc, m_addr
+        pc_client_to_host
+
         op_end 0 6
 
 
@@ -138,8 +141,8 @@ op_40: @ RTI
         @ get SP
         sp_to_tmp
 
-        @ remove old PC and flags
-        and     m_pc, m_pc, #MOS6502_PC_EMU_MASK
+        @ remove old 6502 flags
+        and     m_flags, m_flags, #MOS6502_FLAGS_EMU_MASK
 
         @ inc SP, wrap it
         add     m_tmp, m_tmp, #1
@@ -155,8 +158,7 @@ op_40: @ RTI
         and     m_tmp, m_tmp, #0xff
 
         @ PULL low byte
-        ldrb    m_data, [m_addr, m_tmp]
-        orr     m_pc, m_pc, m_data
+        ldrb    m_pc, [m_addr, m_tmp]
 
         @ inc SP, wrap it
         add     m_tmp, m_tmp, #1
@@ -168,6 +170,7 @@ op_40: @ RTI
 
         @ save SP
         tmp_to_sp
+        pc_client_to_host
         op_end 0 6
 
 
@@ -175,7 +178,6 @@ op_40: @ RTI
 op_48: @ PHA
         a_to_data_low
 
-        @ get SP
         sp_to_tmp
 
         @ PUSH
@@ -185,18 +187,13 @@ op_48: @ PHA
         @ dec SP, we'll only store one byte so it wraps automatically
         sub     m_tmp, m_tmp, #1
 
-        @ save SP
         tmp_to_sp
         op_end 1 3
 
 
         .global op_60
 op_60: @ RTS
-        @ get SP
         sp_to_tmp
-
-        @ remove old PC by shifting it away
-        mov     m_pc, m_pc, lsr #16
 
         @ inc SP, wrap it
         add     m_tmp, m_tmp, #1
@@ -204,8 +201,7 @@ op_60: @ RTS
 
         @ PULL low byte, shift PC back
         ldr     m_addr, =(c1541_ram + 0x100)
-        ldrb    m_data, [m_addr, m_tmp]
-        orr     m_pc, m_data, m_pc, lsl #16 @ set new PC (low)
+        ldrb    m_pc, [m_addr, m_tmp]
 
         @ inc SP, wrap it
         add     m_tmp, m_tmp, #1
@@ -215,8 +211,8 @@ op_60: @ RTS
         ldrb    m_data, [m_addr, m_tmp]
         orr     m_pc, m_pc, m_data, lsl #8
 
-        @ save SP
         tmp_to_sp
+        pc_client_to_host
         op_end 1 6
 
 

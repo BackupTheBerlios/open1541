@@ -30,6 +30,7 @@
  * - Check if we can put at least X and Y into one ARM register to get one
  *   banked register free
  * - Implement BCD mode
+ * - Put SP into high byte, so wrapping needn't to be done manually
  *
  * Implementing opcodes:
  * On entry:
@@ -92,13 +93,17 @@ mos6502_reg_init:
         mov     m_addr, #0xff00
         add     m_addr, m_addr, #0xfc
         memr_addr
-        mov     m_pc, m_data
+        mov     m_flags, m_data
         add     m_addr, m_addr, #1
         memr_addr
-        add     m_pc, m_data, lsl #8
+        add     m_flags, m_data, lsl #8
+
+        mov     m_pc, m_flags, lsl #16
+        mov     m_pc, m_pc, lsr #16
+        pc_client_to_host
 
         @ set single step mode
-        orr     m_pc, m_pc, #MOS6502_S
+        orr     m_flags, m_flags, #MOS6502_S
 
         @ restore old processor and interrupt state, return
         msr     cpsr_c, r3
@@ -117,16 +122,25 @@ mos6502_store_regs:
         @ disable IRQs so we won't be disturbed, goto FIQ mode
         msr cpsr_c, #MODE_FIQ | PSR_I | PSR_F
 
-        stmia   r0!, {m_t}   @ time
+        mov     m_addr, r0
+        stmia   m_addr!, {m_t}   @ time
+
         a_to_data_low
-        stmia   r0!, {m_data}
+        stmia   m_addr!, {m_data}
+
         x_to_data_low
-        stmia   r0!, {m_data}
+        stmia   m_addr!, {m_data}
+
         y_to_data_low
-        stmia   r0!, {m_data}
+        stmia   m_addr!, {m_data}
+
         sp_to_data
-        stmia   r0!, {m_data}
-        stmia   r0!, {m_pc}  @ pc, flags
+        stmia   m_addr!, {m_data}
+
+        pc_host_to_client m_data
+        stmia   m_addr!, {m_data}
+
+        stmia   m_addr!, {m_flags}
 
         b       exit_fiq_mode
 
@@ -143,9 +157,7 @@ mos6502_get_pc:
         @ disable IRQs so we won't be disturbed, goto FIQ mode
         msr     cpsr_c, #MODE_FIQ | PSR_I | PSR_F
 
-        @ copy PC to R0, shift away unused bits
-        mov     r0, m_pc, lsl #16
-        mov     r0, r0, lsr #16
+        pc_host_to_client r0
 
         b       exit_fiq_mode
 
@@ -163,7 +175,7 @@ mos6502_is_stopped:
         @ disable IRQs so we won't be disturbed, goto FIQ mode
         msr     cpsr_c, #MODE_FIQ | PSR_I | PSR_F
 
-        and     r0, m_pc, #(MOS6502_S | MOS6502_P)
+        and     r0, m_flags, #(MOS6502_S | MOS6502_P)
 
         b       exit_fiq_mode
 
@@ -220,7 +232,7 @@ mos6502_stop:
         msr cpsr_c, #MODE_FIQ | PSR_I | PSR_F
 
         @ Set single step mode
-        orr m_pc, m_pc, #MOS6502_S
+        orr m_flags, m_flags, #MOS6502_S
 
 exit_fiq_mode:
         @ restore old processor and interrupt state, return
@@ -242,12 +254,12 @@ mos6502_step:
         msr     cpsr_c, #MODE_FIQ | PSR_I | PSR_F
 
         @ Check for single step or breakpoint mode
-        tst     m_pc, #(MOS6502_S | MOS6502_P)
+        tst     m_flags, #(MOS6502_S | MOS6502_P)
         beq     exit_fiq_mode
 
         @ possibly only the P flag was set but we want to single step now
-        bic     m_pc, m_pc, #MOS6502_P
-        orr     m_pc, m_pc, #MOS6502_S
+        bic     m_flags, m_flags, #MOS6502_P
+        orr     m_flags, m_flags, #MOS6502_S
 
         @ program the timer match register 0 to expire in 2 us
         @ write T0TC
@@ -284,11 +296,11 @@ mos6502_run:
         msr cpsr_c, #MODE_FIQ | PSR_I | PSR_F
 
         @ Check for single step or break mode
-        tst m_pc, #(MOS6502_S | MOS6502_P)
+        tst m_flags, #(MOS6502_S | MOS6502_P)
         beq 1f
 
         @ Delete bit for single step / break mode (in case it's set)
-        bic m_pc, m_pc, #(MOS6502_S | MOS6502_P)
+        bic m_flags, m_flags, #(MOS6502_S | MOS6502_P)
 
         @ program the timer match register 0 to expire in 2 us
         ldr     m_t, [m_ptimer, #(T0TC - T0IR)]
@@ -325,17 +337,17 @@ check_next_bp:
         movs    m_tmp, m_tmp, lsl #16   @ shift away flags
         beq     end_check_bp            @ end if terminating 0 was found
 
-        cmp     m_tmp, m_pc, lsl #16    @ does PC match this BP?
+        cmp     m_tmp, m_flags, lsl #16    @ does PC match this BP?
         bne     check_next_bp
 
-        orr     m_pc, m_pc, #MOS6502_P  @ breakpoint mode
+        orr     m_flags, m_flags, #MOS6502_P  @ breakpoint mode
 
 end_check_bp:
 #endif
 
         @ program the timer match register if not in single step nor
         @ breakpoint mode
-        tst     m_pc, #(MOS6502_S | MOS6502_P)
+        tst     m_flags, #(MOS6502_S | MOS6502_P)
         streq   m_t, [m_ptimer, #(T0MR0 - T0IR)] @ store to T0MR0
 
         ret_fiq

@@ -56,7 +56,7 @@ void mos6502_dump_regs(void)
     //         1234567890 1234 11 22 33 44 ********
     uart_putdec_padded(10, regs.time);
     uart_putc(' ');
-    uart_puthex_padded(4, regs.pc & 0xffff);
+    uart_puthex_padded(4, regs.pc);
     uart_putc(' ');
     uart_puthex_padded(2, regs.a);
     uart_putc(' ');
@@ -66,11 +66,11 @@ void mos6502_dump_regs(void)
     uart_putc(' ');
     uart_puthex_padded(2, regs.sp);
     uart_putc(' ');
-    uart_putc(regs.pc & PSR_N ? 'N' : '-');
-    uart_putc(regs.pc & PSR_V ? 'V' : '-');
+    uart_putc(regs.flags & PSR_N ? 'N' : '-');
+    uart_putc(regs.flags & PSR_V ? 'V' : '-');
     uart_puts("----");
-    uart_putc(regs.pc & PSR_Z ? 'Z' : '-');
-    uart_putc(regs.pc & PSR_C ? 'C' : '-');
+    uart_putc(regs.flags & PSR_Z ? 'Z' : '-');
+    uart_putc(regs.flags & PSR_C ? 'C' : '-');
 
     uart_putcrlf();
 }

@@ -66,7 +66,7 @@
 @ This does not clear bit 8 of m_data, this should disappear when storing
 @ the byte
 .macro do_rol
-        movs    m_tmp, m_pc, lsl #3     @ set ARM C from 6502 C
+        movs    m_tmp, m_flags, lsl #3     @ set ARM C from 6502 C
         adc     m_data, m_data, m_data  @ ROL
         movs    m_tmp, m_data, lsl #24  @ to update flags
         update_nzc
@@ -74,16 +74,16 @@
 
 @ Do a ROR on m_data[7:0]
 .macro do_ror
-        movs    m_tmp, m_pc, lsl #3     @ set ARM C from 6502 C
+        movs    m_tmp, m_flags, lsl #3     @ set ARM C from 6502 C
         orrcs   m_data, m_data, #(1 << 8)
         movs    m_data, m_data, lsr #1  @ ROR
 
         @ update flags
-        bic     m_pc, m_pc, #(MOS6502_N | MOS6502_Z | MOS6502_C)
-        orrcs   m_pc, m_pc, #MOS6502_C
-        orreq   m_pc, m_pc, #MOS6502_Z
+        bic     m_flags, m_flags, #(MOS6502_N | MOS6502_Z | MOS6502_C)
+        orrcs   m_flags, m_flags, #MOS6502_C
+        orreq   m_flags, m_flags, #MOS6502_Z
         tst     m_data, #(1 << 7)
-        orrne   m_pc, m_pc, #MOS6502_N
+        orrne   m_flags, m_flags, #MOS6502_N
 .endm
 
         .global op_01

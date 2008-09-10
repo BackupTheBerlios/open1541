@@ -23,19 +23,19 @@
 #include "mos6502_macros.S"
 
 .macro do_bit
-        bic     m_pc, m_pc, #(MOS6502_N | MOS6502_Z | MOS6502_V)
+        bic     m_flags, m_flags, #(MOS6502_N | MOS6502_Z | MOS6502_V)
         tst     m_data, #(1 << 6)
-        orrne   m_pc, m_pc, #MOS6502_V
+        orrne   m_flags, m_flags, #MOS6502_V
         tst     m_data, #(1 << 7)
-        orrne   m_pc, m_pc, #MOS6502_N
+        orrne   m_flags, m_flags, #MOS6502_N
         a_to_tmp
         ands    m_tmp, m_tmp, m_data, lsl #24
-        orreq   m_pc, m_pc, #MOS6502_Z
+        orreq   m_flags, m_flags, #MOS6502_Z
 .endm
 
         .global op_18
 op_18:  @ CLC
-        bic m_pc, #MOS6502_C
+        bic m_flags, #MOS6502_C
         op_end 1 2
 
         .global op_24
@@ -52,27 +52,27 @@ op_2c: @ BIT $FFFF
 
         .global op_38
 op_38:  @ SEC
-        orr m_pc, m_pc, #MOS6502_C
+        orr m_flags, m_flags, #MOS6502_C
         op_end 1 2
 
         .global op_58
 op_58:  @ CLI
-        bic m_pc, #MOS6502_I
+        bic m_flags, #MOS6502_I
         op_end 1 2
 
         .global op_78
 op_78:  @ SEI
-        orr m_pc, m_pc, #MOS6502_I
+        orr m_flags, m_flags, #MOS6502_I
         op_end 1 2
 
         .global op_b8
 op_b8:  @ CLV
-        bic m_pc, #MOS6502_V
+        bic m_flags, #MOS6502_V
         op_end 1 2
 
         .global op_d8
 op_d8:  @ CLD
-        bic m_pc, #MOS6502_D
+        bic m_flags, #MOS6502_D
         op_end 1 2
 
         .global op_ea
@@ -81,7 +81,7 @@ op_ea:  @ NOP
 
         .global op_f8
 op_f8:  @ SED
-        orr m_pc, m_pc, #MOS6502_D
+        orr m_flags, m_flags, #MOS6502_D
         op_end 1 2
 
 

@@ -29,23 +29,8 @@
  ******************************************************************************/
         stmfd sp!, {r0 - r2, lr}
 
-        @ let m_addr point to the table with pointers to readable mem locations
-        adr     m_addr, direct_read_addresses
-
-        @ each table entry points to 0x0800 bytes, use the higher bits
-        and     m_tmp, m_pc, #0xf800
-
-        @ read pointer to native memory at m_pc to m_addr
-        ldr     m_addr, [m_addr, m_tmp, lsr #(11 - 2)]
-
-        @ put lower 11 bits of m_pc into higher part of m_tmp
-        mov     m_tmp, m_pc, lsl #(32 - 11)
-
-        @ remember converted pc in m_addr for reading args later
-        add     m_addr, m_addr, m_tmp, lsr #(32 - 11)
-
         @ read opcode
-        ldrb    m_tmp, [m_addr]
+        ldrb    m_tmp, [m_pc]
 
         @ jump to the opcode address
         ldr pc, [pc, m_tmp, lsl #2]
@@ -86,31 +71,3 @@
         .word op_e8, op_e9, op_ea, op_xx, op_ec, op_ed, op_ee, op_xx
         .word op_f0, op_f1, op_xx, op_xx, op_xx, op_f5, op_f6, op_xx @ f
         .word op_f8, op_f9, op_xx, op_xx, op_xx, op_fd, op_fe, op_xx
-
-/*******************************************************************************
- * This table points to memory areas for reading instructions from emulated
- * memory directly. It is located in this module to keep its address close to 0,
- * so we can use ADR to get its address relatively to PC.
- *
- * This table is not used to read data, see mos6502_mem.S instead.
- *
- * Each 0x0800 = (1 << 11) = 2048 bytes block has one pointer,
- *
- * Currently the emulated RAM can be read every 2 kBytes. This must be corrected
- * later to meet the real 1541 memory map.
- *
- ******************************************************************************/
-        nop @ use more or less NOPs to fix the distance to ADR
-        nop
-        .global direct_read_addresses
-direct_read_addresses:
-        .word c1541_ram, c1541_ram, c1541_ram, c1541_ram   @ 0x0000
-        .word c1541_ram, c1541_ram, c1541_ram, c1541_ram   @ 0x2000
-        .word c1541_ram, c1541_ram, c1541_ram, c1541_ram   @ 0x4000
-        .word c1541_ram, c1541_ram, c1541_ram, c1541_ram   @ 0x6000
-        .word c1541_ram, c1541_ram, c1541_ram, c1541_ram   @ 0x8000
-        .word c1541_ram, c1541_ram, c1541_ram, c1541_ram   @ 0xa000
-        .word ROM_IMAGE + 0x0000, ROM_IMAGE + 0x0800       @ 0xc000
-        .word ROM_IMAGE + 0x1000, ROM_IMAGE + 0x1800       @  0xc800
-        .word ROM_IMAGE + 0x2000, ROM_IMAGE + 0x2800       @ 0xc000
-        .word ROM_IMAGE + 0x3000, ROM_IMAGE + 0x3800       @  0xe800

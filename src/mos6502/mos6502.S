@@ -328,14 +328,16 @@ mos6502_op_end:
         str     m_tmp, [m_ptimer, #(T0IR - T0IR)]
 
 #if CONFIG_BREAKPOINTS > 0
+        pc_host_to_client lr            @ convert client PC, result into lr
+
         @ Check if PC points to a break point
         add     m_addr, m_pdata, #MOS6502_BP_OFFSET
 check_next_bp:
         ldrh    m_tmp, [m_addr], #2     @ load BP and post-increment addr
-        movs    m_tmp, m_tmp, lsl #16   @ shift away flags
+        cmp     m_tmp, #0
         beq     end_check_bp            @ end if terminating 0 was found
 
-        cmp     m_tmp, m_flags, lsl #16    @ does PC match this BP?
+        cmp     m_tmp, lr               @ does PC match this BP?
         bne     check_next_bp
 
         orr     m_flags, m_flags, #MOS6502_P  @ breakpoint mode

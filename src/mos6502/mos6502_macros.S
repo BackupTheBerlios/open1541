@@ -44,15 +44,14 @@ m_pdata .req    r10
 @ permanent pointer to timer0 registers
 m_ptimer .req   r11
 
-@ This register contains the processor status flags and the PC
+@ This register contains the processor status flags
 @ NZCF are kept in the same order and at the same position as in ARM,
 @ so they simply can be copied.
 @ The bits are:
-@ NZCVBDI0 00000PSx PPPPPPPP PPPPPPPP
-@ P = pc
-@ x = kept for overflow, don't use
-@ 0 = reserved
+@ NZCVBDI0 00000PS0 00000000 00000000
+@ P = break point hit
 @ S = single step mode, for emulation tests
+@ 0 = reserved
 @
 m_flags    .req    r12
 

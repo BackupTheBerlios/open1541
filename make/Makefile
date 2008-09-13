@@ -128,7 +128,8 @@ ifeq ($(rom), dos1541)
 	# Currently the 1541 II ROM is compiled in.
 	# Later it will be loaded from SD card into RAM or Flash.
 	ifeq ("$(wildcard $(srcdir)/dos1541.bin)", "")
-		$(error No 1541 ROM image in $(srcdir)/dos1541.bin)
+		# If I indented the next line with tabs it wouldn't work
+                $(error No 1541 ROM image in $(srcdir)/dos1541.bin)
 	endif
 else
 	obj += $(objdir)/testrom.o

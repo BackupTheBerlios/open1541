@@ -27,6 +27,7 @@ MACH_DATA_DECLARE = 1
 
 
 #if CONFIG_VIA_TRACES
+
 .macro via_report_access_r
         push    {lr}
         mov     r0, #'r'
@@ -276,7 +277,7 @@ via2w_00:
         @ via_report_access_w
         strb    m_data, [m_pdata, #(VIA2_REGS_OFFSET + 0)]
 
-        @ Set LED state (this should be implemented in a better way...)
+        @ Set LED state (this should be implemented a better way...)
         ldr     m_addr, =(DIRTY_LED_PORT + IOPIN)
         ldr     m_tmp, [m_addr]
         tst     m_data, #(1 << 3)
@@ -362,8 +363,7 @@ via_report_access:
         mov     r0, #':'
         bl      uart_putc
 
-        mov     r0, m_pc, lsl #16   @ get PC, remove flags
-        mov     r0, r0, lsr #16
+        pc_host_to_client r0
         bl      uart_puthex
 
         mov     r0, #':'

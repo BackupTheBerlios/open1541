@@ -212,6 +212,7 @@ op_60: @ RTS
         orr     m_pc, m_pc, m_data, lsl #8
 
         tmp_to_sp
+        add     m_pc, m_pc, #1
         pc_client_to_host
         op_end 6
 

@@ -197,8 +197,12 @@ via1r_05:
  *
  ******************************************************************************/
 via1w_0c:
-        via_report_access_w
         strb    m_data, [m_pdata, #(VIA1_REGS_OFFSET + 3)]
+
+        @ we only support value 0x01 to be written here
+        cmp     m_data, #0x01
+        bne     via_report_access
+
         mov     pc, lr                  @ return
 
 /*******************************************************************************
@@ -225,96 +229,3 @@ via1r_xx:
         via_report_access_r
         mov     pc, lr                  @ return
 
-
-
-
-
-
-
-/*******************************************************************************
- * Write to VIA2 Data Port B (SYNC, Motors, Bit Rates, LED)
- *
- ******************************************************************************/
-via2w_00:
-        @ via_report_access_w
-        strb    m_data, [m_pdata, #(VIA2_REGS_OFFSET + 0)]
-
-        @ Set LED state (this should be implemented a better way...)
-        ldr     m_addr, =(DIRTY_LED_PORT + IOPIN)
-        ldr     m_tmp, [m_addr]
-        tst     m_data, #(1 << 3)
-        bicne   m_tmp, #(1 << DIRTY_LED_PIN)
-        orreq   m_tmp, #(1 << DIRTY_LED_PIN)
-        str     m_tmp, [m_addr]
-
-        mov     pc, lr                  @ return
-
-/******************************************************************************
- * Write to VIA2 Data Direction Register B (SYNC, Motors, Bit Rates, LED)
- * 1541 II writes 0x6f here, everything OUT except SYNC and WRITE PROTECT.
- * At one place 0x08 is written, but with no different functionality intended.
- * This is hard-coded in our project and cannot be changed.
- *
- ******************************************************************************/
-via2w_02:
-        strb    m_data, [m_pdata, #(VIA2_REGS_OFFSET + 2)]
-
-        @ we only support values 0x6f and 0x08 to be written here
-        cmp     m_data, #0x6f
-        beq     1f
-        cmp     m_data, #0x08
-        bne     via_report_access
-1:
-        mov     pc, lr                  @ return
-
-/******************************************************************************
- * Write to VIA2 Data Direction Register A  (Data to/from head)
- * Currently ignored, the 1541 II writes 0xff here.
- *
- ******************************************************************************/
-via2w_03:
-        strb    m_data, [m_pdata, #(VIA2_REGS_OFFSET + 3)]
-
-        @ we only support value 0xff and 0x00 to be written here
-        cmp     m_data, #0xff
-        beq     1f
-        cmp     m_data, #0x00
-        bne     via_report_access
-1:
-        mov     pc, lr                  @ return
-
-/******************************************************************************
- * Read from VIA2 Data Port B (SYNC, Motors, Bit Rates, LED)
- * Return last value written
- *
- ******************************************************************************/
-via2r_00:
-        ldrb    m_data, [m_pdata, #(VIA2_REGS_OFFSET + 0)]
-        @ via_report_access_r
-        mov     pc, lr                  @ return
-
-
-
-/*******************************************************************************
- * Generic write function for VIA1
- * Write the value to a VIA mirror register.
- *
- ******************************************************************************/
-via2w_xx:
-        via_report_access_w
-        and     m_tmp, m_addr, #0x0f
-        add     m_tmp, m_tmp, #VIA2_REGS_OFFSET
-        strb    m_data, [m_pdata, m_tmp]
-        mov     pc, lr                  @ return
-
-/*******************************************************************************
- * Generic read function for VIA2
- * Return the last value written to a mirror register.
- *
- ******************************************************************************/
-via2r_xx:
-        and     m_tmp, m_addr, #0x0f
-        add     m_tmp, m_tmp, #VIA2_REGS_OFFSET
-        ldrb    m_data, [m_pdata, m_tmp]
-        via_report_access_r
-        mov     pc, lr                  @ return

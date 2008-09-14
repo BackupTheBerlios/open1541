@@ -25,29 +25,6 @@
 MACH_DATA_DECLARE = 1
 #include <mach_data.S>
 
-
-#if CONFIG_VIA_TRACES
-
-.macro via_report_access_r
-        push    {lr}
-        mov     r0, #'r'
-        bl      via_report_access
-        pop     {lr}
-.endm
-
-.macro via_report_access_w
-        push    {lr}
-        mov     r0, #'w'
-        bl      via_report_access
-        pop     {lr}
-.endm
-#else
-.macro via_report_access_r
-.endm
-.macro via_report_access_w
-.endm
-#endif
-
 /*******************************************************************************
  * Write byte m_data to the VIA 1 register in m_addr.
  *
@@ -100,59 +77,6 @@ memr_via1:
         .word via1r_04, via1r_05, via1r_xx, via1r_xx
         .word via1r_xx, via1r_xx, via1r_xx, via1r_xx
         .word via1r_xx, via1r_xx, via1r_xx, via1r_xx
-
-/*******************************************************************************
- * Write byte m_data to the VIA 2 register in m_addr.
- *
- * In:  m_addr      Client address
- *      m_data      The byte to be written
- *
- * Out: m_addr      Changed (!!!)
- *      m_tmp       Changed
- *
- ******************************************************************************/
-        .global memw_via2
-memw_via2:
-        @ a VIA has 16 regs, remove the other bits
-        and     m_tmp, m_addr, #0x0f
-
-        @ jump to the register handler address
-        ldr pc, [pc, m_tmp, lsl #2]
-
-        nop
-
-        @ the opcode jump table is directly behind our current ARM-PC so we can
-        @ use PC + opcode to find the right entry
-        .word via2w_00, via2w_xx, via2w_02, via2w_03
-        .word via2w_xx, via2w_xx, via2w_xx, via2w_xx
-        .word via2w_xx, via2w_xx, via2w_xx, via2w_xx
-        .word via2w_xx, via2w_xx, via2w_xx, via2w_xx
-
-/*******************************************************************************
- * Read a byte from the VIA 2 register in m_addr and return it in m_data.
- *
- * In:  m_addr      Client address
- *
- * Out: m_data      The byte
- *      m_tmp       Changed
- *
- ******************************************************************************/
-        .global memr_via2
-memr_via2:
-        @ a VIA has 16 regs, remove the other bits
-        and     m_tmp, m_addr, #0x0f
-
-        @ jump to the register handler address
-        ldr pc, [pc, m_tmp, lsl #2]
-
-        nop
-
-        @ the opcode jump table is directly behind our current ARM-PC so we can
-        @ use PC + opcode to find the right entry
-        .word via2r_00, via2r_xx, via2r_xx, via2r_xx
-        .word via2r_xx, via2r_xx, via2r_xx, via2r_xx
-        .word via2r_xx, via2r_xx, via2r_xx, via2r_xx
-        .word via2r_xx, via2r_xx, via2r_xx, via2r_xx
 
 
 /*******************************************************************************
@@ -372,7 +296,7 @@ via2r_00:
 
 
 /*******************************************************************************
- * Generic read function for VIA1
+ * Generic write function for VIA1
  * Write the value to a VIA mirror register.
  *
  ******************************************************************************/
@@ -394,42 +318,3 @@ via2r_xx:
         ldrb    m_data, [m_pdata, m_tmp]
         via_report_access_r
         mov     pc, lr                  @ return
-
-
-/*******************************************************************************
- * Report VIA register accesses
- * input: r0 = 'w' for write, r0 = 'r' for read
- *
- ******************************************************************************/
-via_report_access:
-        push    {r1 - r5, lr}
-
-        mov     r4, m_addr          @ save regs
-        mov     r5, m_data
-
-        bl      uart_putc           @ 'w' or 'r'
-
-        mov     r0, #':'
-        bl      uart_putc
-
-        pc_host_to_client r0
-        bl      uart_puthex
-
-        mov     r0, #':'
-        bl      uart_putc
-
-        mov     r0, r4              @ address
-        bl      uart_puthex
-
-        mov     r0, #'='
-        bl      uart_putc
-
-        mov     r0, r5              @ data
-        bl      uart_puthex
-
-        bl      uart_putcrlf
-
-        @ ugly hack: delay the CPU emulation so it won't stop
-        add     m_t, m_t, #0x10000  @ 65 ms
-
-        pop     {r1 - r5, pc}

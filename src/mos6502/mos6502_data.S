@@ -2,12 +2,6 @@
     mos6502_data.S - definitions for data fields used by CPU emulation
 
     (c) 2008 Thomas Giesel <skoe@directbox.com>
-    Derived from 6502dis for use in mos6502 subsystem of open1541.
-    Changes are mainly to disassemble from memory instead from a file
-    and to replace fprintf by uart functions.
-
-    Copyright (C) 2003 Written by Stian Soreng <skurk@multinet.no>
-    http://freshmeat.net/projects/6502dis/
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

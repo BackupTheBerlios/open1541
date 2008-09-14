@@ -14,6 +14,10 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
+#ifndef VIA_H
+#define VIA_H
+
+#include <autoconf.h>
 
 #define VIA1_BASE       0x1800
 #define VIA2_BASE       0x1c00
@@ -51,3 +55,29 @@
 #define VIA_IM_SR       0x04    /* Shift Register completion */
 #define VIA_IM_CA1      0x02    /* Handshake */
 #define VIA_IM_CA2      0x01    /* Handshake */
+
+#ifdef __ASSEMBLER__
+
+#if CONFIG_VIA_TRACES
+.macro via_report_access_r
+        push    {lr}
+        mov     r0, #'r'
+        bl      via_report_access
+        pop     {lr}
+.endm
+
+.macro via_report_access_w
+        push    {lr}
+        mov     r0, #'w'
+        bl      via_report_access
+        pop     {lr}
+.endm
+#else
+.macro via_report_access_r
+.endm
+.macro via_report_access_w
+.endm
+#endif
+
+#endif /* ASSEMBLY */
+#endif /* VIA_H */

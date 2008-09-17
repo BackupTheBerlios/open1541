@@ -1,12 +1,37 @@
+#
+# Makefile to download, build and install an arm-elf toolchain
+# For documentation see below
+#
+# Copyright (C) 2008 Thomas Giesel
+#
+# This software is provided 'as-is', without any express or implied
+# warranty.  In no event will the authors be held liable for any damages
+# arising from the use of this software.
+#
+# Permission is granted to anyone to use this software for any purpose,
+# including commercial applications, and to alter it and redistribute it
+# freely, subject to the following restrictions:
+#
+# 1. The origin of this software must not be misrepresented; you must not
+#    claim that you wrote the original software. If you use this software
+#    in a product, an acknowledgment in the product documentation would be
+#    appreciated but is not required.
+# 2. Altered source versions must be plainly marked as such, and must not be
+#    misrepresented as being the original software.
+# 3. This notice may not be removed or altered from any source distribution.
+#
+# Thomas Giesel skoe@directbox.com
+#
 
-# tested in Ubuntu/Xubuntu/Kubuntu 7.10, 8.04
+# Tested in Ubuntu/Xubuntu/Kubuntu 7.10, 8.04, Cygwin
 # 
 # Following conditions must be met to sucessfully build the toolchain:
 # - Be sure to have these packages installed
 #     libmpfr-dev >= 2.3.0
 #     libgmp3-dev >= 4.2
 #     make        >= 3.81 (GNU Make)
-# - The user who starts make must be a sudoer (see "man sudo")
+# - The user who starts make must be a sudoer (see "man sudo", not on cygwin)
+#
 
 here  := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 
@@ -20,10 +45,22 @@ gcc       := gcc-4.3.0
 gdb       := gdb-6.8
 insight   := insight-6.8
 
-target  := arm-elf
-prefix  := /opt/$(target)-$(binutils)-$(gcc)
+target    := arm-elf
+prefix    := /opt/$(target)-$(binutils)-$(gcc)
 
-path    := $(PATH):$(prefix)/bin
+# this variable will be empty if we're not on cygwin
+cygwin    := $(shell echo $$MACHTYPE | grep cygwin)
+
+ifeq (x$(cygwin), x)
+  # no cygwin: use sudo, append our bin directory
+  sudo      := sudo
+  path      := $(PATH):$(prefix)/bin
+else
+  # cygwin: no sudo needed, use std paths and our bin dir
+  sudo      :=
+  # don't use all these windows paths
+  path      := /bin:/usr/bin:$(prefix)/bin
+endif
 
 all: binutils gcc gdb insight
 
@@ -41,7 +78,7 @@ $(prefix)/bin/$(target)-objdump: $(build)/obj-$(binutils) $(build)/$(binutils)
 		--target=$(target) --prefix=$(prefix) --disable-nls \
 		--enable-interwork --disable-multilib --with-float=soft
 	cd $(build)/obj-$(binutils) && make
-	cd $(build)/obj-$(binutils) && sudo make install
+	cd $(build)/obj-$(binutils) && $(sudo) make install
 
 $(build)/$(binutils): $(archive)/$(binutils).tar.bz2
 	cd $(build) && tar xjf $(archive)/$(binutils).tar.bz2
@@ -70,7 +107,7 @@ $(prefix)/bin/$(target)-gcc: $(build)/obj-$(gcc) $(build)/$(gcc) | binutils
 		--disable-shared --enable-languages=c --disable-libssp \
 		--enable-interwork --disable-multilib --with-float=soft
 	cd $(build)/obj-$(gcc) && PATH=$(path) make
-	cd $(build)/obj-$(gcc) && sudo bash -c "PATH=$(path) make install"
+	cd $(build)/obj-$(gcc) && $(sudo) bash -c "PATH=$(path) make install"
 
 $(build)/$(gcc): $(archive)/$(gccfile).tar.bz2
 	cd $(build) && tar xjf $(archive)/$(gccfile).tar.bz2
@@ -97,7 +134,7 @@ $(prefix)/bin/$(target)-gdb: $(build)/obj-$(gdb) $(build)/$(gdb) | gcc
 	cd $(build)/obj-$(gdb) && $(build)/$(gdb)/configure \
 		--target=$(target) --prefix=$(prefix) --disable-nls
 	cd $(build)/obj-$(gdb) && PATH=$(path) make
-	cd $(build)/obj-$(gdb) && sudo bash -c "PATH=$(path) make install"
+	cd $(build)/obj-$(gdb) && $(sudo) bash -c "PATH=$(path) make install"
 
 $(build)/$(gdb): $(archive)/$(gdb).tar.bz2
 	cd $(build) && tar xjf $(archive)/$(gdb).tar.bz2
@@ -124,7 +161,7 @@ $(prefix)/bin/$(target)-insight: $(build)/obj-$(insight) $(build)/$(insight) | g
 	cd $(build)/obj-$(insight) && $(build)/$(insight)/configure \
 		--target=$(target) --prefix=$(prefix) --disable-nls
 	cd $(build)/obj-$(insight) && PATH=$(path) make
-	cd $(build)/obj-$(insight) && sudo bash -c "PATH=$(path) make install"
+	cd $(build)/obj-$(insight) && $(sudo) bash -c "PATH=$(path) make install"
 
 $(build)/$(insight): $(archive)/$(insight).tar.bz2
 	cd $(build) && tar xjf $(archive)/$(insight).tar.bz2
@@ -140,7 +177,7 @@ $(build)/obj-$(insight):
 cleandirs += $(build)/obj-$(insight)
 
 ###############################################################################
-### CLEAN
+### Clean
 ###############################################################################
 
 # clean removes everything which could be different on a new build

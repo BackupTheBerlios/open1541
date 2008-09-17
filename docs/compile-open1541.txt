@@ -1,37 +1,15 @@
 
-Requirements
-============
+=======================================
+= Compile and Start open1541 Firmware =
+=======================================
 
-If you want to compile open1541, your system has to meet following requirements:
+by Thomas Giesel
 
-- A Linux environment, cygwin is not tested yet
-- GNU Make version 3.81 or higher
-- A native GCC to compile tools
-- An arm-elf toolchain
-  - See below
-- xa (aka xa65) cross assembler
-  - Comes e.g. with Debian, Ubuntu or get it at 
-    http://www.floodgap.com/retrotech/xa/
+Possibly you want to read linux-getting-started.txt or windows-getting-
+started.txt to find out how to set up the build environment first.
 
-Get an ARM Toolchain 
-====================
-
-If you don't have an arm-elf toolchain yet, you can easily build one with
-scripts/toolchain/Makefile. Read the header of that Makefile first for some
-instructions.
-
-Note that the toolchain does not require to contain a C library. But if it has
-one, this shouldn't matter since we do not use the default libraries when
-linking.
-
-Not using a C library has the advantage of eliminating external dependencies.
-On ARM there are several libraries in several versions which could be used, so
-this projects simply comes bundled with a few standard C functions to get
-constant compile results and additionally to avoid bloat.
-
-
-Compile
-=======
+Compile open1541
+================
 
 Now you should be able to compile the project. There are a few environment
 variables which influence the make process, one of them is "add_path" which may
@@ -48,9 +26,13 @@ or
 
 > add_path=somewhere/else/bin make -s
 
+[this must be updated and completed]
 
-Simulate using skyeye
-=====================
+
+2. Simulate using Skyeye
+========================
+
+[this must be updated and completed]
 
 TODO: Explain how to patch and install skyeye. Contact me to get the patch.
 
@@ -71,8 +53,10 @@ This does the same and starts the Insight debugger additionally.
 In Insight you must first invoke Run=>Connect to target. Choose GDBServer/TCP,
 127.0.0.1 port 12345. Then you can click continue to get the stuff running.
 
-Bring in on hardware
-====================
+3. Bring in on hardware
+=======================
+
+[this must be updated and completed]
 
 open1541 comes with a tool called lpcflash which is used to send the software
 over UART to the open1541 hardware. It is compiled automatically by our Makefile

@@ -1,0 +1,132 @@
+============================================
+= Getting Started with open1541 on Windows =
+============================================
+
+by Thomas Giesel
+
+This document describes how to set up an environment to build the open1541
+software on Windows.
+
+1. Install Cygwin
+=================
+
+Cygwin is a Linux-like environment for Windows. You can use this environment
+to set up all tools we need to build open1541.
+
+You need two directories: <archive>=C:\cygwin-install and <install>=C:\cygwin.
+<archive> can be anywhere, <install> should remain at this place to keep it
+simple. If you put it on another drive, adjust all paths in this manual which 
+refer to "C:\cygwin" or "/cygdrive/c"
+
+Depending on what we're going to do later you should have at least 1 GB free on
+<install>.
+
+If you have Cygwin installed already, check the Install Cygwin section 
+nevertheless to make sure you have recent versions of all packages needed.
+
+You can use a windows text editor to edit some files, make sure to use one which
+detects Unix line endings, e.g. PSPad, Programmers Notepad or ConTEXT. We will
+also install Mined, a quite comfortable command line editor with a Menu that
+is quite similar to many windows programs, e.g. <Alt>+<F> opens the file menu.
+
+So, let's go:
+
+- Download setup.exe from www.cygwin.com ("Install or update now!")
+- Save it to <archive>
+- Start it, "Next", "Install from Internet"
+- Enter your root directory <install>, leave the rest at "RECOMMENDED", "Next"
+- Enter Local Package Directory <archive>, "Next", "Next"
+- Select a mirror
+- Install packages
+  - Click on View => Full to see a flat list
+  - To select a packege, click on "Skip" at the corresponding line
+  - Clicking several times selects different versions, take the highest
+  - Selecting a package may automatically select other dependencies
+  - Packages we need:
+    - gcc
+    - git
+    - libgmp-devel   >= 4.2
+    - libmpfr-devel  >= 3.2.0
+    - make           >= 1.81
+    - mined
+    - open-ssh
+    - rxvt
+    - subversion
+    - util-linux
+    - wget
+- "Next" to start
+- When complete: check the icons you need, finish the installation
+
+2. Make Cygwin more usable
+==========================
+
+We don't want our home directory to reside in a path with spaces, since some 
+tools don't handle them correctly. New versions of Cygwin let it point to places
+like "Documents and Settings", so let's change it:
+
+- Make a backup of C:\cygwin\etc\passwd
+- Open C:\cygwin\etc\passwd in your favourite windows text editor
+  - One of the lines (most likely the last one) is your normal user account
+  - Between the last two colons there is the path of your home directory,
+    if it points to somewhere else, change it to a path like this:
+    /home/yourname
+  - Make sure you didn't change any other field and save the file
+
+Next, we set up a terminal which has a look & feel similar to putty instead
+of the standard DOS box running bash:
+
+- In Windows Explorer go to  C:\cygwin\bin, right-click on rxvt.exe
+  - Send To -> Desktop (create shortcut)
+  - Now right-click on the new shortcut on the desktop
+  - Choose properties, shortcut and change the target to:
+  C:\cygwin\bin\rxvt.exe -sl 800 -fn "Lucida Console-12" -sr -e bash --login -i
+
+Now you should be able to start a cygwin bash shell by clicking the rxvt icon
+on the desktop. Do some basic tests:
+  - The command "pwd" should output "/home/yourname"
+  - The command "gcc" should output "No input files"
+
+2a. Some hints for bash and rxvt
+================================
+
+Beginners often forget that they can use a command line completion. This can
+speed up the command line usage significantly. The tab key can be used for this,
+press it twice if there are more than one possibility.
+Let's try it:
+- type following letters and the Tab key at the places:
+    mine<Tab> /et<Tab>/term<Tab> <Enter>
+  - will be completed to:
+    mined.exe /etc/termcap
+  - Press <Alt>+<F> and Q <Enter> to leave this editor.
+
+Mrxvt uses the traditional Linux-way of copy & paste:
+- Marking text in the rxvt window using the mouse copies it to the clipboard
+  automatically (no <Ctrl>+C)
+- Paste from the clipboard by using the middle mouse button
+- Alternatively you can use <Shift>+<Insert> to insert text
+
+3. Getting the open1541 sources
+===============================
+
+- Open a bash shell (rxvt)
+- Copy following line
+  git clone git://git.berlios.de/open1541
+- Now the sources should appear in you home directory/open1541
+  (type "pwd" to see you working directory if you are lost)
+- Change to there:
+  cd open1541
+
+4. Building the Toolchain
+=========================
+
+- cd open1541/scripts/toolchain
+  - remember that you can use auto-completion by pressing <Tab> once or twice
+- run following command:
+  make
+  - this will download all source files needed and compile the tools
+  - it will take a while, maybe more than one hour
+  - all tools will be installed in a separate directory 
+    /opt/arm-elf-binutils-2.18.50-gcc-4.3.0
+    to avoid any interference with existing tools
+
+Now you can continue with docs/compile-open1541.txt

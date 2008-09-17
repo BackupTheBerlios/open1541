@@ -1,0 +1,36 @@
+==========================================
+= Getting Started with open1541 on Linux =
+==========================================
+
+by Thomas Giesel
+
+This document describes how to set up an environment to build the open1541
+software on Linux.
+
+Requirements
+============
+
+If you want to compile open1541, your system has to meet following requirements:
+
+- A Linux environment
+- GNU Make version 3.81 or higher
+- A native GCC to compile tools
+- An arm-elf toolchain
+  - See below
+
+Building the Toolchain
+======================
+
+If you don't have a suitable toolchain for arm-elf, you can build one using a
+Makefile enclosed to open1541:
+
+- cd open1541/scripts/toolchain
+- run following command:
+  make
+  - this will download all source files needed and compile the tools
+  - it will take a while, maybe more than one hour
+  - all tools will be installed in a separate directory 
+    /opt/arm-elf-binutils-2.18.50-gcc-4.3.0
+    to avoid any interference with existing tools
+
+Now you can continue with docs/compile-open1541.txt

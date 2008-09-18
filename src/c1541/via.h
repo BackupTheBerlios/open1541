@@ -56,28 +56,4 @@
 #define VIA_IM_CA1      0x02    /* Handshake */
 #define VIA_IM_CA2      0x01    /* Handshake */
 
-#ifdef __ASSEMBLER__
-
-#if CONFIG_VIA_TRACES
-.macro via_report_access_r
-        push    {lr}
-        mov     r0, #'r'
-        bl      via_report_access
-        pop     {lr}
-.endm
-
-.macro via_report_access_w
-        push    {lr}
-        mov     r0, #'w'
-        bl      via_report_access
-        pop     {lr}
-.endm
-#else
-.macro via_report_access_r
-.endm
-.macro via_report_access_w
-.endm
-#endif
-
-#endif /* ASSEMBLY */
 #endif /* VIA_H */

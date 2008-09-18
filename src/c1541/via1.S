@@ -205,6 +205,24 @@ via1w_0c:
 
         mov     pc, lr                  @ return
 
+/******************************************************************************
+ * Write to VIA1 Interrupt Flag Register
+ *
+ ******************************************************************************/
+via1w_0d:
+        mvn     m_data, m_data                      @ negate byte
+        ldrb    m_tmp, [m_pdata, #VIA1_IFR_OFFSET]  @ load IFR
+        and     m_data, m_tmp, m_data               @ delete all 1 bits
+
+        @ update IRQ bit (bit 7) of IFR
+        bic     m_data, m_data, #0x80               @ delete IRQ bit
+        ldrb    m_tmp, [m_pdata, #VIA1_IER_OFFSET]  @ load IER
+        ands    m_tmp, m_tmp, m_data                @ combine IER and IFR
+        orrne   m_data, m_data, #0x80               @ set IRQ in IFR if not 0
+        strb    m_tmp, [m_pdata, #VIA1_IFR_OFFSET]  @ store IFR
+
+        mov     pc, lr                  @ return
+
 /*******************************************************************************
  * Generic read function for VIA1
  * Write the value to a VIA mirror register.

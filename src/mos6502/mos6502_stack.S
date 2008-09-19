@@ -252,3 +252,65 @@ op_9a: @ TXS
         x_to_data_low
         data_to_sp
         op_end 2
+
+/*******************************************************************************
+ * Do what has to be done to execute an IRQ.
+ *
+ ******************************************************************************/
+        .global mos6502_do_irq
+mos6502_do_irq:
+        pc_host_to_client m_pc
+
+        @ get SP
+        sp_to_tmp
+
+        @ PUSH high byte
+        @ PC points to next op, on stack there must be (next - 1)
+        sub     m_data, m_pc, #1
+        mov     m_data, m_data, lsr #8
+        ldr     lr, =(c1541_ram + 0x100)
+        strb    m_data, [lr, m_tmp]
+
+        @ dec SP
+        sub     m_tmp, m_tmp, #1
+        and     m_tmp, m_tmp, #0xff
+
+        @ PUSH low byte
+        @ PC points to next op, on stack there must be (next - 1)
+        sub     m_data, m_pc, #1            @ OPTIMIZE ME
+        strb    m_data, [lr, m_tmp]
+
+        @ dec SP
+        sub     m_tmp, m_tmp, #1
+        and     m_tmp, m_tmp, #0xff
+
+        @ PUSH P
+        flags_to_data
+        @ PHP does always push B=1
+@@@@@@        orr     m_data, m_data, #(1 << 4)
+
+        ldr     m_addr, =(c1541_ram + 0x100)
+        strb    m_data, [lr, m_tmp]
+
+        @ dec SP, we'll only store one byte so it wraps automatically
+        sub     m_tmp, m_tmp, #1
+
+        @ save SP
+        tmp_to_sp
+
+        @ read IRQ vector
+        mov     m_addr, #0xff00
+        add     m_addr, m_addr, #0xfe
+        memr_addr
+        mov     m_pc, m_data
+        add     m_addr, m_addr, #1
+        memr_addr
+        orr     m_pc, m_data, lsl #8
+        pc_client_to_host
+
+        @ this took 7 cycles (todo: 8 under certain conditions)
+        add     m_t, m_t, #7
+
+        @ set IRQ flag and fetch an opcode
+        orr     m_flags, m_flags, #MOS6502_I
+        b       mos6502_fetch

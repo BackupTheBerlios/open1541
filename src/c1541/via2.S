@@ -19,8 +19,9 @@
 
 #include <lpc213x.h>
 
-#include <via.h>
 #include <mos6502_macros.S>
+#include "via.h"
+#include "via_macros.S"
 
 MACH_DATA_DECLARE = 1
 #include <mach_data.S>

@@ -34,6 +34,7 @@ static void cli_help(void);
 static void cli_memcmd(int what, const char *params);
 static void cli_fill(const char *params);
 static void cli_step(void);
+static void cli_irqsim(const char *params);
 #if CONFIG_BREAKPOINTS > 0
 static void cli_break(const char *params);
 static void cli_rm(const char *params);
@@ -373,6 +374,10 @@ static void cli_process_line(void)
         uart_putdec(util_benchmark());
         uart_putcrlf();
     }
+    else if (strncmp(command_line, "irqsim", 6) == 0)
+    {
+        cli_irqsim(command_line + 6);
+    }
     else if (strcmp(command_line, "help") == 0)
     {
         cli_help();
@@ -416,6 +421,7 @@ static void cli_help(void)
               "m <a> <b>\tDump 6502 memory range\r\n"
               "d <a> <b>\tDisassemble 6502 memory range\r\n"
               "f <a> [<b>] <v>\tFill one or more bytes with <v>\r\n"
+              "irqsim 0|1\t(De)assert IRQ line\r\n"
               "speed\t\tStart benchmark\r\n"
               "help\t\tHelp\r\n"
               "<F1>\t\tRepeat last command\r\n");
@@ -536,6 +542,33 @@ static void cli_step(void)
     }
     else
         uart_puterror("STEP");
+}
+
+/*******************************************************************************
+ * Execute irqsim.
+ *
+ * "simirq 1" sets MOS6502_IRQ_SIM, "simirq 0" resets MOS6502_IRQ_SIM.
+ * When this bit is set, the 6502 line /IRQ is low.
+ *
+ ******************************************************************************/
+static void cli_irqsim(const char *params)
+{
+    while (*params == ' ')
+        params++;
+
+    switch (*params)
+    {
+    case '0':
+        mos6502_irqsim(0);
+        break;
+
+    case '1':
+        mos6502_irqsim(1);
+        break;
+
+    default:
+        uart_puterror("SYNTAX");
+    }
 }
 
 #if CONFIG_BREAKPOINTS > 0

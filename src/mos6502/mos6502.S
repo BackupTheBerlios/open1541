@@ -308,6 +308,27 @@ mos6502_run:
         b exit_fiq_mode
 
 /*******************************************************************************
+ * Set (r0 != 0) or reset (r0 == 0) the simulated IRQ line. This line is
+ * wire-ored with the other IRQ sources.
+ * Must be called from system mode (not from FIQ mode).
+ *
+ ******************************************************************************/
+        .global mos6502_irqsim
+mos6502_irqsim:
+        @ remember old processor and interrupt state
+        mrs     r3, cpsr
+
+        @ disable IRQs so we won't be disturbed, goto FIQ mode
+        msr     cpsr_c, #MODE_FIQ | PSR_I | PSR_F
+
+        @ Set/reset IRQ source bit
+        cmp     r0, #0
+        biceq   m_flags, m_flags, #MOS6502_IRQ_SIM
+        orrne   m_flags, m_flags, #MOS6502_IRQ_SIM
+
+        b       exit_fiq_mode
+
+/*******************************************************************************
  * End an opcode emulation, called from FIQ mode.
  *
  * Set the CPU emulation timer to expire in 'time' microseconds.
@@ -327,7 +348,7 @@ mos6502_op_end:
         mov     m_tmp, #TIR_MR0
         str     m_tmp, [m_ptimer, #(T0IR - T0IR)]
 
-#if CONFIG_BREAKPOINTS > 0
+#if CONFIG_BREAKPOINTS
         pc_host_to_client lr            @ convert client PC, result into lr
 
         @ Check if PC points to a break point

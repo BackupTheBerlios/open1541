@@ -57,12 +57,12 @@ op_38:  @ SEC
 
         .global op_58
 op_58:  @ CLI
-        bic m_flags, #MOS6502_I
+        orr m_flags, m_flags, #MOS6502_NI   @ inverted meaning
         op_end 2
 
         .global op_78
 op_78:  @ SEI
-        orr m_flags, m_flags, #MOS6502_I
+        bic m_flags, #MOS6502_NI            @ inverted meaning
         op_end 2
 
         .global op_b8

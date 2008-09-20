@@ -48,7 +48,7 @@ m_ptimer .req   r11
 @ NZCF are kept in the same order and at the same position as in ARM,
 @ so they simply can be copied.
 @ The bits are:
-@ NZCVBDI0 00000PS0 000000Vv 00000000
+@ NZCVBDI0 00000PS0 00000sVv 00000000
 @ P = break point hit
 @ S = single step mode, for emulation tests
 @ 0 = reserved
@@ -56,6 +56,7 @@ m_ptimer .req   r11
 @ IRQ flags (1 = IRQ from this device)
 @ v = VIA1 IRQ
 @ V = VIA2 IRQ
+@ s = SIM IRQ
 @
 m_flags    .req    r12
 
@@ -66,15 +67,16 @@ MOS6502_C   = (1 << 29) @ must be same as in ARM
 MOS6502_V   = (1 << 28) @ must be same as in ARM
 MOS6502_B   = (1 << 27)
 MOS6502_D   = (1 << 26)
-MOS6502_I   = (1 << 25)
+MOS6502_NI  = (1 << 25) @ inverted meaning of 6502 I-Flag
 
 MOS6502_P   = (1 << 16) @ stopped because of a break point
 MOS6502_S   = (1 << 17) @ single step mode
 
-MOS6502_IRQ_VIA1 = (1 << 8) @ IRQ from VIA1
-MOS6502_IRQ_VIA2 = (1 << 9) @ IRQ from VIA2
+MOS6502_IRQ_VIA1 = (1 <<  8) @ IRQ from VIA1
+MOS6502_IRQ_VIA2 = (1 <<  9) @ IRQ from VIA2
+MOS6502_IRQ_SIM  = (1 << 10) @ IRQ from VIA2
 
-MOS6502_IRQ_MASK = (MOS6502_IRQ_VIA1 | MOS6502_IRQ_VIA2)
+MOS6502_IRQ_MASK = (MOS6502_IRQ_VIA1 | MOS6502_IRQ_VIA2 | MOS6502_IRQ_SIM)
 
 @ This mask leaves only bits used by the emulation
 MOS6502_FLAGS_EMU_MASK = 0x00ff0000

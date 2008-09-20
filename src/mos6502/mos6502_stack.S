@@ -28,8 +28,8 @@
         orrne   m_data, m_data, #(1 << 6)
         tst     m_flags, #MOS6502_D
         orrne   m_data, m_data, #(1 << 3)
-        tst     m_flags, #MOS6502_I
-        orrne   m_data, m_data, #(1 << 2)
+        tst     m_flags, #MOS6502_NI
+        orreq   m_data, m_data, #(1 << 2)   @ inverted meaning!
         tst     m_flags, #MOS6502_Z
         orrne   m_data, m_data, #(1 << 1)
         tst     m_flags, #MOS6502_C
@@ -50,7 +50,7 @@
         tst     m_data, #(1 << 3)
         orrne   m_flags, m_flags, #MOS6502_D
         tst     m_data, #(1 << 2)
-        orrne   m_flags, m_flags, #MOS6502_I
+        orreq   m_flags, m_flags, #MOS6502_NI   @ inverted meaning!
         tst     m_data, #(1 << 1)
         orrne   m_flags, m_flags, #MOS6502_Z
         tst     m_data, #(1 << 0)
@@ -312,5 +312,5 @@ mos6502_do_irq:
         add     m_t, m_t, #7
 
         @ set IRQ flag and fetch an opcode
-        orr     m_flags, m_flags, #MOS6502_I
+        bic     m_flags, m_flags, #MOS6502_NI   @ inverted meaning
         b       mos6502_fetch

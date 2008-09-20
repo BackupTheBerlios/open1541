@@ -29,11 +29,11 @@
  ******************************************************************************/
         stmfd sp!, {r0 - r2, lr}
 
-        @ check if IRQs are disabled
-        tst     m_pc, #(MOS6502_I)
+        @ check if IRQs are disabled (I flag is inverted)
+        tst     m_flags, #MOS6502_NI
 
         @ if not, check if a device asserts the IRQ line
-        tstne   m_pc, #(MOS6502_IRQ_VIA1 | MOS6502_IRQ_VIA2)
+        tstne   m_flags, #MOS6502_IRQ_MASK
 
         @ oh, there's something else to do
         bne     mos6502_do_irq

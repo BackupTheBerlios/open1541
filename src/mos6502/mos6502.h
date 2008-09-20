@@ -56,6 +56,7 @@ uint16_t mos6502_get_pc(void);
 int mos6502_is_stopped(void);
 uint8_t mos6502_read_mem(uint16_t address);
 uint8_t mos6502_write_mem(uint16_t address, uint8_t val);
+void mos6502_irqsim(uint32_t i);
 
 /* from mos6502_dis.c */
 uint16_t mos6502_dis(uint16_t start, uint16_t stop);

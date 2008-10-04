@@ -265,9 +265,7 @@ mos6502_do_irq:
         sp_to_tmp
 
         @ PUSH high byte
-        @ PC points to next op, on stack there must be (next - 1)
-        sub     m_data, m_pc, #1
-        mov     m_data, m_data, lsr #8
+        mov     m_data, m_pc, lsr #8
         ldr     lr, =(c1541_ram + 0x100)
         strb    m_data, [lr, m_tmp]
 
@@ -276,9 +274,7 @@ mos6502_do_irq:
         and     m_tmp, m_tmp, #0xff
 
         @ PUSH low byte
-        @ PC points to next op, on stack there must be (next - 1)
-        sub     m_data, m_pc, #1            @ OPTIMIZE ME
-        strb    m_data, [lr, m_tmp]
+        strb    m_pc, [lr, m_tmp]
 
         @ dec SP
         sub     m_tmp, m_tmp, #1

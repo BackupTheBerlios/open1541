@@ -15,8 +15,8 @@ Now you should be able to compile the project. There are a few environment
 variables which influence the make process, one of them is "add_path" which may
 contain an additional directory to be added to PATH when invoking the ARM
 compiler. If not set from the command line, it contains
-/opt/arm-elf-binutils-2.18.50-gcc-4.3.0/bin, which is the path were our Makefile
-installs the toolchain.
+$(HOME)/cross/arm-elf-binutils-<version>-gcc-<version>, which is the path were
+our Makefile installs the toolchain.
 
 So you can change to directory "make" and call:
 
@@ -32,11 +32,26 @@ or
 2. Simulate using Skyeye
 ========================
 
-[this must be updated and completed]
+Go to http://www.skyeye.org and download skyeye-1.2.7_rc1.tar.bz2. 
+Unpack it using:
 
-TODO: Explain how to patch and install skyeye. Contact me to get the patch.
+> tar xjf skyeye-1.2.7_rc1.tar.bz2
 
-Change to directory "make" and call:
+Then configure, make and install it using following commands:
+
+> cd skyeye-1.2.7_rc1
+> ./configure
+> make
+> sudo make install
+
+If you get an error in nandflash/nandflash_smallblock.c:519, go to this line
+and change "open(dev->dump, FILE_FLAG)" to 
+"open(dev->dump, FILE_FLAG, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP)".
+
+Now you have a working skyeye which is able to emulate more or less of
+an LPC213x controller.
+
+Change to directory "open1541/make" and call:
 
 > make simulate -s
 

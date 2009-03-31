@@ -23,14 +23,14 @@
 # Thomas Giesel skoe@directbox.com
 #
 
-# Tested in Ubuntu/Xubuntu/Kubuntu 7.10, 8.04, Cygwin
+# Tested in Ubuntu/Xubuntu/Kubuntu 7.10, 8.04, Cygwin, Gentoo
 # 
 # Following conditions must be met to sucessfully build the toolchain:
 # - Be sure to have these packages installed
 #     libmpfr-dev >= 2.3.0
 #     libgmp3-dev >= 4.2
 #     make        >= 3.81 (GNU Make)
-# - The user who starts make must be a sudoer (see "man sudo", not on cygwin)
+#     gawk
 #
 
 here  := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
@@ -39,25 +39,24 @@ build   := $(here)/build
 archive := $(here)/archive
 cleandirs :=
 
-binutils  := binutils-2.18.50
-gccfile   := gcc-core-4.3.0
-gcc       := gcc-4.3.0
+binutils  := binutils-2.19.51
+gccfile   := gcc-core-4.3.3
+gcc       := gcc-4.3.3
 gdb       := gdb-6.8
 insight   := insight-6.8
 
 target    := arm-elf
-prefix    := /opt/$(target)-$(binutils)-$(gcc)
+prefix    := $(HOME)/cross/$(target)-$(binutils)-$(gcc)
+# in case you need sudo for installing
+sudo      :=
+#sudo      := sudo
 
 # this variable will be empty if we're not on cygwin
 cygwin    := $(shell echo $$MACHTYPE | grep cygwin)
 
 ifeq (x$(cygwin), x)
-  # no cygwin: use sudo, append our bin directory
-  sudo      := sudo
   path      := $(PATH):$(prefix)/bin
 else
-  # cygwin: no sudo needed, use std paths and our bin dir
-  sudo      :=
   # don't use all these windows paths
   path      := /bin:/usr/bin:$(prefix)/bin
 endif
@@ -132,7 +131,8 @@ gdb: $(prefix)/bin/$(target)-gdb
 
 $(prefix)/bin/$(target)-gdb: $(build)/obj-$(gdb) $(build)/$(gdb) | gcc
 	cd $(build)/obj-$(gdb) && $(build)/$(gdb)/configure \
-		--target=$(target) --prefix=$(prefix) --disable-nls
+		--target=$(target) --prefix=$(prefix) --disable-nls \
+		--disable-werror
 	cd $(build)/obj-$(gdb) && PATH=$(path) make
 	cd $(build)/obj-$(gdb) && $(sudo) bash -c "PATH=$(path) make install"
 

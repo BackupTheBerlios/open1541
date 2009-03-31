@@ -43,6 +43,7 @@ So, let's go:
   - Clicking several times selects different versions, take the highest
   - Selecting a package may automatically select other dependencies
   - Packages we need:
+    - gawk
     - gcc
     - git
     - libgmp-devel   >= 4.2
@@ -125,8 +126,8 @@ Mrxvt uses the traditional Linux-way of copy & paste:
   make
   - this will download all source files needed and compile the tools
   - it will take a while, maybe more than one hour
-  - all tools will be installed in a separate directory 
-    /opt/arm-elf-binutils-2.18.50-gcc-4.3.0
+  - all tools will be installed in a separate directory
+    $(HOME)/cross/arm-elf-binutils-<version>-gcc-<version>
     to avoid any interference with existing tools
 
 Now you can continue with docs/compile-open1541.txt

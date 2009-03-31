@@ -28,7 +28,7 @@ endif
 # use "dos1541" or "testrom" here
 rom          ?= dos1541
 
-add_path     ?= /opt/arm-elf-binutils-2.18.50-gcc-4.3.0/bin
+add_path     ?= $(HOME)/cross/arm-elf-binutils-2.19.51-gcc-4.3.3/bin
 serial_port  ?= /dev/ttyUSB0
 
 project_root := $(abspath $(shell echo `pwd`)/..)

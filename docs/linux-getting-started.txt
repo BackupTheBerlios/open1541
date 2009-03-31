@@ -22,7 +22,17 @@ Building the Toolchain
 ======================
 
 If you don't have a suitable toolchain for arm-elf, you can build one using a
-Makefile enclosed to open1541:
+Makefile enclosed to open1541.
+
+First make sure to have following packets installed. You can do this most 
+probably with the package manager of your distribution:
+
+- libmpfr-dev >= 2.3.0
+- libgmp3-dev >= 4.2
+- make        >= 3.81 (GNU Make)
+- gawk
+
+Then you can build the toolchain:
 
 - cd open1541/scripts/toolchain
 - run following command:
@@ -30,7 +40,7 @@ Makefile enclosed to open1541:
   - this will download all source files needed and compile the tools
   - it will take a while, maybe more than one hour
   - all tools will be installed in a separate directory 
-    /opt/arm-elf-binutils-2.18.50-gcc-4.3.0
+    $(HOME)/cross/arm-elf-binutils-<version>-gcc-<version>
     to avoid any interference with existing tools
 
 Now you can continue with docs/compile-open1541.txt

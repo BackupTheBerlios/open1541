@@ -159,7 +159,8 @@ insight: $(prefix)/bin/$(target)-insight
 
 $(prefix)/bin/$(target)-insight: $(build)/obj-$(insight) $(build)/$(insight) | gcc
 	cd $(build)/obj-$(insight) && $(build)/$(insight)/configure \
-		--target=$(target) --prefix=$(prefix) --disable-nls
+		--target=$(target) --prefix=$(prefix) --disable-nls \
+		--disable-werror
 	cd $(build)/obj-$(insight) && PATH=$(path) make
 	cd $(build)/obj-$(insight) && $(sudo) bash -c "PATH=$(path) make install"
 

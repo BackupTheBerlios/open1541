@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="open1541" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/open1541" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+		</Compiler>
+		<Unit filename="docs/compile-open1541.txt" />
+		<Unit filename="docs/linux-getting-started.txt" />
+		<Unit filename="docs/mos6502.txt" />
+		<Unit filename="docs/windows-getting-started.txt" />
+		<Unit filename="include/arm7tdmi.h" />
+		<Unit filename="include/demonswi.h" />
+		<Unit filename="include/lpc213x.h" />
+		<Unit filename="include/stdint.h" />
+		<Unit filename="include/string.h" />
+		<Unit filename="make/Makefile" />
+		<Unit filename="make/Rules.mk" />
+		<Unit filename="make/config.gdbsim" />
+		<Unit filename="make/config.lpc2134" />
+		<Unit filename="scripts/conf2h.sed" />
+		<Unit filename="scripts/gdb-commands" />
+		<Unit filename="scripts/lpc2134.ld" />
+		<Unit filename="src/c1541/c1541.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/c1541/c1541.h" />
+		<Unit filename="src/c1541/mach_data.S" />
+		<Unit filename="src/c1541/via.h" />
+		<Unit filename="src/c1541/via1.S" />
+		<Unit filename="src/c1541/via2.S" />
+		<Unit filename="src/c1541/via_common.S" />
+		<Unit filename="src/c1541/via_data.S" />
+		<Unit filename="src/c1541/via_macros.S" />
+		<Unit filename="src/cli.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/cli.h" />
+		<Unit filename="src/libc/arm7tdmi.S" />
+		<Unit filename="src/libc/memcmp.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/libc/memcpy.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/libc/memmove.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/libc/memset.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/libc/strcmp.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/libc/strcpy.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/libc/strlen.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/libc/strncmp.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mos6502/mos6502.S" />
+		<Unit filename="src/mos6502/mos6502.h" />
+		<Unit filename="src/mos6502/mos6502_arith.S" />
+		<Unit filename="src/mos6502/mos6502_compare.S" />
+		<Unit filename="src/mos6502/mos6502_data.S" />
+		<Unit filename="src/mos6502/mos6502_dis.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mos6502/mos6502_fiq.S" />
+		<Unit filename="src/mos6502/mos6502_flags.S" />
+		<Unit filename="src/mos6502/mos6502_if.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mos6502/mos6502_jmp.S" />
+		<Unit filename="src/mos6502/mos6502_logic.S" />
+		<Unit filename="src/mos6502/mos6502_macros.S" />
+		<Unit filename="src/mos6502/mos6502_mem.S" />
+		<Unit filename="src/mos6502/mos6502_stack.S" />
+		<Unit filename="src/mos6502/mos6502_transfer.S" />
+		<Unit filename="src/open1541.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/startup.S" />
+		<Unit filename="src/timer.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/timer.h" />
+		<Unit filename="src/uart.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/uart.h" />
+		<Unit filename="src/util-ll.S" />
+		<Unit filename="src/util.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/util.h" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

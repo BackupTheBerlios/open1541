@@ -1,6 +1,12 @@
+
 XTAL=60000000
 CCLK=60000000
 PCLK=60000000
+
+# Set this to instrument the software to be able to run in the GDB software
+# simulator. This disables access to some hardware registers and enables some
+# SWIs for debug output.
+CONFIG_GDBSIM=1
 
 CONFIG_UART_BAUDRATE=115200
 

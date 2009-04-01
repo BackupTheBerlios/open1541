@@ -8,3 +8,6 @@
 obj-*
 *.kdev*
 Doxyfile
+scripts/toolchain/archive
+scripts/toolchain/build
+tools/lpcflash/lpcflash

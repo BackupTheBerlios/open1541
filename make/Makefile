@@ -17,10 +17,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-skyeye_goals := $(filter $(MAKECMDGOALS), simulate debug)
+gdbsim_goals := $(filter $(MAKECMDGOALS), simulate debug)
 
-ifneq (x$(skyeye_goals), x)
-platform     ?= skyeye
+ifneq (x$(gdbsim_goals), x)
+platform     ?= gdbsim
 else
 platform     ?= lpc2134
 endif
@@ -80,7 +80,7 @@ DEFINE  :=
 
 CFLAGS  := -Wall -Wno-trigraphs -Werror -Os -Wall
 CFLAGS  += --param max-inline-insns-auto=3
-CFLAGS  += 
+CFLAGS  +=
 CFLAGS  += -march=armv4 -mtune=arm7tdmi -std=c99
 
 LDFLAGS := -N -p -X -T$(scriptdir)/lpc2134.ld
@@ -150,12 +150,11 @@ $(objdir)/open1541: $(obj)
 
 .PHONY: debug
 debug: $(objdir)/open1541
-	$(SHELL) -c "$(INSIGHT) $(objdir)/open1541 & \
-		skyeye -c $(scriptdir)/skyeye.conf -e $(objdir)/open1541 -d"
+	$(INSIGHT) $(objdir)/open1541 command=$(scriptdir)/gdb-commands
 
 .PHONY: simulate
 simulate: $(objdir)/open1541
-	skyeye -c $(scriptdir)/skyeye.conf -e $(objdir)/open1541
+	arm-elf-run --swi-support=DEMON $(objdir)/open1541
 
 .PHONY: flash
 flash: $(lpcflash) $(objdir)/open1541.hex

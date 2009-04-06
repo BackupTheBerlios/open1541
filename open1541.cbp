@@ -24,14 +24,13 @@
 		<Unit filename="docs/mos6502.txt" />
 		<Unit filename="docs/windows-getting-started.txt" />
 		<Unit filename="include/arm7tdmi.h" />
-		<Unit filename="include/demonswi.h" />
 		<Unit filename="include/lpc213x.h" />
 		<Unit filename="include/stdint.h" />
 		<Unit filename="include/string.h" />
 		<Unit filename="make/Makefile" />
 		<Unit filename="make/Rules.mk" />
-		<Unit filename="make/config.gdbsim" />
 		<Unit filename="make/config.lpc2134" />
+		<Unit filename="make/config.skyeye" />
 		<Unit filename="scripts/conf2h.sed" />
 		<Unit filename="scripts/gdb-commands" />
 		<Unit filename="scripts/lpc2134.ld" />

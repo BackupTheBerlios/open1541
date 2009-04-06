@@ -49,7 +49,7 @@ MACH_DATA_DECLARE = 1
 
         // it's low, check if the last edge has been registered already
         tst     m_flags, #VIA1_CA1_LOW_EDGE_DETECTED
-        bne     m_flags, #VIA1_CA1_LOW_EDGE_DETECTED
+        bne     2f
 
         // we see this low level the first time, flag it
         ldrb    m_data, [m_pdata, #(VIA1_REGS_OFFSET + VIA_IFR)]

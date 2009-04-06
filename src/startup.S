@@ -41,7 +41,7 @@ undefined_instr:
         b   undefined_instr
 
 swi:
-        mov pc, lr
+        b   swi
 
 prefetch_abort:
         b   prefetch_abort
@@ -64,7 +64,6 @@ fiq:
  * Initialize the system and call main()
  *
  ******************************************************************************/
-        .global _begin
 _begin:
         /* Set up stack pointers for all CPU modes */
 

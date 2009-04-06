@@ -21,7 +21,6 @@
 #include <autoconf.h>
 #include <lpc213x.h>
 #include <uart.h>
-#include <util.h>
 
 static inline void uart_puthex_digit(int digit);
 
@@ -30,7 +29,7 @@ static inline void uart_puthex_digit(int digit);
  * Init everything needed to get the rest of the UART functions running.
  *
  ******************************************************************************/
-void uart_init(void)
+void uart_init()
 {
     U0LCR = U0LCR_DLAB | U0LCR_WLENGTH_8;
     U0DLM = ((PCLK / 16) / CONFIG_UART_BAUDRATE) >> 8;
@@ -46,15 +45,11 @@ void uart_init(void)
  ******************************************************************************/
 void uart_putc(char c)
 {
-#ifdef CONFIG_GDBSIM
-    demon_writec(c);
-#else
     // wait for space in TX FIFO
     while (!(U0LSR & U0LSR_THRE))
     {;}
 
     U0THR = c;
-#endif
 }
 
 /*******************************************************************************
@@ -71,7 +66,7 @@ void uart_putnc(int n, char c)
 }
 
 /*******************************************************************************
- * Get a character from UART if one is buffered. Returns -1 if nothing is
+ * Get a character from UART if one is buffered. Returns -1 if nothing is 
  * buffered.
  *
  ******************************************************************************/
@@ -87,7 +82,7 @@ int uart_getc(void)
  * Print CR LF to UART.
  *
  ******************************************************************************/
-void uart_putcrlf(void)
+void uart_putcrlf()
 {
     uart_putc(13);
     uart_putc(10);
@@ -160,7 +155,7 @@ void uart_puthex(uint32_t num)
 }
 
 /*******************************************************************************
- * Print the given number in decimal format. Fill up leading spaces on the left
+ * Print the given number in decimal format. Fill up leading spaces on the left 
  * side to get at least *size* digits.
  * If more then *size* digits are needed, use more.
  *

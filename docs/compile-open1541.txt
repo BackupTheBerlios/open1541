@@ -29,24 +29,44 @@ or
 [this must be updated and completed]
 
 
-2. Simulate using GDB simulator
-===============================
+2. Simulate using Skyeye
+========================
+
+Go to http://www.skyeye.org and download skyeye-1.2.7_rc1.tar.bz2. 
+Unpack it using:
+
+> tar xjf skyeye-1.2.7_rc1.tar.bz2
+
+Then configure, make and install it using following commands:
+
+> cd skyeye-1.2.7_rc1
+> ./configure
+> make
+> sudo make install
+
+If you get an error in nandflash/nandflash_smallblock.c:519, go to this line
+and change "open(dev->dump, FILE_FLAG)" to 
+"open(dev->dump, FILE_FLAG, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP)".
+
+Now you have a working skyeye which is able to emulate more or less of
+an LPC213x controller.
 
 Change to directory "open1541/make" and call:
 
 > make simulate -s
 
-This builds the simulator configuration of the software and starts the
-emulator arm-elf-run in the current terminal window.
+This builds the skyeye configuration of the software and starts skyeye in the
+current terminal window.
 
-In the terminal window you can see the debug output of the emulated device.
-Also UART output is sent to this window.
-
-Let's to the same with the Insight debugger:
+In the terminal window you should be able to access the UART interface of the
+emulated device.
 
 > make debug -s
 
-You can click run to start.
+This does the same and starts the Insight debugger additionally.
+
+In Insight you must first invoke Run=>Connect to target. Choose GDBServer/TCP,
+127.0.0.1 port 12345. Then you can click continue to get the stuff running.
 
 3. Bring in on hardware
 =======================

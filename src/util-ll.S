@@ -17,8 +17,6 @@
  */
 
 #include <lpc213x.h>
-#include <demonswi.h>
-#include <autoconf.h>
 
         .global util_benchmark
 util_benchmark:
@@ -58,28 +56,3 @@ udelay:
         blo 1b
 
         mov pc, lr
-
-
-#ifdef CONFIG_GDBSIM
-/*******************************************************************************
- * Call the SWI to print a character to the debug monitor DEMON.
- *
- ******************************************************************************/
-        .global demon_writec
-demon_writec:
-        @ r0 character to print
-        stmfd r13!, {r4 - r12, lr}
-        swi SWI_WriteC
-        ldmfd r13!, {r4 - r12, pc}
-
-
-/*******************************************************************************
- *
- ******************************************************************************/
-        .global demon_clock
-demon_clock:
-        @ return r0 with current time
-        stmfd r13!, {r4 - r12, lr}
-        swi SWI_Clock
-        ldmfd r13!, {r4 - r12, pc}
-#endif

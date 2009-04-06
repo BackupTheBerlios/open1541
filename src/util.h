@@ -21,13 +21,8 @@
 #include <stdint.h>
 
 /* from util-ll.S */
-uint32_t util_benchmark(void);
+uint32_t util_benchmark();
 void udelay(uint32_t us);
-
-#ifdef CONFIG_GDBSIM
-void demon_writec(int c);
-uint32_t demon_clock(void);
-#endif
 
 /* from util.c */
 int util_hdigit2i(int ch);

@@ -17,6 +17,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+
 #include <autoconf.h>
 
 #include <lpc213x.h>
@@ -54,10 +55,6 @@ int main()
 
     for (;;)
     {
-#ifdef CONFIG_GDBSIM
-        uart_putdec(demon_clock());
-        uart_putcrlf();
-#endif
         cli_check();
     }
 
@@ -70,7 +67,7 @@ int main()
  ******************************************************************************/
 static void init_clocks()
 {
-#ifndef CONFIG_GDBSIM
+#if CCLK != XTAL
     /* PLL initialization */
     PLLCFG = ((CCLK / XTAL) - 1) | PLLCFG_PSEL_2;
     PLLCON = PLLCON_PLLE;
@@ -81,6 +78,7 @@ static void init_clocks()
     PLLCON = PLLCON_PLLE | PLLCON_PLLC;
     PLLFEED=0xAA;
     PLLFEED=0x55;
+#endif
 
     /* VPB runs at clock speed, divider = 1 */
     VPBDIV = VPBDIV_1;
@@ -90,5 +88,4 @@ static void init_clocks()
     MAMCR  = 2;
 
     PINSEL0 = PINSEL0_P00_TXD0 | PINSEL0_P01_RXD0;
-#endif
 }

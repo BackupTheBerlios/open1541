@@ -1,0 +1,18 @@
+
+====================================
+= Implementation state of open1541 =
+====================================
+
+VIA Implementation State
+========================
+
+VIA 1 0x0E: Interrupt Enable Register
+=====================================
+
+Read:
+OK
+
+Write:
+OK
+
+Functionality:

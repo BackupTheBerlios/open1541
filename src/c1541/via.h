@@ -1,19 +1,27 @@
 /*
- * (c) 2008 Thomas Giesel <skoe@directbox.com>
+ * VIA emulation
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License only.
+ * (c) 2008, 2009 Thomas Giesel
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This software is provided 'as-is', without any express or implied
+ * warranty.  In no event will the authors be held liable for any damages
+ * arising from the use of this software.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Permission is granted to anyone to use this software for any purpose,
+ * including commercial applications, and to alter it and redistribute it
+ * freely, subject to the following restrictions:
+ *
+ * 1. The origin of this software must not be misrepresented; you must not
+ *    claim that you wrote the original software. If you use this software
+ *    in a product, an acknowledgment in the product documentation would be
+ *    appreciated but is not required.
+ * 2. Altered source versions must be plainly marked as such, and must not be
+ *    misrepresented as being the original software.
+ * 3. This notice may not be removed or altered from any source distribution.
+ *
+ * Thomas Giesel skoe@directbox.com
  */
+
 #ifndef VIA_H
 #define VIA_H
 
@@ -41,7 +49,7 @@
 #define VIA_PCR         0x0c    /* Peripheral control register */
 
 #define VIA_IFR         0x0d    /* Interrupt flag register */
-#define VIA_IER         0x0e    /* Interrupt control register */
+#define VIA_IER         0x0e    /* Interrupt enable register */
 #define VIA_PRA_NHS     0x0f    /* Port A with no handshake */
 
 #define VIA_REG_SIZE    0x10    /* Number of VIA registers */

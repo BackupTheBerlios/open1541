@@ -20,6 +20,7 @@
 #include <string.h>
 
 #include <autoconf.h>
+#include <lpc213x.h>
 #include <uart.h>
 #include <util.h>
 #include <mos6502.h>
@@ -39,6 +40,7 @@ static void cli_irqsim(const char *params);
 static void cli_break(const char *params);
 static void cli_rm(const char *params);
 #endif
+static void cli_io(void);
 
 // These constants are used to mark special commands
 #define VK_UP        0x100
@@ -189,10 +191,10 @@ int cli_buffer_char(void)
 
 /*******************************************************************************
  * Get a character from the input buffer. If there is no (valid) character
- * available, return 0. Special control characters and VT100 escape sequeces 
+ * available, return 0. Special control characters and VT100 escape sequeces
  * are mapped to > 255, see VK_... macros.
  *
- * If the buffer contains an unknown escape sequence,0 is returned and the 
+ * If the buffer contains an unknown escape sequence,0 is returned and the
  * collected input bytes are discarded.
  *
  ******************************************************************************/
@@ -239,7 +241,7 @@ static int cli_key_from_input_buffer(void)
             for (i = 0; esccmds[i].seq != NULL; i++)
             {
                 // known sequence?
-                if (!strncmp(input_buffer + 1, esccmds[i].seq, 
+                if (!strncmp(input_buffer + 1, esccmds[i].seq,
                              strlen(esccmds[i].seq)))
                 {
                     ret = esccmds[i].vkey;
@@ -378,11 +380,15 @@ static void cli_process_line(void)
     {
         cli_irqsim(command_line + 6);
     }
+    else if (strcmp(command_line, "io") == 0)
+    {
+        cli_io();
+    }
     else if (strcmp(command_line, "help") == 0)
     {
         cli_help();
     }
-    /* these short commands may be prefixes of others, nevertheless I want 
+    /* these short commands may be prefixes of others, nevertheless I want
      * things like "m0500" to work, so put them last
      */
     else if (command_line[0] == 'm')
@@ -423,6 +429,7 @@ static void cli_help(void)
               "f <a> [<b>] <v>\tFill one or more bytes with <v>\r\n"
               "irqsim 0|1\t(De)assert IRQ line\r\n"
               "speed\t\tStart benchmark\r\n"
+              "io\t\tPrint LPC IO port states\r\n"
               "help\t\tHelp\r\n"
               "<F1>\t\tRepeat last command\r\n");
 }
@@ -617,3 +624,20 @@ static void cli_rm(const char *params)
     mos6502_rm_breakpoint(addr);
 }
 #endif
+
+/*******************************************************************************
+ * Print the state of the LPC IO ports registers 0 and 1.
+ *
+ ******************************************************************************/
+static void cli_io(void)
+{
+    uart_puts("ATN: ");
+    uart_puthex(!!(REG32OFFSET(IEC_IN_PORT, IOPIN) & ATN_IN_BIT));
+    uart_putcrlf();
+    uart_puts("CLK: ");
+    uart_puthex(!!(REG32OFFSET(IEC_IN_PORT, IOPIN) & CLK_IN_BIT));
+    uart_putcrlf();
+    uart_puts("DAT: ");
+    uart_puthex(!!(REG32OFFSET(IEC_IN_PORT, IOPIN) & DAT_IN_BIT));
+    uart_putcrlf();
+}

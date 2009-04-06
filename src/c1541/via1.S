@@ -15,6 +15,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+/*
+ * References:
+ * [1] mos_6522.pdf: MCS6522 Versatile Interface Adapter; MOS Technology Inc. 1977
+ */
+
 #include <autoconf.h>
 
 #include <lpc213x.h>
@@ -51,7 +56,7 @@ memw_via1:
         .word via1w_00, via1w_xx, via1w_02, via1w_03
         .word via1w_xx, via1w_05, via1w_xx, via1w_xx
         .word via1w_xx, via1w_xx, via1w_xx, via1w_xx
-        .word via1w_0c, via1w_xx, via1w_xx, via1w_xx
+        .word via1w_0c, via1w_0d, via1w_0e, via1w_xx
 
 /*******************************************************************************
  * Read a byte from the VIA 1 register in m_addr and return it in m_data.
@@ -217,7 +222,7 @@ via1w_0d:
 
         @ update IRQ bit (bit 7) of IFR
         bic     m_data, m_data, #0x80               @ delete IRQ bit
-        ldrb    m_tmp, [m_pdata, #VIA1_IER_OFFSET]  @ load IER
+        ldrb    m_tmp, [m_pdata, #VIA1_REGS_OFFSET + VIA_IER]
         ands    m_tmp, m_tmp, m_data                @ combine IER and IFR
         orrne   m_data, m_data, #0x80               @ set IRQ in IFR if not 0
         strb    m_tmp, [m_pdata, #VIA1_IFR_OFFSET]  @ store IFR
@@ -225,7 +230,26 @@ via1w_0d:
         mov     pc, lr                  @ return
 
 /*******************************************************************************
- * Generic read function for VIA1
+ * Write to Interrupt Enable Register
+ *
+ * Ref. [1] page 13
+ *
+ * This code always writes a 1 in bit 7, so this register can be read with a
+ * generic function.
+ *
+ ******************************************************************************/
+via1w_0e:
+        via_report_access_w
+        ldrb    m_tmp, [m_pdata, #VIA1_REGS_OFFSET + VIA_IER]
+        // check bit 7 to find out if we have to set or clear bits
+        tst     m_data, #0x80
+        biceq   m_tmp, m_tmp, m_data
+        orrne   m_tmp, m_tmp, m_data
+        strb    m_tmp, [m_pdata, #VIA1_REGS_OFFSET + VIA_IER]
+        mov     pc, lr                  @ return
+
+/*******************************************************************************
+ * Generic write function for VIA1
  * Write the value to a VIA mirror register.
  *
  ******************************************************************************/

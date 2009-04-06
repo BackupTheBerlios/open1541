@@ -52,7 +52,7 @@ memw_via2:
         .word via2w_00, via2w_xx, via2w_02, via2w_03
         .word via2w_xx, via2w_xx, via2w_xx, via2w_xx
         .word via2w_xx, via2w_xx, via2w_xx, via2w_xx
-        .word via2w_xx, via2w_xx, via2w_xx, via2w_xx
+        .word via2w_xx, via2w_xx, via2w_0e, via2w_xx
 
 /*******************************************************************************
  * Read a byte from the VIA 2 register in m_addr and return it in m_data.
@@ -78,7 +78,7 @@ memr_via2:
         .word via2r_00, via2r_xx, via2r_xx, via2r_xx
         .word via2r_xx, via2r_xx, via2r_xx, via2r_xx
         .word via2r_xx, via2r_xx, via2r_xx, via2r_xx
-        .word via2r_xx, via2r_xx, via2r_xx, via2r_xx
+        .word via2r_xx, via2r_0d, via2r_xx, via2r_xx
 
 /*******************************************************************************
  * Write to VIA2 Data Port B (SYNC, Motors, Bit Rates, LED)
@@ -89,11 +89,11 @@ via2w_00:
         strb    m_data, [m_pdata, #(VIA2_REGS_OFFSET + 0)]
 
         @ Set LED state (this should be implemented a better way...)
-        ldr     m_addr, =(DIRTY_LED_PORT + IOPIN)
+        ldr     m_addr, =(LED_PORT + IOPIN)
         ldr     m_tmp, [m_addr]
         tst     m_data, #(1 << 3)
-        bicne   m_tmp, #(1 << DIRTY_LED_PIN)
-        orreq   m_tmp, #(1 << DIRTY_LED_PIN)
+        bicne   m_tmp, #DIRTY_LED_BIT
+        orreq   m_tmp, #DIRTY_LED_BIT
         str     m_tmp, [m_addr]
 
         mov     pc, lr                  @ return
@@ -142,6 +142,34 @@ via2r_00:
         @ via_report_access_r
         mov     pc, lr                  @ return
 
+/******************************************************************************
+ * Read from VIA2 Data Port B (SYNC, Motors, Bit Rates, LED)
+ * Return last value written
+ *
+ ******************************************************************************/
+via2r_0d:
+        mov     m_data, #0
+        @ via_report_access_r
+        mov     pc, lr                  @ return
+
+/*******************************************************************************
+ * Write to Interrupt Enable Register
+ *
+ * Ref. [1] page 13
+ *
+ * This code always writes a 1 in bit 7, so this register can be read with a
+ * generic function.
+ *
+ ******************************************************************************/
+via2w_0e:
+        via_report_access_w
+        ldrb    m_tmp, [m_pdata, #VIA2_REGS_OFFSET + VIA_IER]
+        // check bit 7 to find out if we have to set or clear bits
+        tst     m_data, #0x80
+        biceq   m_tmp, m_tmp, m_data
+        orrne   m_tmp, m_tmp, m_data
+        strb    m_tmp, [m_pdata, #VIA2_REGS_OFFSET + VIA_IER]
+        mov     pc, lr                  @ return
 
 
 /*******************************************************************************

@@ -1,3 +1,4 @@
+
 XTAL=16000000
 CCLK=48000000
 PCLK=48000000
@@ -14,10 +15,25 @@ CONFIG_BREAKPOINTS=4
 CONFIG_DRIVE_CLOCK_DIV=1
 
 # Set this to print trace messages each time a VIA register gets accessed.
-CONFIG_VIA_TRACES=0
+CONFIG_VIA_TRACES=1
 
 # I/O configuration
-DIRTY_LED_PORT  = IO0
-DIRTY_LED_PIN   =  31
-BUSY_LED_PORT   = IO0
+LED_PORT  = IO0
 BUSY_LED_PIN    =  30
+DIRTY_LED_PIN   =  31
+BUSY_LED_BIT    =  (1 << BUSY_LED_PIN)
+DIRTY_LED_BIT   =  (1 << DIRTY_LED_PIN)
+
+IEC_IN_PORT     = IO1
+ATN_IN_PIN      =  27
+CLK_IN_PIN      =  28
+DAT_IN_PIN      =  29
+ATN_IN_BIT      =  (1 << ATN_IN_PIN)
+CLK_IN_BIT      =  (1 << CLK_IN_PIN)
+DAT_IN_BIT      =  (1 << DAT_IN_PIN)
+
+IEC_OUT_PORT    = IO0
+CLK_OUT_PIN     =  28
+DAT_OUT_PIN     =  29
+CLK_OUT_BIT     =  (1 << CLK_OUT_PIN)
+DAT_OUT_BIT     =  (1 << DAT_OUT_PIN)

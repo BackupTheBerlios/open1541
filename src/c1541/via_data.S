@@ -1,28 +1,27 @@
 /*
-    via_data.S - definitions for data fields used by VIA emulation
-
-    (c) 2008 Thomas Giesel <skoe@directbox.com>
-    Derived from 6502dis for use in mos6502 subsystem of open1541.
-    Changes are mainly to disassemble from memory instead from a file
-    and to replace fprintf by uart functions.
-
-    Copyright (C) 2003 Written by Stian Soreng <skurk@multinet.no>
-    http://freshmeat.net/projects/6502dis/
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ * VIA emulation
+ * via_data.S - definitions for data fields used by VIA emulation
+ *
+ * (c) 2008, 2009 Thomas Giesel
+ *
+ * This software is provided 'as-is', without any express or implied
+ * warranty.  In no event will the authors be held liable for any damages
+ * arising from the use of this software.
+ *
+ * Permission is granted to anyone to use this software for any purpose,
+ * including commercial applications, and to alter it and redistribute it
+ * freely, subject to the following restrictions:
+ *
+ * 1. The origin of this software must not be misrepresented; you must not
+ *    claim that you wrote the original software. If you use this software
+ *    in a product, an acknowledgment in the product documentation would be
+ *    appreciated but is not required.
+ * 2. Altered source versions must be plainly marked as such, and must not be
+ *    misrepresented as being the original software.
+ * 3. This notice may not be removed or altered from any source distribution.
+ *
+ * Thomas Giesel skoe@directbox.com
+ */
 
 /* This file must be included into mach_data.S */
 
@@ -33,9 +32,7 @@ data VIA_REG_SIZE   via1_reg_mirror     VIA1_REGS_OFFSET
 data VIA_REG_SIZE   via2_reg_mirror     VIA2_REGS_OFFSET
 
 data 1              via1_ifr            VIA1_IFR_OFFSET
-data 1              via1_ier            VIA1_IER_OFFSET
 data 1              via2_ifr            VIA2_IFR_OFFSET
-data 1              via2_ier            VIA2_IER_OFFSET
 
 data 4              via1_t1_exp         VIA1_T1_EXP_OFFSET
 data 4              via1_t2_exp         VIA1_T2_EXP_OFFSET

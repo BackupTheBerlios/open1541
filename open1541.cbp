@@ -42,6 +42,7 @@
 		<Unit filename="src/c1541/mach_data.S" />
 		<Unit filename="src/c1541/via.h" />
 		<Unit filename="src/c1541/via1.S" />
+		<Unit filename="src/c1541/via1_irq.S" />
 		<Unit filename="src/c1541/via2.S" />
 		<Unit filename="src/c1541/via_common.S" />
 		<Unit filename="src/c1541/via_data.S" />

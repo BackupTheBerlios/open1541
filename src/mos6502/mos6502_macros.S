@@ -1,19 +1,29 @@
 /*
- * (c) 2008 Thomas Giesel <skoe@directbox.com>
+ * mos6502 - a 6502 emulator
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License only.
+ * (c) 2008, 2009 Thomas Giesel
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This software is provided 'as-is', without any express or implied
+ * warranty.  In no event will the authors be held liable for any damages
+ * arising from the use of this software.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Permission is granted to anyone to use this software for any purpose,
+ * including commercial applications, and to alter it and redistribute it
+ * freely, subject to the following restrictions:
+ *
+ * 1. The origin of this software must not be misrepresented; you must not
+ *    claim that you wrote the original software. If you use this software
+ *    in a product, an acknowledgment in the product documentation would be
+ *    appreciated but is not required.
+ * 2. Altered source versions must be plainly marked as such, and must not be
+ *    misrepresented as being the original software.
+ * 3. This notice may not be removed or altered from any source distribution.
+ *
+ * Thomas Giesel skoe@directbox.com
  */
+
+#ifndef MOS6502_MACROS_H
+#define MOS6502_MACROS_H
 
 MACH_DATA_DECLARE = 1
 #include <mach_data.S>
@@ -48,7 +58,7 @@ m_ptimer .req   r11
 @ NZCF are kept in the same order and at the same position as in ARM,
 @ so they simply can be copied.
 @ The bits are:
-@ NZCVBDI0 00000PS0 00000sVv 00000000
+@ NZCVBDI0 00000PS0 00000sVv 0000000z
 @ P = break point hit
 @ S = single step mode, for emulation tests
 @ 0 = reserved
@@ -57,6 +67,9 @@ m_ptimer .req   r11
 @ v = VIA1 IRQ
 @ V = VIA2 IRQ
 @ s = SIM IRQ
+@
+@ VIA helpers:
+@ z = VIA1 CA1 low edge detected
 @
 m_flags    .req    r12
 
@@ -75,6 +88,10 @@ MOS6502_S   = (1 << 17) @ single step mode
 MOS6502_IRQ_VIA1 = (1 <<  8) @ IRQ from VIA1
 MOS6502_IRQ_VIA2 = (1 <<  9) @ IRQ from VIA2
 MOS6502_IRQ_SIM  = (1 << 10) @ IRQ from VIA2
+
+// VIA helpers
+VIA1_CA1_LOW_EDGE_DETECTED = (1 << 0)
+
 
 MOS6502_IRQ_MASK = (MOS6502_IRQ_VIA1 | MOS6502_IRQ_VIA2 | MOS6502_IRQ_SIM)
 
@@ -434,7 +451,7 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
         @ read argument at PC (zeropage address)
         ldrb    m_addr, [m_pc], #1
 
-        @ now m_addr contains the zp address, add it shifted to Y 
+        @ now m_addr contains the zp address, add it shifted to Y
         @ into m_addr[31:24]
         y_to_tmp
         add     m_addr, m_tmp, m_addr, lsl #24
@@ -891,3 +908,4 @@ mos6502_romsize       =   (1 << mos6502_ramsize_shift)
         orr     m_flags, m_flags, m_tmp   @ copy flags to 6502
 .endm
 
+#endif // MOS6502_MACROS_H

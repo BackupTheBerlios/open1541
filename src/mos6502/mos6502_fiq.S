@@ -1,26 +1,30 @@
 /*
- * (c) 2008 Thomas Giesel <skoe@directbox.com>
+ * mos6502 - a 6502 emulator
  *
- * 6502 processor emulation implemented with some inspiration by code
- * by David Sharp and Neal Tew.
+ * (c) 2008, 2009 Thomas Giesel
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License only.
+ * This software is provided 'as-is', without any express or implied
+ * warranty.  In no event will the authors be held liable for any damages
+ * arising from the use of this software.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Permission is granted to anyone to use this software for any purpose,
+ * including commercial applications, and to alter it and redistribute it
+ * freely, subject to the following restrictions:
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * 1. The origin of this software must not be misrepresented; you must not
+ *    claim that you wrote the original software. If you use this software
+ *    in a product, an acknowledgment in the product documentation would be
+ *    appreciated but is not required.
+ * 2. Altered source versions must be plainly marked as such, and must not be
+ *    misrepresented as being the original software.
+ * 3. This notice may not be removed or altered from any source distribution.
  *
+ * Thomas Giesel skoe@directbox.com
  */
 
 #include <autoconf.h>
 #include <mos6502_macros.S>
+#include <via1_irq.S>
 
 /*******************************************************************************
  * Execute a single instruction on the emulated 6502 processor.
@@ -29,10 +33,15 @@
  ******************************************************************************/
         stmfd sp!, {r0 - r2, lr}
 
-        @ check if IRQs are disabled (I flag is inverted)
+        // check if IRQs are disabled (I flag is inverted)
         tst     m_flags, #MOS6502_NI
 
-        @ if not, check if a device asserts the IRQ line
+        beq     mos6502_fetch
+
+        // check IRQ conditions
+        via1_check_irqs
+
+        // if not, check if a device asserts the IRQ line
         tstne   m_flags, #MOS6502_IRQ_MASK
 
         @ oh, there's something else to do

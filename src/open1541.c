@@ -1,22 +1,26 @@
 /*
- * open1541.c - The main program
+ * mos6502 - a 6502 emulator
  *
- * (c) 2008 Thomas Giesel <skoe@directbox.com>
+ * (c) 2008, 2009 Thomas Giesel
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License only.
+ * This software is provided 'as-is', without any express or implied
+ * warranty.  In no event will the authors be held liable for any damages
+ * arising from the use of this software.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Permission is granted to anyone to use this software for any purpose,
+ * including commercial applications, and to alter it and redistribute it
+ * freely, subject to the following restrictions:
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * 1. The origin of this software must not be misrepresented; you must not
+ *    claim that you wrote the original software. If you use this software
+ *    in a product, an acknowledgment in the product documentation would be
+ *    appreciated but is not required.
+ * 2. Altered source versions must be plainly marked as such, and must not be
+ *    misrepresented as being the original software.
+ * 3. This notice may not be removed or altered from any source distribution.
+ *
+ * Thomas Giesel skoe@directbox.com
  */
-
 
 #include <autoconf.h>
 
@@ -28,7 +32,8 @@
 #include <c1541.h>
 #include <mos6502.h>
 
-static void init_clocks();
+static void clock_init();
+static void io_init();
 
 /*******************************************************************************
  * Do it.
@@ -36,25 +41,23 @@ static void init_clocks();
  ******************************************************************************/
 int main()
 {
-    init_clocks();
+    clock_init();
     uart_init();
     uart_puts("\r\nInitializing...\r\n");
     timer_init();
-
+    io_init();
     uart_puts("Starting drive...\r\n");
 
     c1541_init();
 
     cli_init();
 
-    REG32OFFSET(DIRTY_LED_PORT, IODIR) |= 1 << DIRTY_LED_PIN;
-    REG32OFFSET(DIRTY_LED_PORT, IOCLR)  = 1 << DIRTY_LED_PIN;
-
-    REG32OFFSET(BUSY_LED_PORT, IODIR) |= 1 << BUSY_LED_PIN;
-    REG32OFFSET(BUSY_LED_PORT, IOCLR)  = 1 << BUSY_LED_PIN;
-
     for (;;)
     {
+#ifdef CONFIG_GDBSIM
+        uart_putdec(demon_clock());
+        uart_putcrlf();
+#endif
         cli_check();
     }
 
@@ -65,9 +68,9 @@ int main()
  * Init all the clocks we need.
  *
  ******************************************************************************/
-static void init_clocks()
+static void clock_init()
 {
-#if CCLK != XTAL
+#ifndef CONFIG_GDBSIM
     /* PLL initialization */
     PLLCFG = ((CCLK / XTAL) - 1) | PLLCFG_PSEL_2;
     PLLCON = PLLCON_PLLE;
@@ -78,7 +81,6 @@ static void init_clocks()
     PLLCON = PLLCON_PLLE | PLLCON_PLLC;
     PLLFEED=0xAA;
     PLLFEED=0x55;
-#endif
 
     /* VPB runs at clock speed, divider = 1 */
     VPBDIV = VPBDIV_1;
@@ -88,4 +90,29 @@ static void init_clocks()
     MAMCR  = 2;
 
     PINSEL0 = PINSEL0_P00_TXD0 | PINSEL0_P01_RXD0;
+#endif
 }
+
+/*******************************************************************************
+ * Init all GPIOs we need.
+ *
+ ******************************************************************************/
+static void io_init()
+{
+    // All GPIOs are input
+    REG32OFFSET(IO0, IODIR) = 0;
+    REG32OFFSET(IO0, IODIR) = 0;
+
+    // set output for LEDs
+    REG32OFFSET(LED_PORT, IODIR) |= DIRTY_LED_BIT | BUSY_LED_BIT;
+
+    // set output for IEC
+    REG32OFFSET(IEC_OUT_PORT, IODIR) |= (DAT_OUT_BIT | CLK_OUT_BIT);
+
+    // Both LEDs on (low)
+    REG32OFFSET(LED_PORT, IOCLR) = (DIRTY_LED_BIT | BUSY_LED_BIT);
+
+    // DAT, CLK released (negated)
+    REG32OFFSET(IEC_OUT_PORT, IOCLR) = (DAT_OUT_BIT | CLK_OUT_BIT);
+}
+

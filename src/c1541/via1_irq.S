@@ -25,14 +25,38 @@
 
 #include <autoconf.h>
 
-#include <lpc213x.h>
-
 #include <mos6502_macros.S>
 #include "via.h"
-#include "via_macros.S"
 
 MACH_DATA_DECLARE = 1
 #include <mach_data.S>
+
+
+/*******************************************************************************
+ * Update the IRQ flag of VIA1.
+ *
+ * This does only update MOS6502_IRQ_VIA1 in m_flags, which represents the
+ * physical IRQ line of the VIA chip. IFR is written to memory in this macro.
+ * For performance reasons bit 7 of IFR is only updated when IFR is read by an
+ * emulated instruction.
+ *
+ * In:  m_data      Value of IFR with updated bits 0..6
+ *
+ * Out: m_tmp       Changed
+ *
+ ******************************************************************************/
+.macro via1_update_irq_flag
+
+        strb    m_data, [m_pdata, #(VIA1_REGS_OFFSET + VIA_IFR)]
+        ldrb    m_tmp, [m_pdata, #(VIA1_REGS_OFFSET + VIA_IER)]
+        and     m_tmp, m_data
+        ands    m_tmp, #0x7f
+        // set update flag for IRQ
+        biceq   m_flags, #MOS6502_IRQ_VIA1
+        orrne   m_flags, #MOS6502_IRQ_VIA1
+.endm
+
+
 
 .macro via1_check_irqs
 
@@ -44,26 +68,17 @@ MACH_DATA_DECLARE = 1
         tst     m_tmp, #ATN_IN_BIT
 
         // inactive => next active edge can be detected again
-        bicne   m_flags, #VIA1_CA1_LOW_EDGE_DETECTED
-        bne     1f
+        biceq   m_flags, #VIA1_CA1_LOW_EDGE_DETECTED
+        beq     1f
 
         // it's low, check if the last edge has been registered already
         tst     m_flags, #VIA1_CA1_LOW_EDGE_DETECTED
-        bne     2f
+        bne     1f
 
         // we see this low level the first time, flag it
         ldrb    m_data, [m_pdata, #(VIA1_REGS_OFFSET + VIA_IFR)]
         orr     m_data, #(VIA_IM_IRQ | VIA_IM_CA1)
-        strb    m_data, [m_pdata, #(VIA1_REGS_OFFSET + VIA_IFR)]
+
+        via1_update_irq_flag
 1:
-        // update IRQ
-        ldrb    m_tmp, [m_pdata, #(VIA1_REGS_OFFSET + VIA_IER)]
-        and     m_tmp, m_data
-        ands    m_tmp, #0x7f
-        beq     2f
-        // set flags for IRQ
-        orr     m_flags, #MOS6502_IRQ_VIA1
-        orr     m_data, #VIA_IM_IRQ
-        strb    m_tmp, [m_pdata, #(VIA1_REGS_OFFSET + VIA_IER)]
-2:
 .endm

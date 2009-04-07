@@ -1,3 +1,4 @@
+syntax: glob
 *.o
 *.a
 *.s
@@ -8,3 +9,4 @@
 obj-*
 *.kdev*
 Doxyfile
+tools/lpcflash/lpcflash

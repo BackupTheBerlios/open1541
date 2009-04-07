@@ -27,6 +27,7 @@
 #include <mos6502_macros.S>
 #include "via.h"
 #include "via_macros.S"
+#include "via1_irq.S"
 
 MACH_DATA_DECLARE = 1
 #include <mach_data.S>
@@ -53,7 +54,7 @@ memw_via1:
 
         @ the opcode jump table is directly behind our current ARM-PC so we can
         @ use PC + opcode to find the right entry
-        .word via1w_00, via1w_xx, via1w_02, via1w_03
+        .word via1w_00, via1w_01, via1w_02, via1w_03
         .word via1w_xx, via1w_05, via1w_xx, via1w_xx
         .word via1w_xx, via1w_xx, via1w_xx, via1w_xx
         .word via1w_0c, via1w_0d, via1w_0e, via1w_xx
@@ -79,7 +80,7 @@ memr_via1:
 
         @ the opcode jump table is directly behind our current ARM-PC so we can
         @ use PC + opcode to find the right entry
-        .word via1r_00, via1r_xx, via1r_xx, via1r_xx
+        .word via1r_00, via1r_01, via1r_xx, via1r_xx
         .word via1r_04, via1r_05, via1r_xx, via1r_xx
         .word via1r_xx, via1r_xx, via1r_xx, via1r_xx
         .word via1r_xx, via1r_xx, via1r_xx, via1r_xx
@@ -104,6 +105,29 @@ via1r_00:
         ldrb    m_data, [m_pdata, #(VIA1_REGS_OFFSET + 0)]
         via_report_access_r
         mov     pc, lr                  @ return
+
+/*******************************************************************************
+ * Write to VIA1 PRA
+ *
+ * Write is ignored, clear IFR:CA1
+ *
+ ******************************************************************************/
+via1w_01:
+        via_report_access_w
+        via1_update_irq_flag
+        mov     pc, lr
+
+/******************************************************************************
+ * Read from VIA1 PRA
+ *
+ * Return 0xff, clear IFR:CA1
+ *
+ ******************************************************************************/
+via1r_01:
+        ldrb    m_data, [m_pdata, #(VIA1_REGS_OFFSET + VIA_IFR)]
+        via1_update_irq_flag
+        mov     m_data, #0xff
+        mov     pc, lr
 
 /******************************************************************************
  * Write to VIA1 Data Direction Register B (CLOCK, DATA etc.)

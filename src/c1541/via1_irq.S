@@ -75,9 +75,12 @@ MACH_DATA_DECLARE = 1
         tst     m_flags, #VIA1_CA1_LOW_EDGE_DETECTED
         bne     1f
 
-        // we see this low level the first time, flag it
+        // remember that we realized this edge
+        orr     m_flags, #VIA1_CA1_LOW_EDGE_DETECTED
+
+        // flag it
         ldrb    m_data, [m_pdata, #(VIA1_REGS_OFFSET + VIA_IFR)]
-        orr     m_data, #(VIA_IM_IRQ | VIA_IM_CA1)
+        orr     m_data, #VIA_IM_CA1
 
         via1_update_irq_flag
 1:

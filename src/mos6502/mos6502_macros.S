@@ -87,7 +87,7 @@ MOS6502_S   = (1 << 17) @ single step mode
 
 MOS6502_IRQ_VIA1 = (1 <<  8) @ IRQ from VIA1
 MOS6502_IRQ_VIA2 = (1 <<  9) @ IRQ from VIA2
-MOS6502_IRQ_SIM  = (1 << 10) @ IRQ from VIA2
+MOS6502_IRQ_SIM  = (1 << 10) @ simulated IRQ
 
 // VIA helpers
 VIA1_CA1_LOW_EDGE_DETECTED = (1 << 0)
@@ -95,8 +95,8 @@ VIA1_CA1_LOW_EDGE_DETECTED = (1 << 0)
 
 MOS6502_IRQ_MASK = (MOS6502_IRQ_VIA1 | MOS6502_IRQ_VIA2 | MOS6502_IRQ_SIM)
 
-@ This mask leaves only bits used by the emulation
-MOS6502_FLAGS_EMU_MASK = 0x00ff0000
+@ This mask leaves only the CPU flags
+MOS6502_CPU_FLAGS_MASK = (MOS6502_N | MOS6502_Z | MOS6502_C | MOS6502_V | MOS6502_B | MOS6502_D | MOS6502_NI)
 
 @ our client has 2 kByte of RAM
 mos6502_ramsize_shift =   11

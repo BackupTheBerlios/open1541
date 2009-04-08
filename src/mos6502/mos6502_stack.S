@@ -149,7 +149,7 @@ op_40: @ RTI
         sp_to_tmp
 
         @ remove old 6502 flags
-        and     m_flags, m_flags, #MOS6502_FLAGS_EMU_MASK
+        bic     m_flags, #MOS6502_CPU_FLAGS_MASK
 
         @ inc SP, wrap it
         add     m_tmp, m_tmp, #1

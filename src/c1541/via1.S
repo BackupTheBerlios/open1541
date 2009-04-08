@@ -113,7 +113,8 @@ via1r_00:
  *
  ******************************************************************************/
 via1w_01:
-        via_report_access_w
+        ldrb    m_data, [m_pdata, #(VIA1_REGS_OFFSET + VIA_IFR)]
+        bic     m_data, #VIA_IM_CA1
         via1_update_irq_flag
         mov     pc, lr
 
@@ -125,6 +126,7 @@ via1w_01:
  ******************************************************************************/
 via1r_01:
         ldrb    m_data, [m_pdata, #(VIA1_REGS_OFFSET + VIA_IFR)]
+        bic     m_data, #VIA_IM_CA1
         via1_update_irq_flag
         mov     m_data, #0xff
         mov     pc, lr

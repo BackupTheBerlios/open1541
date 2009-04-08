@@ -8,5 +8,7 @@ syntax: glob
 *.?#?
 obj-*
 *.kdev*
+*.layout
+*.orig
 Doxyfile
 tools/lpcflash/lpcflash

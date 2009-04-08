@@ -31,9 +31,6 @@
 data VIA_REG_SIZE   via1_reg_mirror     VIA1_REGS_OFFSET
 data VIA_REG_SIZE   via2_reg_mirror     VIA2_REGS_OFFSET
 
-data 1              via1_ifr            VIA1_IFR_OFFSET
-data 1              via2_ifr            VIA2_IFR_OFFSET
-
 data 4              via1_t1_exp         VIA1_T1_EXP_OFFSET
 data 4              via1_t2_exp         VIA1_T2_EXP_OFFSET
 data 4              via2_t1_exp         VIA2_T1_EXP_OFFSET

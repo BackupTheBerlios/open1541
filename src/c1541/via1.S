@@ -83,7 +83,7 @@ memr_via1:
         .word via1r_00, via1r_01, via1r_xx, via1r_xx
         .word via1r_04, via1r_05, via1r_xx, via1r_xx
         .word via1r_xx, via1r_xx, via1r_xx, via1r_xx
-        .word via1r_xx, via1r_xx, via1r_xx, via1r_xx
+        .word via1r_xx, via1r_0d, via1r_xx, via1r_xx
 
 
 /*******************************************************************************
@@ -144,7 +144,7 @@ via1w_02:
         cmp     m_data, #0x1a
         bne     via_report_access
 
-        mov     pc, lr                  @ return
+        mov     pc, lr
 
 /******************************************************************************
  * Write to VIA1 Data Direction Register A  (Parallel cable)
@@ -158,7 +158,7 @@ via1w_03:
         cmp     m_data, #0xff
         bne     via_report_access
 
-        mov     pc, lr                  @ return
+        mov     pc, lr
 
 /******************************************************************************
  * Write to VIA1 T1CH
@@ -168,6 +168,7 @@ via1w_03:
 via1w_04:
         strb    m_data, [m_pdata, #(VIA1_REGS_OFFSET + VIA_T1LL)]
         @ todo: reset T1 IRQ flag
+        via_report_access_w
         mov     pc, lr                  @ return
 
 /******************************************************************************
@@ -205,6 +206,8 @@ via1w_05:
 
         @ todo: reset T1 IRQ flag
 
+        via_report_access_w
+
         mov     pc, lr                  @ return
 
 /******************************************************************************
@@ -235,6 +238,8 @@ via1w_0c:
         cmp     m_data, #0x01
         bne     via_report_access
 
+        via_report_access_w
+
         mov     pc, lr                  @ return
 
 /******************************************************************************
@@ -242,18 +247,25 @@ via1w_0c:
  *
  ******************************************************************************/
 via1w_0d:
-        mvn     m_data, m_data                      @ negate byte
-        ldrb    m_tmp, [m_pdata, #VIA1_IFR_OFFSET]  @ load IFR
-        and     m_data, m_tmp, m_data               @ delete all 1 bits
+        mvn     m_data, m_data                      // negate byte
+        ldrb    m_tmp, [m_pdata, #VIA1_REGS_OFFSET + VIA_IFR]
+        and     m_data, m_tmp, m_data               // delete all 1 bits
 
-        @ update IRQ bit (bit 7) of IFR
-        bic     m_data, m_data, #0x80               @ delete IRQ bit
-        ldrb    m_tmp, [m_pdata, #VIA1_REGS_OFFSET + VIA_IER]
-        ands    m_tmp, m_tmp, m_data                @ combine IER and IFR
-        orrne   m_data, m_data, #0x80               @ set IRQ in IFR if not 0
-        strb    m_tmp, [m_pdata, #VIA1_IFR_OFFSET]  @ store IFR
+        via1_update_irq_flag
 
-        mov     pc, lr                  @ return
+        mov     pc, lr
+
+/******************************************************************************
+ * Read from VIA1 Interrupt Flag Register
+ *
+ ******************************************************************************/
+via1r_0d:
+        // load IFR and update bit 7
+        ldrb    m_data, [m_pdata, #VIA1_REGS_OFFSET + VIA_IFR]
+        tst     m_flags, #MOS6502_IRQ_VIA1
+        orrne   m_data, #0x80
+
+        mov     pc, lr
 
 /*******************************************************************************
  * Write to Interrupt Enable Register
@@ -265,7 +277,6 @@ via1w_0d:
  *
  ******************************************************************************/
 via1w_0e:
-        via_report_access_w
         ldrb    m_tmp, [m_pdata, #VIA1_REGS_OFFSET + VIA_IER]
         // check bit 7 to find out if we have to set or clear bits
         tst     m_data, #0x80

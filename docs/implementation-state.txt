@@ -6,6 +6,61 @@
 VIA Implementation State
 ========================
 
+VIA 1 0x01: Data Port A
+=======================
+
+Read:
+Ignored, always return 0xff.
+A read access clears IFR:AC1
+
+Write:
+Ignored.
+A write access clears IFR:AC1
+
+Functionality:
+This port is not connected on an original 1541. It is used sometimes to connect
+a parallel cable. Since we don't support parallel cables at the moment. The
+functionality is complete.
+
+VIA 1 0x02: Data Direction Register B
+=====================================
+
+Read:
+Return last value written.
+
+Write:
+1541 II writes 0x1a here, i.e. ATN_ACK, DATA, CLOCK OUT, everything else IN.
+This is hard-coded in our project and cannot be changed.
+
+Functionality:
+Ignored, because the data direction cannot be changed in our project.
+
+VIA 1 0x02: Data Direction Register A
+=====================================
+
+Read:
+Return last value written.
+
+Write:
+This port is not connected on an original 1541. It is used sometimes to connect
+a parallel cable. The 1541 II writed 0xff here.
+
+Functionality:
+Ignored, because the data direction cannot be changed in our project.
+
+VIA 1 0x0D: Interrupt Flag Register
+===================================
+
+Read:
+OK
+
+Write:
+OK
+
+Functionality:
+Currently only CA1 is set when ATN goes active.
+All other flags are not implemented yet.
+
 VIA 1 0x0E: Interrupt Enable Register
 =====================================
 
@@ -16,3 +71,4 @@ Write:
 OK
 
 Functionality:
+Is combined with IFR to find out if an IRQ has to be flagged.

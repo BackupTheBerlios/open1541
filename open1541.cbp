@@ -20,6 +20,7 @@
 			<Add option="-Wall" />
 		</Compiler>
 		<Unit filename="docs/compile-open1541.txt" />
+		<Unit filename="docs/implementation-state.txt" />
 		<Unit filename="docs/linux-getting-started.txt" />
 		<Unit filename="docs/mos6502.txt" />
 		<Unit filename="docs/windows-getting-started.txt" />

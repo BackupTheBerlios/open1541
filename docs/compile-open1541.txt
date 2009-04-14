@@ -18,6 +18,9 @@ compiler. If not set from the command line, it contains
 $(HOME)/cross/arm-elf-binutils-<version>-gcc-<version>, which is the path were
 our Makefile installs the toolchain.
 
+On Windows there should ne reason to touch this variable. When you use the 
+default installation of YAGARTO, the compiler is in the PATH already. 
+
 So you can change to directory "make" and call:
 
 > make -s
@@ -26,8 +29,10 @@ or
 
 > add_path=somewhere/else/bin make -s
 
-[this must be updated and completed]
 
+
+
+[this must be updated and completed]
 
 2. Simulate using Skyeye
 ========================

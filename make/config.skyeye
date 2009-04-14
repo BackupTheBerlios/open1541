@@ -1,39 +1,47 @@
 
-XTAL=60000000
-CCLK=60000000
-PCLK=60000000
+#define XTAL  60000000
+#define CCLK  60000000
+#define PCLK  60000000
 
-CONFIG_UART_BAUDRATE=115200
+#define CONFIG_UART_BAUDRATE  115200
 
-# This is the maximum number of breakpoints set at once.
-# Set it to 0 to disable the breakpoint mechanism. This will save about
-# 500 Bytes of code and speed up the emulation about 10%.
-CONFIG_BREAKPOINTS=4
+/*
+ * This is the maximum number of breakpoints set at once.
+ * Set it to 0 to disable the breakpoint mechanism. This will save about
+ * 500 Bytes of code and speed up the emulation about 10%.
+ */ 
+#define CONFIG_BREAKPOINTS 4
 
-# The is the drive clock divisor. Set it to 1 to run at original speed.
-# Set it to higher values to slow down the execution for debugging.
-CONFIG_DRIVE_CLOCK_DIV=1
+/*
+ * The is the drive clock divisor. Set it to 1 to run at original speed.
+ * Set it to higher values to slow down the execution for debugging.
+ */ 
+#define CONFIG_DRIVE_CLOCK_DIV 1
 
-# Set this to print trace messages each time a VIA register gets accessed.
-CONFIG_VIA_TRACES=0
+/*
+ * Set this to print trace messages each time a VIA register gets accessed.
+ */ 
+#define CONFIG_VIA_TRACES 0
 
-# I/O configuration
-LED_PORT  = IO0
-BUSY_LED_PIN    =  30
-DIRTY_LED_PIN   =  31
-BUSY_LED_BIT    =  (1 << BUSY_LED_PIN)
-DIRTY_LED_BIT   =  (1 << DIRTY_LED_PIN)
+/*
+ * I/O configuration
+ */ 
+#define LED_PORT        IO0
+#define BUSY_LED_PIN     30
+#define DIRTY_LED_PIN    31
+#define BUSY_LED_BIT     (1 << BUSY_LED_PIN)
+#define DIRTY_LED_BIT    (1 << DIRTY_LED_PIN)
 
-IEC_IN_PORT     = IO1
-ATN_IN_PIN      =  27
-CLK_IN_PIN      =  28
-DAT_IN_PIN      =  29
-ATN_IN_BIT      =  (1 << ATN_IN_PIN)
-CLK_IN_BIT      =  (1 << CLK_IN_PIN)
-DAT_IN_BIT      =  (1 << DAT_IN_PIN)
+#define IEC_IN_PORT     IO1
+#define ATN_IN_PIN       27
+#define CLK_IN_PIN       28
+#define DAT_IN_PIN       29
+#define ATN_IN_BIT       (1 << ATN_IN_PIN)
+#define CLK_IN_BIT       (1 << CLK_IN_PIN)
+#define DAT_IN_BIT       (1 << DAT_IN_PIN)
 
-IEC_OUT_PORT    = IO0
-CLK_OUT_PIN     =  28
-DAT_OUT_PIN     =  29
-CLK_OUT_BIT     =  (1 << CLK_OUT_PIN)
-DAT_OUT_BIT     =  (1 << DAT_OUT_PIN)
+#define IEC_OUT_PORT    IO0
+#define CLK_OUT_PIN      28
+#define DAT_OUT_PIN      29
+#define CLK_OUT_BIT      (1 << CLK_OUT_PIN)
+#define DAT_OUT_BIT      (1 << DAT_OUT_PIN)

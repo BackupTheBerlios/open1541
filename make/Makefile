@@ -25,13 +25,21 @@ else
 platform     ?= lpc2134
 endif
 
+ifneq (_$(shell uname | grep MINGW), _)
+mingw        := yes
+endif
+
 # use "dos1541" or "testrom" here
 rom          ?= dos1541
 
-add_path     ?= $(HOME)/cross/arm-elf-binutils-2.19.51-gcc-4.3.3/bin
+ifeq (_$(mingw), _yes)
+serial_port  ?= 1
+else
 serial_port  ?= /dev/ttyUSB0
+add_path     ?= $(HOME)/cross/arm-elf-binutils-2.19.51-gcc-4.3.3/bin
+endif
 
-project_root := $(abspath $(shell echo `pwd`)/..)
+project_root := ..
 scriptdir    := $(project_root)/scripts
 tooldir      := $(project_root)/tools
 srcdir       := $(project_root)/src
@@ -40,6 +48,7 @@ incdir       := $(project_root)/include
 objdir       := $(project_root)/obj-$(platform)-$(rom)
 
 lpcflash     := $(project_root)/tools/lpcflash/lpcflash
+hexdump      := $(project_root)/tools/hexdump/hexdump
 config       := $(project_root)/make/config.$(platform)
 
 CC           := arm-elf-gcc
@@ -157,11 +166,24 @@ debug: $(objdir)/open1541
 simulate: $(objdir)/open1541
 	skyeye -c $(scriptdir)/skyeye.conf -e $(objdir)/open1541
 
+
 .PHONY: flash
-flash: $(lpcflash) $(objdir)/open1541.hex
+flash: flash_$(mingw)
+
+.PHONY: flash_yes # for MinGW
+flash_yes: 
+	cd $(objdir) && FM "COM($(serial_port), 19200) \
+		DEVICE(LPC2148, 16.000) ERASE(DEVICE, PROTECTISP) \
+		HEXFILE(open1541.hex, CHECKSUMS, NOFILL, PROTECTISP)"
+
+.PHONY: flash_ # for Linux etc.
+flash_: $(lpcflash) $(objdir)/open1541.hex
 	$(lpcflash) -p $(serial_port) -b 19200 $(objdir)/open1541.hex
 
 $(lpcflash):
+	make -C $(dir $@)
+
+$(hexdump):
 	make -C $(dir $@)
 
 #############################################################################

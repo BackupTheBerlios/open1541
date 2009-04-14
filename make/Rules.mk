@@ -20,7 +20,7 @@
 #############################################################################
 # Create .o in objdir from .c in the corresponding srcdir
 #
-$(objdir)%.o: $(srcdir)%.c | $(objdir)/autoconf.h
+$(objdir)%.o: $(srcdir)%.c $(objdir)/autoconf.h
 	echo 'compiling $(notdir $<) ...'
 	mkdir -p $(dir $@)
 	$(CC) -c -MD -MT $@ -MF $(objdir)$*.d \
@@ -29,7 +29,7 @@ $(objdir)%.o: $(srcdir)%.c | $(objdir)/autoconf.h
 #############################################################################
 # Create .o in objdir from .S in the corresponding srcdir
 #
-$(objdir)%.o: $(srcdir)%.S | $(objdir)/autoconf.h
+$(objdir)%.o: $(srcdir)%.S $(objdir)/autoconf.h
 	echo 'compiling $(notdir $<) ...'
 	mkdir -p $(dir $@)
 	$(CC) -c -MD -MT $@ -MF $(objdir)$*.d \
@@ -38,7 +38,7 @@ $(objdir)%.o: $(srcdir)%.S | $(objdir)/autoconf.h
 #############################################################################
 # Create .o from .s
 #
-%.o: %.s | $(objdir)/autoconf.h
+%.o: %.s $(objdir)/autoconf.h
 	echo 'compiling $(notdir $<) ...'
 	mkdir -p $(dir $@)
 	$(CC) -c -MD -MT $@ -MF $(objdir)$*.d \
@@ -47,11 +47,11 @@ $(objdir)%.o: $(srcdir)%.S | $(objdir)/autoconf.h
 #############################################################################
 # Create .s in objdir from .bin in the corresponding srcdir
 #
-$(objdir)%.s: $(srcdir)%.bin
+$(objdir)%.s: $(srcdir)%.bin $(hexdump)
 	echo .text > $@
 	echo .global $(*F) >> $@
 	echo $(*F): >> $@
-	hexdump -v -e '".byte " 1/1 "0x%02x\n"' $< >> $@
+	$(hexdump) $< >> $@
 
 #############################################################################
 # Create .s from .bin
@@ -71,9 +71,8 @@ $(objdir)%.s: $(srcdir)%.bin
 	$(SIZE) $<
 
 #############################################################################
-# Generate autoconf.h from config
+# Copy config to autoconf.h 
 #
 $(objdir)/autoconf.h: $(config)
 	mkdir -p $(dir $@)
-	sed -f $(scriptdir)/conf2h.sed $(config) > $(objdir)/autoconf.h
-#    gawk -f $(scriptdir)/conf2h.awk $(config) > $(objdir)/autoconf.h
+	cp $^ $@

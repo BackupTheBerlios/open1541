@@ -17,27 +17,46 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-skyeye_goals := $(filter $(MAKECMDGOALS), simulate debug)
-
-ifneq (x$(skyeye_goals), x)
-platform     ?= skyeye
-else
-platform     ?= lpc2134
+ifeq (_$(platform), _)
+$(warning )
+$(warning *** No platform chosen, use one of following command lines:)
+$(warning )
+$(warning To build the software:)
+$(warning make -s platform=lpc2134)
+$(warning make -s platform=olimex-p2148)
+$(warning )
+$(warning To build the software and flash it:)
+$(warning make -s platform=lpc2134      flash)
+$(warning make -s platform=olimex-p2148 flash)
+$(warning )
+$(warning To build the software and simulate or debug it in SkyEye:)
+$(warning make -s platform=skyeye       simulate)
+$(warning make -s platform=skyeye       debug)
+$(warning )
+$(warning To choose a different UART you can add one of these:)
+$(warning serial_port=/dev/something)
+$(warning serial_port=2)
+$(warning )
+$(error I give up)
 endif
 
 ifneq (_$(shell uname | grep MINGW), _)
-mingw        := yes
+hosttype     := mingw
+else
+hosttype     := linux
+# or simular OSs
 endif
 
 # use "dos1541" or "testrom" here
-rom          ?= dos1541
+rom               ?= dos1541
 
-ifeq (_$(mingw), _yes)
-serial_port  ?= 1
-else
-serial_port  ?= /dev/ttyUSB0
-add_path     ?= $(HOME)/cross/arm-elf-binutils-2.19.51-gcc-4.3.3/bin
-endif
+serial_port_mingw := 1
+serial_port_linux := /dev/ttyUSB0
+serial_port       ?= $(serial_port_$(hosttype))
+
+add_path_mingw    :=
+add_path_linux    := $(HOME)/cross/arm-elf-binutils-2.19.51-gcc-4.3.3/bin
+add_path          ?= $(add_path_$(hosttype))
 
 project_root := ..
 scriptdir    := $(project_root)/scripts
@@ -58,13 +77,14 @@ INSIGHT      := arm-elf-insight
 OBJCOPY      := arm-elf-objcopy
 SIZE         := arm-elf-size
 
-# remove built-in rules to make debugging easier
+# remove built-in rules to make Makefile debugging easier
 .SUFFIXES:
 % : %
 
-ifneq ($(add_path), )
+ifneq (_$(add_path), _)
 PATH := $(PATH):$(add_path)
 endif
+
 
 #############################################################################
 # Default target
@@ -133,17 +153,16 @@ obj += $(objdir)/libc/strcpy.o
 obj += $(objdir)/libc/arm7tdmi.o
 
 ifeq ($(rom), dos1541)
-	obj += $(objdir)/dos1541.o
-	DEFINE += -DROM_IMAGE=dos1541
-	# Currently the 1541 II ROM is compiled in.
-	# Later it will be loaded from SD card into RAM or Flash.
-	ifeq ("$(wildcard $(srcdir)/dos1541.bin)", "")
-		# If I indented the next line with tabs it wouldn't work
-                $(error No 1541 ROM image in $(srcdir)/dos1541.bin)
-	endif
+    obj += $(objdir)/dos1541.o
+    DEFINE += -DROM_IMAGE=dos1541
+    # Currently the 1541 II ROM is compiled in.
+    # Later it will be loaded from SD card into RAM or Flash.
+    ifeq ("$(wildcard $(srcdir)/dos1541.bin)", "")
+        $(error No 1541 ROM image in $(srcdir)/dos1541.bin)
+    endif
 else
-	obj += $(objdir)/testrom.o
-	DEFINE += -DROM_IMAGE=testrom
+    obj += $(objdir)/testrom.o
+    DEFINE += -DROM_IMAGE=testrom
 endif
 
 extra_obj := `$(CC) -print-libgcc-file-name`
@@ -168,16 +187,16 @@ simulate: $(objdir)/open1541
 
 
 .PHONY: flash
-flash: flash_$(mingw)
+flash: flash_$(hosttype)
 
-.PHONY: flash_yes # for MinGW
-flash_yes: 
+.PHONY: flash_mingw
+flash_mingw: $(objdir)/open1541.hex
 	cd $(objdir) && FM "COM($(serial_port), 19200) \
 		DEVICE(LPC2148, 16.000) ERASE(DEVICE, PROTECTISP) \
 		HEXFILE(open1541.hex, CHECKSUMS, NOFILL, PROTECTISP)"
 
-.PHONY: flash_ # for Linux etc.
-flash_: $(lpcflash) $(objdir)/open1541.hex
+.PHONY: flash_linux
+flash_linux: $(lpcflash) $(objdir)/open1541.hex
 	$(lpcflash) -p $(serial_port) -b 19200 $(objdir)/open1541.hex
 
 $(lpcflash):

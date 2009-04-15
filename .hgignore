@@ -12,3 +12,5 @@ obj-*
 *.orig
 Doxyfile
 tools/lpcflash/lpcflash
+tools/hexdump/hexdump
+tools/hexdump/hexdump.exe

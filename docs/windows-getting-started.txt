@@ -7,9 +7,9 @@ by Thomas Giesel
 This document describes how to set up an environment to build the open1541
 software on Windows.
 
-The method described in this document does not use Cygwin, but a much simpler 
+The method described in this document does not use Cygwin, but a much simpler
 MinGW based toolchain.
- 
+
 1. Install MinGW and MSYS
 =========================
 
@@ -20,7 +20,7 @@ native Microsoft Windows applications.
 MSYS is a collection of GNU utilities such as bash, make and grep to allow
 building of applications and programs which depend on traditionally UNIX tools
 to be present. It is intended to supplement MinGW and the deficiencies of the
-cmd shell. 
+cmd shell.
 
 First install http://downloads.sourceforge.net/mingw/MinGW-5.1.4.exe
 If you have no experience with this software yet, I strongly recommend to use
@@ -29,17 +29,17 @@ the default installation settings, so just click "Next" several times...
 Then install http://downloads.sourceforge.net/mingw/MSYS-1.0.10.exe
 
 You can use the default install settings. After the installation, a script will
-be started to set up some things. 
-- Allow it to run with "y" 
+be started to set up some things.
+- Allow it to run with "y"
 - When it askes wether you have MinGW installed, answer "y"
-- Enter the path "C:/MinWG", be sure to type it exactly like written here  
+- Enter the path where MinGW has been installed "C:/MinGW"
 
-I recommend to have a look at these two files to get an idea about what you 
-just installed: 
+I recommend to have a look at these two files to get an idea about what you
+just installed:
 - C:\msys\1.0\doc\msys\MSYS_WELCOME.rtf
-- C:\msys\1.0\doc\msys\README.rtf 
+- C:\msys\1.0\doc\msys\README.rtf
 
-2. Install YAGARTO 
+2. Install YAGARTO
 ==================
 
 Now we need a compiler for ARM.
@@ -56,34 +56,34 @@ the development), you need the Mercurial version control system.
 
 Get the latest release version from http://mercurial.berkwood.com/.
 Install it.
- 
+
 4. Install Flash Magic
 ======================
 
-If you want to write the software you built to the LPC's flash directly using 
+If you want to write the software you built to the LPC's flash directly using
 make, you should install Flash Magic.
 
 Go to http://www.flashmagictool.com/ and download the tool. Install it.
 
-5. Log out log in
-=================
+5. Restart Windows
+==================
 
-To be sure all PATHs are set, log out and log in again.
+To be sure all PATHs are set, restart Windows.
 
-6. Getting the open1541 sources
-===============================
+6. Get the open1541 sources
+===========================
 
 - Open the msys shell (rxvt)
     Start => Programs => MinGW => MSYS => msys
-    
+
 rxvt uses the traditional Linux-way of copy & paste:
 - Marking text in the rxvt window using the mouse copies it to the clipboard
   automatically (no <Ctrl>+C)
 - Paste from the clipboard by using the middle mouse button
 - Alternatively you can use <Shift>+<Insert> to insert text
-    
+
 - Copy following line to the shell:
-    hg clone http://hg.berlios.de/repos/open1541 
+    hg clone http://hg.berlios.de/repos/open1541
 - Now the sources should appear in your home directory, e.g.:
   c:\msys\1.0\home\skoe
   this is seen in the msys shell as:

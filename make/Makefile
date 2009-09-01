@@ -55,7 +55,7 @@ serial_port_linux := /dev/ttyUSB0
 serial_port       ?= $(serial_port_$(hosttype))
 
 add_path_mingw    :=
-add_path_linux    := $(HOME)/cross/arm-elf-binutils-2.19.51-gcc-4.3.3/bin
+add_path_linux    := $(HOME)/cross/arm-elf-binutils-2.19.1-gcc-4.3.3/bin
 add_path          ?= $(add_path_$(hosttype))
 
 project_root := ..

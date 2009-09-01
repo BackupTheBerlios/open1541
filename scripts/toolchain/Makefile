@@ -39,7 +39,7 @@ build   := $(here)/build
 archive := $(here)/archive
 cleandirs :=
 
-binutils  := binutils-2.19.51
+binutils  := binutils-2.19.1
 gccfile   := gcc-core-4.3.3
 gcc       := gcc-4.3.3
 gdb       := gdb-6.8
@@ -84,7 +84,7 @@ $(build)/$(binutils): $(archive)/$(binutils).tar.bz2
 
 $(archive)/$(binutils).tar.bz2:
 	mkdir -p $(archive)
-	cd $(archive) && wget ftp://sourceware.org/pub/binutils/snapshots/$(binutils).tar.bz2
+	cd $(archive) && wget http://ftp.gnu.org/gnu/binutils/$(binutils).tar.bz2
 	touch $@
 
 $(build)/obj-$(binutils):

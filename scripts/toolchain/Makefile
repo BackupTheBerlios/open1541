@@ -39,10 +39,10 @@ build   := $(here)/build
 archive := $(here)/archive
 cleandirs :=
 
-binutils  := binutils-2.19.1
-gccfile   := gcc-core-4.3.3
-gcc       := gcc-4.3.3
-gdb       := gdb-6.8
+binutils  := binutils-2.20
+gccfile   := gcc-core-4.3.4
+gcc       := gcc-4.3.4
+gdb       := gdb-7.0
 insight   := insight-6.8
 
 target    := arm-elf
